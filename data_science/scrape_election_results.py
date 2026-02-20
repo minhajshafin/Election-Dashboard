@@ -54,6 +54,163 @@ def fetch_html(url: str, timeout: int = 30) -> str:
     return response.text
 
 
+def extract_balanced_json_object(text: str, marker: str) -> Dict[str, object] | None:
+    marker_index = text.find(marker)
+    if marker_index < 0:
+        return None
+
+    start = text.find("{", marker_index)
+    if start < 0:
+        return None
+
+    depth = 0
+    in_string = False
+    escaped = False
+    quote_char = ""
+
+    for index in range(start, len(text)):
+        char = text[index]
+        if in_string:
+            if escaped:
+                escaped = False
+            elif char == "\\":
+                escaped = True
+            elif char == quote_char:
+                in_string = False
+            continue
+
+        if char in ['"', "'"]:
+            in_string = True
+            quote_char = char
+            continue
+
+        if char == "{":
+            depth += 1
+            continue
+
+        if char == "}":
+            depth -= 1
+            if depth == 0:
+                payload = text[start : index + 1]
+                try:
+                    return json.loads(payload)
+                except json.JSONDecodeError:
+                    return None
+
+    return None
+
+
+def extract_daily_star_rows(soup: BeautifulSoup) -> List[Dict[str, str]]:
+    script = soup.find("script", {"type": "application/json"})
+    if not script:
+        return []
+
+    script_text = script.string or script.get_text() or ""
+    if not script_text.strip():
+        return []
+
+    try:
+        payload = json.loads(script_text)
+    except json.JSONDecodeError:
+        return []
+
+    election_block = payload.get("electionMapBlock", {})
+    constituency_data = election_block.get("constituencyData", {})
+    if not isinstance(constituency_data, dict):
+        return []
+
+    rows: List[Dict[str, str]] = []
+    for _, constituency in constituency_data.items():
+        seat_name_raw = clean_text(str(constituency.get("seat_name", "")))
+        seat_name = seat_name_raw.replace("_", " ").title()
+        if not seat_name:
+            continue
+
+        winner = constituency.get("winner") or {}
+        candidates = constituency.get("candidates") or []
+        winner_name = clean_text(str(winner.get("title", "")))
+        winner_party = clean_text(str(winner.get("party_name", "")))
+        winner_votes = clean_text(str(winner.get("votes", "")))
+
+        if not winner_name:
+            for candidate in candidates:
+                if str(candidate.get("is_winner", "")).lower() in {"1", "true", "yes"}:
+                    winner_name = clean_text(str(candidate.get("title", "")))
+                    winner_party = clean_text(str(candidate.get("party_name", "")))
+                    winner_votes = clean_text(str(candidate.get("votes", "")))
+                    break
+
+        candidate_vote_values: List[int] = []
+        for candidate in candidates:
+            candidate_votes = re.sub(r"[^0-9]", "", str(candidate.get("votes", "")))
+            if candidate_votes:
+                candidate_vote_values.append(int(candidate_votes))
+
+        margin = ""
+        if candidate_vote_values:
+            candidate_vote_values.sort(reverse=True)
+            if len(candidate_vote_values) > 1:
+                margin = str(candidate_vote_values[0] - candidate_vote_values[1])
+            else:
+                margin = str(candidate_vote_values[0])
+
+        rows.append(
+            {
+                "constituency": seat_name,
+                "candidates": winner_name,
+                "party": winner_party,
+                "votes": winner_votes,
+                "turnout": clean_text(str(constituency.get("total_votes", ""))),
+                "margin": margin,
+            }
+        )
+
+    return rows
+
+
+def extract_tbs_summary_rows(html: str) -> List[Dict[str, str]]:
+    payload = extract_balanced_json_object(html, "const electionResults")
+    if not payload:
+        return []
+
+    parties = payload.get("parties", {})
+    if not isinstance(parties, dict):
+        return []
+
+    rows: List[Dict[str, str]] = []
+    for _, party_data in parties.items():
+        if not isinstance(party_data, dict):
+            continue
+        party_name = clean_text(str(party_data.get("party_name", "")))
+        seats_won = clean_text(str(party_data.get("seats_won", "")))
+        if not party_name:
+            continue
+        rows.append(
+            {
+                "constituency": "",
+                "candidates": "",
+                "party": party_name,
+                "votes": "",
+                "turnout": "",
+                "margin": seats_won,
+            }
+        )
+
+    return rows
+
+
+def extract_embedded_rows(html: str, soup: BeautifulSoup) -> List[Dict[str, str]]:
+    daily_star_rows = extract_daily_star_rows(soup)
+    if daily_star_rows:
+        return daily_star_rows
+
+    tbs_rows = extract_tbs_summary_rows(html)
+    if tbs_rows:
+        return tbs_rows
+
+    return []
+
+
 def extract_tables(html: str) -> Tuple[str, List[Dict[str, str]]]:
     soup = BeautifulSoup(html, "html.parser")
     page_title = clean_text(soup.title.get_text()) if soup.title else ""
@@ -70,6 +227,17 @@ def extract_tables(html: str) -> Tuple[str, List[Dict[str, str]]]:
             }
             raw_rows.append({**row_meta, **row})
 
+    if raw_rows:
+        return page_title, raw_rows
+
+    embedded_rows = extract_embedded_rows(html, soup)
+    for row_index, row in enumerate(embedded_rows):
+        row_meta = {
+            "table_index": "embedded",
+            "row_index": str(row_index),
+        }
+        raw_rows.append({**row_meta, **row})
+
     return page_title, raw_rows
 
 
@@ -83,7 +251,7 @@ def get_headers(table) -> List[str]:
             return headers
 
     first_row = table.find("tr")
-    if first_row:
+    if first_row and first_row.find_all("th"):
         header_cells = first_row.find_all(["th", "td"])
         headers = [clean_text(cell.get_text()) for cell in header_cells]
         headers = [h for h in headers if h]
@@ -146,7 +314,7 @@ def write_csv(path: str, rows: List[Dict[str, str]]) -> None:
 def scrape_source(name: str, url: str, sleep_seconds: float) -> Dict[str, List[Dict[str, str]]]:
     html = fetch_html(url)
     page_title, raw_rows = extract_tables(html)
-    scraped_at = dt.datetime.utcnow().isoformat() + "Z"
+    scraped_at = dt.datetime.now(dt.UTC).isoformat().replace("+00:00", "Z")
 
     raw_payload = []
     standard_payload = []
@@ -205,14 +373,19 @@ def main() -> None:
     for source in SOURCES:
         name = source["name"]
         url = source["url"]
-        payloads = scrape_source(name, url, args.sleep)
-        paths = build_output_paths(args.out_dir, name, date_stamp)
-        write_json(paths["raw"], payloads["raw"])
-        write_json(paths["standard_json"], payloads["standard"])
-        write_csv(paths["standard_csv"], payloads["standard"])
-        print(f"Saved {name} raw: {paths['raw']}")
-        print(f"Saved {name} standard JSON: {paths['standard_json']}")
-        print(f"Saved {name} standard CSV: {paths['standard_csv']}")
+        try:
+            payloads = scrape_source(name, url, args.sleep)
+            paths = build_output_paths(args.out_dir, name, date_stamp)
+            write_json(paths["raw"], payloads["raw"])
+            write_json(paths["standard_json"], payloads["standard"])
+            write_csv(paths["standard_csv"], payloads["standard"])
+            print(f"Saved {name} raw: {paths['raw']}")
+            print(f"Saved {name} standard JSON: {paths['standard_json']}")
+            print(f"Saved {name} standard CSV: {paths['standard_csv']}")
+        except requests.RequestException as exc:
+            print(f"Skipping {name} due to request error: {exc}")
+        except Exception as exc:
+            print(f"Skipping {name} due to unexpected error: {exc}")
 
 
 if __name__ == "__main__":
