@@ -10,7 +10,7 @@ import json
 import os
 import re
 import time
-from typing import Dict, Iterable, List, Tuple
+from typing import Any, Dict, Iterable, List, Tuple
 
 import requests
 from bs4 import BeautifulSoup
@@ -22,6 +22,18 @@ SOURCES = [
 ]
 
 TARGET_FIELDS = ["constituency", "candidates", "party", "votes", "turnout", "margin"]
+
+CANDIDATE_FIELDS = [
+    "constituency",
+    "division",
+    "district",
+    "alliance",
+    "candidate_count",
+    "candidate_name",
+    "party",
+    "votes",
+    "is_winner",
+]
 
 FIELD_PATTERNS = {
     "constituency": ["constituency", "seat", "electorate"],
@@ -100,23 +112,31 @@ def extract_balanced_json_object(text: str, marker: str) -> Dict[str, object] | 
     return None
 
 
-def extract_daily_star_rows(soup: BeautifulSoup) -> List[Dict[str, str]]:
+def get_daily_star_constituency_data(soup: BeautifulSoup) -> Dict[str, Dict[str, Any]]:
     script = soup.find("script", {"type": "application/json"})
     if not script:
-        return []
+        return {}
 
     script_text = script.string or script.get_text() or ""
     if not script_text.strip():
-        return []
+        return {}
 
     try:
         payload = json.loads(script_text)
     except json.JSONDecodeError:
-        return []
+        return {}
 
     election_block = payload.get("electionMapBlock", {})
     constituency_data = election_block.get("constituencyData", {})
     if not isinstance(constituency_data, dict):
+        return {}
+
+    return constituency_data
+
+
+def extract_daily_star_rows(soup: BeautifulSoup) -> List[Dict[str, str]]:
+    constituency_data = get_daily_star_constituency_data(soup)
+    if not constituency_data:
         return []
 
     rows: List[Dict[str, str]] = []
@@ -168,6 +188,42 @@ def extract_daily_star_rows(soup: BeautifulSoup) -> List[Dict[str, str]]:
     return rows
 
 
+def extract_daily_star_candidate_rows(soup: BeautifulSoup) -> List[Dict[str, str]]:
+    constituency_data = get_daily_star_constituency_data(soup)
+    if not constituency_data:
+        return []
+
+    rows: List[Dict[str, str]] = []
+    for _, constituency in constituency_data.items():
+        seat_name_raw = clean_text(str(constituency.get("seat_name", "")))
+        seat_name = seat_name_raw.replace("_", " ").title()
+        if not seat_name:
+            continue
+
+        division = clean_text(str(constituency.get("division", "")))
+        district = clean_text(str(constituency.get("district", "")))
+        alliance = clean_text(str(constituency.get("alliance", "")))
+        candidates = constituency.get("candidates") or []
+        candidate_count = str(len(candidates))
+
+        for candidate in candidates:
+            rows.append(
+                {
+                    "constituency": seat_name,
+                    "division": division,
+                    "district": district,
+                    "alliance": alliance,
+                    "candidate_count": candidate_count,
+                    "candidate_name": clean_text(str(candidate.get("title", ""))),
+                    "party": clean_text(str(candidate.get("party_name", ""))),
+                    "votes": clean_text(str(candidate.get("votes", ""))),
+                    "is_winner": str(bool(candidate.get("is_winner", False))).lower(),
+                }
+            )
+
+    return rows
+
+
 def extract_tbs_summary_rows(html: str) -> List[Dict[str, str]]:
     payload = extract_balanced_json_object(html, "const electionResults")
     if not payload:
@@ -211,6 +267,14 @@ def extract_embedded_rows(html: str, soup: BeautifulSoup) -> List[Dict[str, str]
     return []
 
 
+def extract_embedded_candidate_rows(html: str, soup: BeautifulSoup) -> List[Dict[str, str]]:
+    daily_star_candidate_rows = extract_daily_star_candidate_rows(soup)
+    if daily_star_candidate_rows:
+        return daily_star_candidate_rows
+
+    return []
+
+
 def extract_tables(html: str) -> Tuple[str, List[Dict[str, str]]]:
     soup = BeautifulSoup(html, "html.parser")
     page_title = clean_text(soup.title.get_text()) if soup.title else ""
@@ -239,6 +303,11 @@ def extract_tables(html: str) -> Tuple[str, List[Dict[str, str]]]:
         raw_rows.append({**row_meta, **row})
 
     return page_title, raw_rows
+
+
+def extract_candidate_rows(html: str) -> List[Dict[str, str]]:
+    soup = BeautifulSoup(html, "html.parser")
+    return extract_embedded_candidate_rows(html, soup)
 
 
 def get_headers(table) -> List[str]:
@@ -314,10 +383,12 @@ def write_csv(path: str, rows: List[Dict[str, str]]) -> None:
 def scrape_source(name: str, url: str, sleep_seconds: float) -> Dict[str, List[Dict[str, str]]]:
     html = fetch_html(url)
     page_title, raw_rows = extract_tables(html)
+    candidate_rows = extract_candidate_rows(html)
     scraped_at = dt.datetime.now(dt.UTC).isoformat().replace("+00:00", "Z")
 
     raw_payload = []
     standard_payload = []
+    candidate_payload = []
     for row in raw_rows:
         raw_payload.append(
             {
@@ -338,8 +409,19 @@ def scrape_source(name: str, url: str, sleep_seconds: float) -> Dict[str, List[D
             }
         )
 
+    for row in candidate_rows:
+        candidate_payload.append(
+            {
+                "source": name,
+                "url": url,
+                "page_title": page_title,
+                "scraped_at": scraped_at,
+                **{field: row.get(field, "") for field in CANDIDATE_FIELDS},
+            }
+        )
+
     time.sleep(sleep_seconds)
-    return {"raw": raw_payload, "standard": standard_payload}
+    return {"raw": raw_payload, "standard": standard_payload, "candidates": candidate_payload}
 
 
 def build_output_paths(out_dir: str, source: str, date_stamp: str) -> Dict[str, str]:
@@ -347,7 +429,15 @@ def build_output_paths(out_dir: str, source: str, date_stamp: str) -> Dict[str, 
     raw_path = os.path.join(out_dir, f"{source}_raw_{date_stamp}.json")
     standard_json = os.path.join(out_dir, f"{source}_standard_{date_stamp}.json")
     standard_csv = os.path.join(out_dir, f"{source}_standard_{date_stamp}.csv")
-    return {"raw": raw_path, "standard_json": standard_json, "standard_csv": standard_csv}
+    candidates_json = os.path.join(out_dir, f"{source}_candidates_{date_stamp}.json")
+    candidates_csv = os.path.join(out_dir, f"{source}_candidates_{date_stamp}.csv")
+    return {
+        "raw": raw_path,
+        "standard_json": standard_json,
+        "standard_csv": standard_csv,
+        "candidates_json": candidates_json,
+        "candidates_csv": candidates_csv,
+    }
 
 
 def parse_args() -> argparse.Namespace:
@@ -379,9 +469,13 @@ def main() -> None:
             write_json(paths["raw"], payloads["raw"])
             write_json(paths["standard_json"], payloads["standard"])
             write_csv(paths["standard_csv"], payloads["standard"])
+            write_json(paths["candidates_json"], payloads["candidates"])
+            write_csv(paths["candidates_csv"], payloads["candidates"])
             print(f"Saved {name} raw: {paths['raw']}")
             print(f"Saved {name} standard JSON: {paths['standard_json']}")
             print(f"Saved {name} standard CSV: {paths['standard_csv']}")
+            print(f"Saved {name} candidates JSON: {paths['candidates_json']}")
+            print(f"Saved {name} candidates CSV: {paths['candidates_csv']}")
         except requests.RequestException as exc:
             print(f"Skipping {name} due to request error: {exc}")
         except Exception as exc:
