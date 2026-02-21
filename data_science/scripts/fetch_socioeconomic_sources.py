@@ -22,18 +22,48 @@ USER_AGENT = (
 DEFAULT_TIMEOUT = 60
 DOWNLOADABLE_EXTENSIONS = {
     ".csv",
-    ".json",
-    ".geojson",
-    ".xls",
     ".xlsx",
-    ".zip",
-    ".7z",
-    ".parquet",
-    ".pdf",
-    ".shp",
-    ".gpkg",
-    ".tif",
-    ".tiff",
+}
+
+BANGLADESH_MARKERS = {
+    "bangladesh",
+    "bgd",
+}
+
+TARGET_TOPIC_MARKERS = {
+    "population",
+    "demograph",
+    "age",
+    "sex",
+    "gender",
+    "education",
+    "literacy",
+    "school",
+    "income",
+    "poverty",
+    "consumption",
+    "religion",
+    "ethnicity",
+}
+
+EXCLUDED_TOPIC_MARKERS = {
+    "malaria",
+    "tuberculosis",
+    "tb",
+    "hiv",
+    "aids",
+    "cholera",
+    "covid",
+    "coronavirus",
+    "ebola",
+    "dengue",
+    "measles",
+    "vaccin",
+    "outbreak",
+    "conflict",
+    "earthquake",
+    "cyclone",
+    "flood",
 }
 
 
@@ -71,6 +101,50 @@ def make_session() -> requests.Session:
 
 def ensure_dir(path: Path) -> None:
     path.mkdir(parents=True, exist_ok=True)
+
+
+def normalize_text(value: str | None) -> str:
+    return re.sub(r"\s+", " ", (value or "").strip().lower())
+
+
+def build_dataset_search_text(dataset: dict) -> str:
+    parts: list[str] = [
+        str(dataset.get("title") or ""),
+        str(dataset.get("name") or ""),
+        str(dataset.get("notes") or ""),
+    ]
+
+    for tag in dataset.get("tags", []) or []:
+        if isinstance(tag, dict):
+            parts.append(str(tag.get("name") or ""))
+            parts.append(str(tag.get("display_name") or ""))
+
+    for group in dataset.get("groups", []) or []:
+        if isinstance(group, dict):
+            parts.append(str(group.get("name") or ""))
+            parts.append(str(group.get("title") or ""))
+
+    organization = dataset.get("organization")
+    if isinstance(organization, dict):
+        parts.append(str(organization.get("name") or ""))
+        parts.append(str(organization.get("title") or ""))
+
+    return normalize_text(" ".join(parts))
+
+
+def dataset_is_relevant(dataset: dict) -> tuple[bool, str | None]:
+    text = build_dataset_search_text(dataset)
+
+    if not any(marker in text for marker in BANGLADESH_MARKERS):
+        return False, "not-bangladesh"
+
+    if any(marker in text for marker in EXCLUDED_TOPIC_MARKERS):
+        return False, "excluded-topic"
+
+    if not any(marker in text for marker in TARGET_TOPIC_MARKERS):
+        return False, "non-target-topic"
+
+    return True, None
 
 
 def download_file(
@@ -186,6 +260,10 @@ def collect_hdx(
             continue
 
         for dataset in datasets:
+            is_relevant, _ = dataset_is_relevant(dataset)
+            if not is_relevant:
+                continue
+
             dataset_title = dataset.get("title") or dataset.get("name") or "unknown_dataset"
             resources = dataset.get("resources", [])
             for resource in resources:
@@ -196,6 +274,12 @@ def collect_hdx(
                 if not url or url in seen_urls:
                     continue
                 if not is_downloadable_link(url):
+                    continue
+
+                resource_name = normalize_text(
+                    str(resource.get("name") or resource.get("description") or resource.get("format") or "")
+                )
+                if resource_name and any(marker in resource_name for marker in EXCLUDED_TOPIC_MARKERS):
                     continue
 
                 seen_urls.add(url)
@@ -289,11 +373,13 @@ def parse_args() -> argparse.Namespace:
         "--queries",
         nargs="+",
         default=[
-            "bangladesh poverty",
             "bangladesh population",
             "bangladesh age sex",
-            "bangladesh literacy",
             "bangladesh education",
+            "bangladesh literacy",
+            "bangladesh household income",
+            "bangladesh religion",
+            "bangladesh census",
         ],
         help="HDX search queries.",
     )

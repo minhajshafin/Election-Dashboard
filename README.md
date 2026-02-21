@@ -12,13 +12,13 @@ From the project root:
 python3 -m venv .venv
 source .venv/bin/activate
 pip install -r data_science/requirements.txt
-python data_science/scrape_election_results.py
+python data_science/scripts/scrape_election_results.py
 ```
 
 If VS Code runs with a different interpreter, use the workspace venv explicitly:
 
 ```bash
-Election-Dashboard/.venv/bin/python data_science/scrape_election_results.py
+Election-Dashboard/.venv/bin/python data_science/scripts/scrape_election_results.py
 ```
 
 ### Fetch socioeconomic source data
@@ -26,13 +26,13 @@ Election-Dashboard/.venv/bin/python data_science/scrape_election_results.py
 Run the acquisition script to fetch HDX datasets and generate an acquisition manifest:
 
 ```bash
-Election-Dashboard/.venv/bin/python data_science/fetch_socioeconomic_sources.py --dry-run
+Election-Dashboard/.venv/bin/python data_science/scripts/fetch_socioeconomic_sources.py --dry-run
 ```
 
 Then run full HDX download when ready:
 
 ```bash
-Election-Dashboard/.venv/bin/python data_science/fetch_socioeconomic_sources.py
+Election-Dashboard/.venv/bin/python data_science/scripts/fetch_socioeconomic_sources.py
 ```
 
 Outputs are written under `data_science/data/raw/HDX/` and include
