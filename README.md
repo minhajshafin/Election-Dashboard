@@ -1,6 +1,10 @@
-# Election Dashboard
+# Bangladesh National Election 2026 – Big Data Correlation & Predictive Analytics
 
-## Run the scraper
+## 1. Project Overview
+
+A big data analytics project that analyzes the Bangladesh National Election 2026 results and investigates the relationship between election outcomes and socio-economic factors. The project uses **Apache Spark** for large-scale data processing, **Spark MLlib** for correlation analysis, regression, classification, and clustering, and a **Next.js dashboard** for interactive visualization of findings
+
+### Run the scraper
 
 From the project root:
 
