@@ -17,7 +17,6 @@ from bs4 import BeautifulSoup
 
 SOURCES = [
     {"name": "tbs", "url": "https://www.tbsnews.net/election-2026"},
-    {"name": "prothom_alo", "url": "https://election.prothomalo.com/"},
     {"name": "daily_star", "url": "https://www.thedailystar.net/news/national-election-2026"},
 ]
 
