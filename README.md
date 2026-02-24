@@ -18,7 +18,7 @@ python data_science/scripts/scrape_election_results.py
 If VS Code runs with a different interpreter, use the workspace venv explicitly:
 
 ```bash
-Election-Dashboard/.venv/bin/python data_science/scripts/scrape_election_results.py
+.venv/bin/python data_science/scripts/scrape_election_results.py
 ```
 
 ### Fetch socioeconomic source data
@@ -26,13 +26,13 @@ Election-Dashboard/.venv/bin/python data_science/scripts/scrape_election_results
 Run the acquisition script to fetch HDX datasets and generate an acquisition manifest:
 
 ```bash
-Election-Dashboard/.venv/bin/python data_science/scripts/fetch_socioeconomic_sources.py --dry-run
+.venv/bin/python data_science/scripts/fetch_socioeconomic_sources.py --dry-run
 ```
 
 Then run full HDX download when ready:
 
 ```bash
-Election-Dashboard/.venv/bin/python data_science/scripts/fetch_socioeconomic_sources.py
+.venv/bin/python data_science/scripts/fetch_socioeconomic_sources.py
 ```
 
 Outputs are written under `data_science/data/raw/HDX/` and include
@@ -43,13 +43,14 @@ Outputs are written under `data_science/data/raw/HDX/` and include
 Use the PDF extraction script to convert tabular content from BBS reports into CSV files:
 
 ```bash
-Election-Dashboard/.venv/bin/python data_science/scripts/extract_bbs_pdf_tables.py
+.venv/bin/python data_science/scripts/extract_bbs_pdf_tables.py
 ```
 
 Optional custom paths:
 
 ```bash
-Election-Dashboard/.venv/bin/python data_science/scripts/extract_bbs_pdf_tables.py \
+
+.venv/bin/python data_science/scripts/extract_bbs_pdf_tables.py \
 	--input-dir "data_science/data/raw/BBS (Bangladesh Bureau of Statistics)" \
 	--output-dir "data_science/data/processed/bbs_tables"
 ```
@@ -60,4 +61,21 @@ and a summary file `table_extraction_manifest.csv`.
 By default it keeps only plan-relevant socio-economic tables (literacy, poverty,
 income/household, population density, urban/rural, employment, internet,
 electricity). Use `--include-all` to export every detected table.
+
+Useful options:
+
+```bash
+# Export all detected tables (no keyword filtering)
+.venv/bin/python data_science/scripts/extract_bbs_pdf_tables.py --include-all
+
+# Custom keyword filter
+.venv/bin/python data_science/scripts/extract_bbs_pdf_tables.py \
+	--keywords "literacy,poverty,income,employment,internet,electricity"
+```
+
+### Troubleshooting
+
+- If `source .venv/bin/activate` returns exit code `1` but `VIRTUAL_ENV` is set,
+	your shell may have `hashall` off. Run `set -h` once, then activate again.
+- You can always skip activation and run scripts directly with `.venv/bin/python ...`.
 
