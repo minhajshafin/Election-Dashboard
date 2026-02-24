@@ -38,3 +38,26 @@ Election-Dashboard/.venv/bin/python data_science/scripts/fetch_socioeconomic_sou
 Outputs are written under `data_science/data/raw/HDX/` and include
 `source_acquisition_manifest.json` with per-resource status.
 
+### Extract BBS PDF tables to CSV
+
+Use the PDF extraction script to convert tabular content from BBS reports into CSV files:
+
+```bash
+Election-Dashboard/.venv/bin/python data_science/scripts/extract_bbs_pdf_tables.py
+```
+
+Optional custom paths:
+
+```bash
+Election-Dashboard/.venv/bin/python data_science/scripts/extract_bbs_pdf_tables.py \
+	--input-dir "data_science/data/raw/BBS (Bangladesh Bureau of Statistics)" \
+	--output-dir "data_science/data/processed/bbs_tables"
+```
+
+The script writes individual table CSVs to `data_science/data/processed/bbs_tables/tables/`
+and a summary file `table_extraction_manifest.csv`.
+
+By default it keeps only plan-relevant socio-economic tables (literacy, poverty,
+income/household, population density, urban/rural, employment, internet,
+electricity). Use `--include-all` to export every detected table.
+
