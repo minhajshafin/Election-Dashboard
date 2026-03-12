@@ -229,149 +229,151 @@ export function LandingShell({ summaryDataset, constituencyDataset, geoJson }: L
               />
             </div>
 
-            <div className="min-w-0 grid gap-4 lg:grid-cols-[0.9fr_1fr_1.35fr]">
-              <section className="rounded-[22px] bg-[#f7f1e7] p-3">
-                <p className="px-2 text-[11px] font-semibold uppercase tracking-[0.28em] text-[#8b755c]">Divisions</p>
-                <div className="mt-3 space-y-2">
-                  {divisions.map((division) => {
-                    const active = division.name === activeDivision;
-                    return (
-                      <button
-                        key={division.name}
-                        type="button"
-                        onClick={() => handleDivisionChange(division.name)}
-                        className={`flex w-full items-center justify-between rounded-2xl px-3 py-2 text-left text-sm transition ${
-                          active
-                            ? "bg-[#201910] text-[#fff7ed] shadow-sm"
-                            : "bg-white/80 text-[#3d3126] hover:bg-white"
-                        }`}
-                      >
-                        <span className="font-medium text-xs">{division.name}</span>
-                        <span className={`text-xs ${active ? "text-[#e9d5ba]" : "text-[#8b755c]"}`}>
-                          {division.count}
-                        </span>
-                      </button>
-                    );
-                  })}
-                </div>
-              </section>
+            <div className="min-w-0 grid gap-4 lg:grid-cols-[1fr_1.6fr]">
+              <div className="flex flex-col gap-4">
+                <section className="rounded-[22px] bg-[#f7f1e7] p-3">
+                  <p className="px-2 text-[11px] font-semibold uppercase tracking-[0.28em] text-[#8b755c] mb-3">Divisions</p>
+                  <div className="grid grid-cols-2 gap-1.5">
+                    {divisions.map((division) => {
+                      const active = division.name === activeDivision;
+                      const isAll = division.name === ALL_DIVISIONS;
+                      return (
+                        <button
+                          key={division.name}
+                          type="button"
+                          onClick={() => handleDivisionChange(division.name)}
+                          className={`flex items-center justify-between rounded-2xl px-3 py-2 text-left transition ${
+                            isAll ? "col-span-2" : ""
+                          } ${
+                            active
+                              ? "bg-[#201910] text-[#fff7ed] shadow-sm"
+                              : "bg-white/80 text-[#3d3126] hover:bg-white"
+                          }`}
+                        >
+                          <span className="font-medium text-xs truncate">{division.name}</span>
+                          <span className={`ml-1.5 shrink-0 text-xs ${active ? "text-[#e9d5ba]" : "text-[#8b755c]"}`}>
+                            {division.count}
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </section>
 
-              <section className="rounded-[22px] bg-[#f7f1e7] p-3">
-                <div className="flex items-center justify-between px-2">
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-[#8b755c]">Seats</p>
-                  <p className="text-xs text-[#8b755c]">{filteredSeats.length}</p>
-                </div>
-                <div className="mt-3 max-h-147.5 space-y-1 overflow-y-auto pr-1">
-                  {filteredSeats.map((seat) => {
-                    const selected = seat.seat_key === selectedSeatKey;
-                    return (
-                      <button
-                        key={seat.seat_key}
-                        ref={(node) => {
-                          seatRefs.current[seat.seat_key] = node;
-                        }}
-                        type="button"
-                        onClick={() => setSelectedSeatKey(seat.seat_key)}
-                        className={`w-full rounded-2xl border px-3 py-2 text-left transition `}
-                        style={
-                          selected
-                            ? {
-                                background: `linear-gradient(135deg, ${getAllianceColor(seat.alliance)}, #1f1a14)`,
-                                borderColor: "transparent",
-                                color: "white",
-                              }
-                            : {
-                                backgroundColor: "rgba(255,255,255,0.82)",
-                                borderColor: "transparent",
-                              }
-                        }
-                      >
-                        <div className="flex items-start justify-between gap-2">
-                          <div className="flex-1 min-w-0">
-                            <p className="font-medium text-xs">{seat.constituency}</p>
-                            <p className={`mt-0.5 text-[11px] ${selected ? "text-white/80" : "text-[#7b6a59]"}`}>
-                              {seat.district}
-                            </p>
+                <section className="rounded-[22px] bg-[#f7f1e7] p-3 flex-1 min-h-0">
+                  <div className="flex items-center justify-between px-2 mb-3">
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-[#8b755c]">Seats</p>
+                    <p className="text-xs text-[#8b755c]">{filteredSeats.length}</p>
+                  </div>
+                  <div className="max-h-96 space-y-1 overflow-y-auto pr-1">
+                    {filteredSeats.map((seat) => {
+                      const selected = seat.seat_key === selectedSeatKey;
+                      return (
+                        <button
+                          key={seat.seat_key}
+                          ref={(node) => {
+                            seatRefs.current[seat.seat_key] = node;
+                          }}
+                          type="button"
+                          onClick={() => setSelectedSeatKey(seat.seat_key)}
+                          className="w-full rounded-2xl border px-3 py-2 text-left transition"
+                          style={
+                            selected
+                              ? {
+                                  background: `linear-gradient(135deg, ${getAllianceColor(seat.alliance)}, #1f1a14)`,
+                                  borderColor: "transparent",
+                                  color: "white",
+                                }
+                              : {
+                                  backgroundColor: "rgba(255,255,255,0.82)",
+                                  borderColor: "transparent",
+                                }
+                          }
+                        >
+                          <div className="flex items-center justify-between gap-2">
+                            <div className="flex-1 min-w-0">
+                              <p className="font-medium text-xs truncate">{seat.constituency}</p>
+                              <p className={`mt-0.5 text-[11px] truncate ${selected ? "text-white/75" : "text-[#7b6a59]"}`}>
+                                {seat.district}
+                              </p>
+                            </div>
+                            <span
+                              className="h-2.5 w-2.5 shrink-0 rounded-full"
+                              style={{ backgroundColor: getAllianceColor(seat.alliance) }}
+                            />
                           </div>
-                          <span
-                            className="mt-0.5 h-2.5 w-2.5 shrink-0 rounded-full"
-                            style={{ backgroundColor: getAllianceColor(seat.alliance) }}
-                          />
-                        </div>
-                      </button>
-                    );
-                  })}
-                  {filteredSeats.length === 0 ? (
-                    <div className="rounded-2xl border border-dashed border-[#d5c4ab] px-3 py-4 text-xs text-[#6c5d4d]">
-                      No seats match the filters.
-                    </div>
-                  ) : null}
-                </div>
-              </section>
+                        </button>
+                      );
+                    })}
+                    {filteredSeats.length === 0 ? (
+                      <div className="rounded-2xl border border-dashed border-[#d5c4ab] px-3 py-4 text-xs text-[#6c5d4d]">
+                        No seats match the filters.
+                      </div>
+                    ) : null}
+                  </div>
+                </section>
+              </div>
 
-              <section className="rounded-[22px] bg-[#f7f1e7] p-4">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-[#8b755c]">Details</p>
+              <section className="rounded-[22px] bg-[#f7f1e7] p-5">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-[#8b755c] mb-4">Details</p>
                 {selectedSeat ? (
-                  <div className="mt-3 space-y-3 max-h-147.5 overflow-y-auto pr-1">
+                  <div className="space-y-4 max-h-147.5 overflow-y-auto pr-1">
                     <div>
-                      <h3 className="text-lg font-semibold tracking-[-0.02em] text-[#211910]">
+                      <h3 className="text-xl font-semibold tracking-[-0.02em] text-[#211910] leading-tight">
                         {selectedSeat.constituency}
                       </h3>
-                      <p className="mt-0.5 text-xs text-[#6e604f]">
+                      <p className="mt-1 text-sm text-[#6e604f]">
                         {selectedSeat.district}, {selectedSeat.division}
                       </p>
                     </div>
 
                     <ConstituencyMiniMap feature={selectedFeature} alliance={selectedSeat.alliance} />
 
-                    <div className="grid gap-2 sm:grid-cols-2">
+                    <div className="grid gap-3 grid-cols-2">
                       <article
-                        className="rounded-[18px] border px-3 py-3"
+                        className="rounded-[18px] border px-4 py-3"
                         style={{
                           backgroundColor: getAllianceSoftColor(selectedSeat.alliance),
                           borderColor: `${getAllianceColor(selectedSeat.alliance)}33`,
                         }}
                       >
-                        <p className="text-[9px] font-semibold uppercase tracking-[0.24em] text-[#7f6852]">Winner</p>
-                        <h4 className="mt-1.5 text-sm font-semibold text-[#201910]">{selectedSeat.winner_candidate}</h4>
-                        <p className="mt-0.5 text-xs text-[#5d4f41]">{selectedSeat.winner_party}</p>
-                        <p className="mt-1.5 text-xs text-[#5d4f41]">
-                          {formatNumber(selectedSeat.winner_votes)} · {formatPercent(selectedSeat.winner_vote_share_pct)}
+                        <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-[#7f6852]">Winner</p>
+                        <h4 className="mt-2 text-sm font-semibold text-[#201910] leading-snug">{selectedSeat.winner_candidate}</h4>
+                        <p className="mt-1 text-xs text-[#5d4f41]">{selectedSeat.winner_party}</p>
+                        <p className="mt-2 text-xs text-[#5d4f41]">
+                          {formatNumber(selectedSeat.winner_votes)} votes<br />{formatPercent(selectedSeat.winner_vote_share_pct)} share
                         </p>
                       </article>
 
-                      <article className="rounded-[18px] border border-[#dbc9b0] bg-white/72 px-3 py-3">
-                        <p className="text-[9px] font-semibold uppercase tracking-[0.24em] text-[#7f6852]">Runner Up</p>
-                        <h4 className="mt-1.5 text-sm font-semibold text-[#201910]">{selectedSeat.runner_up_candidate}</h4>
-                        <p className="mt-0.5 text-xs text-[#5d4f41]">{selectedSeat.runner_up_party}</p>
-                        <p className="mt-1.5 text-xs text-[#5d4f41]">
-                          {formatNumber(selectedSeat.runner_up_votes)}
+                      <article className="rounded-[18px] border border-[#dbc9b0] bg-white/72 px-4 py-3">
+                        <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-[#7f6852]">Runner Up</p>
+                        <h4 className="mt-2 text-sm font-semibold text-[#201910] leading-snug">{selectedSeat.runner_up_candidate}</h4>
+                        <p className="mt-1 text-xs text-[#5d4f41]">{selectedSeat.runner_up_party}</p>
+                        <p className="mt-2 text-xs text-[#5d4f41]">
+                          {formatNumber(selectedSeat.runner_up_votes)} votes
                         </p>
                       </article>
                     </div>
 
-                    <div className="grid gap-1.5 sm:grid-cols-4">
+                    <div className="grid gap-2 grid-cols-4">
                       {[
                         { label: "Turnout", value: formatPercent(selectedSeat.turnout_pct) },
                         { label: "Margin", value: formatPercent(selectedSeat.winning_margin_pct) },
                         { label: "Candidates", value: formatNumber(selectedSeat.candidate_count) },
-                        {
-                          label: "Cluster",
-                          value: selectedSeat.cluster === null ? "N/A" : `C${selectedSeat.cluster}`,
-                        },
+                        { label: "Cluster", value: selectedSeat.cluster === null ? "N/A" : `C${selectedSeat.cluster}` },
                       ].map((item) => (
-                        <div key={item.label} className="rounded-2xl bg-white/82 px-2 py-2">
-                          <p className="text-[9px] font-semibold uppercase tracking-[0.24em] text-[#8b755c]">{item.label}</p>
-                          <p className="mt-1 text-xs font-semibold text-[#211910]">{item.value}</p>
+                        <div key={item.label} className="rounded-2xl bg-white/82 px-3 py-3 text-center">
+                          <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[#8b755c]">{item.label}</p>
+                          <p className="mt-1.5 text-sm font-semibold text-[#211910]">{item.value}</p>
                         </div>
                       ))}
                     </div>
 
-                    <div className="rounded-[18px] border border-[#dbc9b0] bg-white/76 px-3 py-3">
-                      <p className="text-[9px] font-semibold uppercase tracking-[0.24em] text-[#7f6852] mb-2">
+                    <div className="rounded-[18px] border border-[#dbc9b0] bg-white/76 px-4 py-4">
+                      <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-[#7f6852] mb-3">
                         Socioeconomic vs National
                       </p>
-                      <div className="space-y-2">
+                      <div className="space-y-3">
                         {(
                           [
                             ["Literacy", selectedSeat.literacy_rate, summary.national_averages.literacy_rate],
@@ -390,11 +392,11 @@ export function LandingShell({ summaryDataset, constituencyDataset, geoJson }: L
 
                           return (
                             <div key={label}>
-                              <div className="flex items-center justify-between gap-2 text-[10px] text-[#4f4336]">
+                              <div className="flex items-center justify-between gap-2 text-xs text-[#4f4336]">
                                 <span className="font-medium">{label}</span>
                                 <span className="text-[#8b755c]">{formatPercent(seatValue)}</span>
                               </div>
-                              <div className="mt-1 h-1 overflow-hidden rounded-full bg-[#eadfce]">
+                              <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-[#eadfce]">
                                 <div
                                   className="h-full rounded-full"
                                   style={{
@@ -403,7 +405,7 @@ export function LandingShell({ summaryDataset, constituencyDataset, geoJson }: L
                                   }}
                                 />
                               </div>
-                              <p className="mt-0.5 text-[9px] text-[#8b755c]">{comparison} pts</p>
+                              <p className="mt-0.5 text-[10px] text-[#8b755c]">{comparison} pts vs national</p>
                             </div>
                           );
                         })}
@@ -411,11 +413,11 @@ export function LandingShell({ summaryDataset, constituencyDataset, geoJson }: L
                     </div>
                   </div>
                 ) : (
-                  <div className="mt-3 rounded-[18px] border border-dashed border-[#d8c8b1] bg-white/76 px-4 py-5 text-[#5d4f41]">
+                  <div className="rounded-[18px] border border-dashed border-[#d8c8b1] bg-white/76 px-5 py-8 text-[#5d4f41]">
                     <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-[#8b755c]">No Selection</p>
-                    <h3 className="mt-2 text-sm font-semibold text-[#211910]">Click a seat from left or map</h3>
-                    <p className="mt-2 text-xs leading-5">
-                      View candidate info, election stats, and socioeconomic comparison.
+                    <h3 className="mt-3 text-base font-semibold text-[#211910]">Click a seat from the list or map</h3>
+                    <p className="mt-2 text-sm leading-6">
+                      View candidate info, election stats, and socioeconomic comparison against national averages.
                     </p>
                   </div>
                 )}
