@@ -121,6 +121,17 @@ export function BangladeshMap({
     return getAllianceColor(seat.alliance);
   };
 
+  const selectedFeature = useMemo(() => {
+    if (!selectedSeatKey) {
+      return null;
+    }
+
+    return geoJson.features.find((feature) => {
+      const seat = getSeatForFeature(feature);
+      return seat?.seat_key === selectedSeatKey;
+    }) ?? null;
+  }, [geoJson.features, seatIndex, selectedSeatKey]);
+
   return (
     <div className="relative h-full w-full overflow-hidden bg-[#141412]">
       <MapContainer
@@ -204,6 +215,21 @@ export function BangladeshMap({
             });
           }}
         />
+
+        {selectedFeature ? (
+          <GeoJSON
+            key={`selected-${selectedSeatKey}`}
+            data={selectedFeature as GeoJsonObject}
+            interactive={false}
+            style={{
+              className: "selected-seat-outline",
+              color: "#fff3b0",
+              weight: 4,
+              opacity: 1,
+              fillOpacity: 0,
+            }}
+          />
+        ) : null}
       </MapContainer>
       <div className="absolute bottom-4 left-4 flex gap-4 border border-white/10 bg-[#0d0d0b]/90 px-3 py-2 font-mono text-[11px] uppercase tracking-[0.08em] text-[#9c9888]">
         <span className="inline-flex items-center gap-2">

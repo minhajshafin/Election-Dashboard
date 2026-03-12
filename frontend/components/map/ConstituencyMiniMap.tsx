@@ -39,9 +39,12 @@ export function ConstituencyMiniMap({ feature, alliance }: ConstituencyMiniMapPr
     );
   }
 
+  const featureKey = `${feature.properties.cst}-${alliance}`;
+
   return (
     <div className="h-56 overflow-hidden border border-white/10 bg-[#141412]">
       <MapContainer
+        key={featureKey}
         center={[23.685, 90.3563]}
         zoom={10}
         zoomControl={false}
@@ -59,6 +62,7 @@ export function ConstituencyMiniMap({ feature, alliance }: ConstituencyMiniMapPr
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
         <GeoJSON
+          key={featureKey}
           data={feature as GeoJsonObject}
           style={{
             color: "#c9a84c",

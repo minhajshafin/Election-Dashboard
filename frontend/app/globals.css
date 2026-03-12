@@ -70,3 +70,9 @@ a {
   font-family: var(--font-inter), sans-serif;
   font-variant-numeric: tabular-nums;
 }
+
+.leaflet-interactive.selected-seat-outline {
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  filter: drop-shadow(0 0 7px rgba(201, 168, 76, 0.85)) drop-shadow(0 0 2px rgba(255, 243, 176, 0.95));
+}
