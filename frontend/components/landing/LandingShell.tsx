@@ -205,33 +205,35 @@ export function LandingShell({ summaryDataset, constituencyDataset, geoJson }: L
         </section>
 
         <div className="mt-6 rounded-[30px] border border-white/60 bg-white/74 p-5 shadow-[0_24px_80px_rgba(40,29,17,0.1)] backdrop-blur-sm">
-          <label className="block mb-5">
-            <span className="sr-only">Search by seat, district, division, or party</span>
-            <input
-              type="search"
-              value={searchValue}
-              onChange={(event) => handleSearchChange(event.target.value)}
-              placeholder="Search constituency, district, division, party, or candidate"
-              className="w-full rounded-full border border-[#d9c9b1] bg-[#f8f2e9] px-5 py-3 text-sm text-[#2c2218] outline-none transition focus:border-[#8e6e42] focus:ring-2 focus:ring-[#d9c7aa]"
-            />
-          </label>
+          <section className="grid gap-5 lg:grid-cols-[0.3fr_0.27fr_0.43fr] lg:items-start">
+            <div className="min-w-0 h-170 flex flex-col gap-4">
+              <label className="block">
+                <span className="sr-only">Search by seat, district, division, or party</span>
+                <input
+                  type="search"
+                  value={searchValue}
+                  onChange={(event) => handleSearchChange(event.target.value)}
+                  placeholder="Search constituency, district, division, party, or candidate"
+                  className="w-full rounded-full border border-[#d9c9b1] bg-[#f8f2e9] px-5 py-3 text-sm text-[#2c2218] outline-none transition focus:border-[#8e6e42] focus:ring-2 focus:ring-[#d9c7aa]"
+                />
+              </label>
 
-          <section className="grid gap-5 lg:grid-cols-[0.3fr_0.7fr]">
-            <div className="min-w-0 h-155">
-              <BangladeshMap
-                geoJson={geoJson}
-                seats={sortedSeats}
-                selectedSeatKey={selectedSeatKey}
-                onSelectSeat={(seatKey) => {
-                  setSelectedSeatKey(seatKey);
-                }}
-                onClearSelection={() => setSelectedSeatKey(null)}
-              />
+              <div className="min-h-0 flex-1">
+                <BangladeshMap
+                  geoJson={geoJson}
+                  seats={sortedSeats}
+                  selectedSeatKey={selectedSeatKey}
+                  onSelectSeat={(seatKey) => {
+                    setSelectedSeatKey(seatKey);
+                  }}
+                  onClearSelection={() => setSelectedSeatKey(null)}
+                />
+              </div>
             </div>
 
-            <div className="min-w-0 grid gap-4 lg:grid-cols-[1fr_1.6fr]">
-              <div className="flex flex-col gap-4">
-                <section className="rounded-[22px] bg-[#f7f1e7] p-3">
+            <div className="min-w-0 h-170 flex flex-col gap-4">
+              <div className="flex h-full min-h-0 flex-col gap-4">
+                <section className="shrink-0 rounded-[22px] bg-[#f7f1e7] p-3">
                   <p className="px-2 text-[11px] font-semibold uppercase tracking-[0.28em] text-[#8b755c] mb-3">Divisions</p>
                   <div className="grid grid-cols-2 gap-1.5">
                     {divisions.map((division) => {
@@ -265,7 +267,7 @@ export function LandingShell({ summaryDataset, constituencyDataset, geoJson }: L
                     <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-[#8b755c]">Seats</p>
                     <p className="text-xs text-[#8b755c]">{filteredSeats.length}</p>
                   </div>
-                  <div className="max-h-96 space-y-1 overflow-y-auto pr-1">
+                  <div className="h-[calc(100%-1.75rem)] min-h-0 space-y-1 overflow-y-auto pr-1">
                     {filteredSeats.map((seat) => {
                       const selected = seat.seat_key === selectedSeatKey;
                       return (
@@ -313,11 +315,12 @@ export function LandingShell({ summaryDataset, constituencyDataset, geoJson }: L
                   </div>
                 </section>
               </div>
+            </div>
 
-              <section className="rounded-[22px] bg-[#f7f1e7] p-5">
+            <section className="rounded-[22px] bg-[#f7f1e7] p-5 h-170 min-h-0 flex flex-col">
                 <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-[#8b755c] mb-4">Details</p>
                 {selectedSeat ? (
-                  <div className="space-y-4 max-h-147.5 overflow-y-auto pr-1">
+                  <div className="space-y-4 min-h-0 flex-1 overflow-y-auto pr-1">
                     <div>
                       <h3 className="text-xl font-semibold tracking-[-0.02em] text-[#211910] leading-tight">
                         {selectedSeat.constituency}
@@ -413,7 +416,7 @@ export function LandingShell({ summaryDataset, constituencyDataset, geoJson }: L
                     </div>
                   </div>
                 ) : (
-                  <div className="rounded-[18px] border border-dashed border-[#d8c8b1] bg-white/76 px-5 py-8 text-[#5d4f41]">
+                  <div className="rounded-[18px] border border-dashed border-[#d8c8b1] bg-white/76 px-5 py-8 text-[#5d4f41] min-h-0 flex-1">
                     <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-[#8b755c]">No Selection</p>
                     <h3 className="mt-3 text-base font-semibold text-[#211910]">Click a seat from the list or map</h3>
                     <p className="mt-2 text-sm leading-6">
@@ -422,7 +425,6 @@ export function LandingShell({ summaryDataset, constituencyDataset, geoJson }: L
                   </div>
                 )}
               </section>
-            </div>
           </section>
         </div>
       </div>
