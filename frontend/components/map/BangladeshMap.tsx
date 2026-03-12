@@ -97,10 +97,7 @@ export function BangladeshMap({
       >
         <FitBoundsToBangladesh geoJson={geoJson} />
         <MapBackgroundReset onClearSelection={onClearSelection} />
-        <TileLayer
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-        />
+        
         <GeoJSON
           data={geoJson as GeoJsonObject}
           style={(feature) => {
