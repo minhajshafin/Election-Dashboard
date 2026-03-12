@@ -9,7 +9,7 @@ import type { ConstituencyDataset, ConstituencyRow, SummaryDataset } from "@/typ
 
 const BangladeshMap = dynamic(() => import("../map/BangladeshMap").then((mod) => mod.BangladeshMap), {
   ssr: false,
-  loading: () => <div className="h-[620px] rounded-[28px] bg-[#f3efe5] animate-pulse" />,
+  loading: () => <div className="h-155 rounded-[28px] bg-[#f3efe5] animate-pulse" />,
 });
 
 const ConstituencyMiniMap = dynamic(() => import("../map/ConstituencyMiniMap").then((mod) => mod.ConstituencyMiniMap), {
@@ -217,7 +217,7 @@ export function LandingShell({ summaryDataset, constituencyDataset, geoJson }: L
           </label>
 
           <section className="grid gap-5 lg:grid-cols-[0.3fr_0.7fr]">
-            <div className="min-w-0 h-[620px]">
+            <div className="min-w-0 h-155">
               <BangladeshMap
                 geoJson={geoJson}
                 seats={sortedSeats}
@@ -261,7 +261,7 @@ export function LandingShell({ summaryDataset, constituencyDataset, geoJson }: L
                   <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-[#8b755c]">Seats</p>
                   <p className="text-xs text-[#8b755c]">{filteredSeats.length}</p>
                 </div>
-                <div className="mt-3 max-h-[590px] space-y-1 overflow-y-auto pr-1">
+                <div className="mt-3 max-h-147.5 space-y-1 overflow-y-auto pr-1">
                   {filteredSeats.map((seat) => {
                     const selected = seat.seat_key === selectedSeatKey;
                     return (
@@ -312,7 +312,7 @@ export function LandingShell({ summaryDataset, constituencyDataset, geoJson }: L
               <section className="rounded-[22px] bg-[#f7f1e7] p-4">
                 <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-[#8b755c]">Details</p>
                 {selectedSeat ? (
-                  <div className="mt-3 space-y-3 max-h-[590px] overflow-y-auto pr-1">
+                  <div className="mt-3 space-y-3 max-h-147.5 overflow-y-auto pr-1">
                     <div>
                       <h3 className="text-lg font-semibold tracking-[-0.02em] text-[#211910]">
                         {selectedSeat.constituency}

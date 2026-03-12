@@ -83,7 +83,7 @@ export function BangladeshMap({
   };
 
   return (
-    <div className="relative h-[620px] overflow-hidden rounded-[28px] border border-white/60 bg-[#f3efe5] shadow-[0_24px_80px_rgba(37,28,17,0.12)]">
+    <div className="relative h-155 overflow-hidden rounded-[28px] border border-white/60 bg-[#f3efe5] shadow-[0_24px_80px_rgba(37,28,17,0.12)]">
       <MapContainer
         center={[23.685, 90.3563]}
         zoom={7}
