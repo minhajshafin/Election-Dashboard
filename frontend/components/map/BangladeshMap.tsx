@@ -160,13 +160,12 @@ export function BangladeshMap({
           data={geoJson as GeoJsonObject}
           style={(feature) => {
             const seat = getSeatForFeature(feature as BangladeshGeoFeature | undefined);
-            const selected = seat?.seat_key === selectedSeatKey;
 
             return {
-              color: selected ? "#c9a84c" : "rgba(255,255,255,0.2)",
-              weight: selected ? 2.4 : 0.7,
+              color: "rgba(255,255,255,0.2)",
+              weight: 0.7,
               fillColor: getSeatFillColor(seat),
-              fillOpacity: selected ? 0.95 : seat ? 0.8 : 0.35,
+              fillOpacity: seat ? 0.8 : 0.35,
               opacity: 1,
             };
           }}
@@ -197,7 +196,7 @@ export function BangladeshMap({
                 }
 
                 styleLayer.setStyle({
-                  weight: seat?.seat_key === selectedSeatKey ? 2.4 : 1.4,
+                  weight: 1.4,
                   fillOpacity: 0.92,
                 });
               },
@@ -205,11 +204,9 @@ export function BangladeshMap({
                 if (!styleLayer) {
                   return;
                 }
-
-                const selected = seat?.seat_key === selectedSeatKey;
                 styleLayer.setStyle({
-                  weight: selected ? 2.4 : 0.7,
-                  fillOpacity: selected ? 0.95 : seat ? 0.8 : 0.35,
+                  weight: 0.7,
+                  fillOpacity: seat ? 0.8 : 0.35,
                 });
               },
             });
