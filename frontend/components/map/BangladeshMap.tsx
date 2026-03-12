@@ -121,6 +121,8 @@ export function BangladeshMap({
               ? `${seat.constituency} · ${seat.winner_party} · ${seat.winner_vote_share_pct ?? "N/A"}%`
               : `${feature.properties.cst_n} · No election data`;
 
+            const styleLayer = layer instanceof L.Path ? layer : null;
+
             layer.bindTooltip(title, {
               direction: "top",
               sticky: true,
@@ -135,14 +137,22 @@ export function BangladeshMap({
                 }
               },
               mouseover: () => {
-                layer.setStyle({
+                if (!styleLayer) {
+                  return;
+                }
+
+                styleLayer.setStyle({
                   weight: seat?.seat_key === selectedSeatKey ? 2.8 : 1.8,
                   fillOpacity: 0.9,
                 });
               },
               mouseout: () => {
+                if (!styleLayer) {
+                  return;
+                }
+
                 const selected = seat?.seat_key === selectedSeatKey;
-                layer.setStyle({
+                styleLayer.setStyle({
                   weight: selected ? 2.8 : 1,
                   fillOpacity: selected ? 0.88 : seat ? 0.72 : 0.38,
                 });
@@ -151,17 +161,6 @@ export function BangladeshMap({
           }}
         />
       </MapContainer>
-
-      <div className="pointer-events-none absolute left-4 top-4 max-w-xs rounded-2xl border border-white/70 bg-white/80 p-4 backdrop-blur-sm">
-        <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-[#7c6b58]">
-          National Seat Map
-        </p>
-        <h2 className="mt-2 text-xl font-semibold text-[#1f1a14]">Hover to inspect, click to lock a seat</h2>
-        <p className="mt-2 text-sm leading-6 text-[#625548]">
-          Constituencies are colored by alliance. The right browser stays synchronized with map selection and search.
-        </p>
-      </div>
-
       <div className="absolute bottom-4 left-4 flex gap-2 rounded-full border border-white/70 bg-white/82 px-3 py-2 text-xs text-[#4b4034] shadow-sm backdrop-blur-sm">
         <span className="inline-flex items-center gap-2">
           <span className="h-2.5 w-2.5 rounded-full bg-[#14532d]" /> BNP
