@@ -372,14 +372,16 @@ export function LandingShell({ summaryDataset, constituencyDataset, geoJson }: L
                         Socioeconomic vs National
                       </p>
                       <div className="space-y-2">
-                        {[
-                          ["Literacy", selectedSeat.literacy_rate, summary.national_averages.literacy_rate],
-                          ["Internet", selectedSeat.internet_pct, summary.national_averages.internet_pct],
-                          ["Urbanization", selectedSeat.urbanization_index, summary.national_averages.urbanization_index],
-                          ["Employment", selectedSeat.employment_rate_pct, summary.national_averages.employment_rate_pct],
-                          ["NEET", selectedSeat.neet_pct, summary.national_averages.neet_pct],
-                          ["Financial Account", selectedSeat.financial_account_pct, summary.national_averages.financial_account_pct],
-                        ].map(([label, seatValue, nationalValue]) => {
+                        {(
+                          [
+                            ["Literacy", selectedSeat.literacy_rate, summary.national_averages.literacy_rate],
+                            ["Internet", selectedSeat.internet_pct, summary.national_averages.internet_pct],
+                            ["Urbanization", selectedSeat.urbanization_index, summary.national_averages.urbanization_index],
+                            ["Employment", selectedSeat.employment_rate_pct, summary.national_averages.employment_rate_pct],
+                            ["NEET", selectedSeat.neet_pct, summary.national_averages.neet_pct],
+                            ["Financial Account", selectedSeat.financial_account_pct, summary.national_averages.financial_account_pct],
+                          ] as [string, number | null, number | null][]
+                        ).map(([label, seatValue, nationalValue]) => {
                           const width = seatValue ? Math.min(seatValue, 100) : 0;
                           const comparison =
                             seatValue !== null && nationalValue !== null
@@ -387,10 +389,10 @@ export function LandingShell({ summaryDataset, constituencyDataset, geoJson }: L
                               : "N/A";
 
                           return (
-                            <div key={label as string}>
+                            <div key={label}>
                               <div className="flex items-center justify-between gap-2 text-[10px] text-[#4f4336]">
                                 <span className="font-medium">{label}</span>
-                                <span className="text-[#8b755c]">{formatPercent(seatValue as number | null)}</span>
+                                <span className="text-[#8b755c]">{formatPercent(seatValue)}</span>
                               </div>
                               <div className="mt-1 h-1 overflow-hidden rounded-full bg-[#eadfce]">
                                 <div
