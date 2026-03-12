@@ -31,14 +31,33 @@ function MapBackgroundReset({ onClearSelection }: { onClearSelection: () => void
   return null;
 }
 
-function FitBoundsToBangladesh({ geoJson }: { geoJson: BangladeshGeoJson }) {
+function FitBoundsAfterResize({ geoJson }: { geoJson: BangladeshGeoJson }) {
   const map = useMap();
 
   useEffect(() => {
     const bounds = L.geoJSON(geoJson as GeoJsonObject).getBounds();
-    if (bounds.isValid()) {
-      map.fitBounds(bounds, { padding: [0, 0], maxZoom: 8 });
+    if (!bounds.isValid()) {
+      return;
     }
+
+    const fitToBounds = () => {
+      map.invalidateSize();
+      map.fitBounds(bounds, {
+        animate: false,
+      });
+
+      // Slightly tighter than exact bounds fit so geometry reads edge-to-edge.
+      map.setZoom(map.getZoom(), { animate: false });
+    };
+
+    // Run once after layout settles, then keep fit centered on map resizes.
+    const id = setTimeout(fitToBounds, 120);
+    map.on("resize", fitToBounds);
+
+    return () => {
+      clearTimeout(id);
+      map.off("resize", fitToBounds);
+    };
   }, [map, geoJson]);
 
   return null;
@@ -83,20 +102,28 @@ export function BangladeshMap({
   };
 
   return (
-    <div className="relative h-155 overflow-hidden rounded-[28px] border border-white/60 bg-[#f3efe5] shadow-[0_24px_80px_rgba(37,28,17,0.12)]">
+    <div className="relative h-full w-full overflow-hidden bg-[#141412]">
       <MapContainer
         center={[23.685, 90.3563]}
         zoom={7}
+        zoomSnap={0.25}
+        zoomDelta={0.25}
         scrollWheelZoom={false}
         zoomControl={false}
         className="h-full w-full"
         maxBounds={[
-          [25.5, 95.5],
           [21.5, 87.5],
+          [25.5, 95.5],
         ]}
       >
-        <FitBoundsToBangladesh geoJson={geoJson} />
+        <FitBoundsAfterResize geoJson={geoJson} />
         <MapBackgroundReset onClearSelection={onClearSelection} />
+
+        <TileLayer
+          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          opacity={0.2}
+          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+        />
         
         <GeoJSON
           data={geoJson as GeoJsonObject}
@@ -105,10 +132,10 @@ export function BangladeshMap({
             const selected = seat?.seat_key === selectedSeatKey;
 
             return {
-              color: selected ? "#fff7ed" : "rgba(255,255,255,0.88)",
-              weight: selected ? 2.8 : 1,
+              color: selected ? "#c9a84c" : "rgba(255,255,255,0.2)",
+              weight: selected ? 2.4 : 0.7,
               fillColor: seat ? getAllianceColor(seat.alliance) : "#94a3b8",
-              fillOpacity: selected ? 0.88 : seat ? 0.72 : 0.38,
+              fillOpacity: selected ? 0.95 : seat ? 0.8 : 0.35,
               opacity: 1,
             };
           }}
@@ -139,8 +166,8 @@ export function BangladeshMap({
                 }
 
                 styleLayer.setStyle({
-                  weight: seat?.seat_key === selectedSeatKey ? 2.8 : 1.8,
-                  fillOpacity: 0.9,
+                  weight: seat?.seat_key === selectedSeatKey ? 2.4 : 1.4,
+                  fillOpacity: 0.92,
                 });
               },
               mouseout: () => {
@@ -150,23 +177,23 @@ export function BangladeshMap({
 
                 const selected = seat?.seat_key === selectedSeatKey;
                 styleLayer.setStyle({
-                  weight: selected ? 2.8 : 1,
-                  fillOpacity: selected ? 0.88 : seat ? 0.72 : 0.38,
+                  weight: selected ? 2.4 : 0.7,
+                  fillOpacity: selected ? 0.95 : seat ? 0.8 : 0.35,
                 });
               },
             });
           }}
         />
       </MapContainer>
-      <div className="absolute bottom-4 left-4 flex gap-2 rounded-full border border-white/70 bg-white/82 px-3 py-2 text-xs text-[#4b4034] shadow-sm backdrop-blur-sm">
+      <div className="absolute bottom-4 left-4 flex gap-4 border border-white/10 bg-[#0d0d0b]/90 px-3 py-2 font-mono text-[11px] uppercase tracking-[0.08em] text-[#9c9888]">
         <span className="inline-flex items-center gap-2">
-          <span className="h-2.5 w-2.5 rounded-full bg-[#14532d]" /> BNP
+          <span className="h-2.5 w-2.5 rounded-full bg-[#4a9e7a]" /> BNP
         </span>
         <span className="inline-flex items-center gap-2">
-          <span className="h-2.5 w-2.5 rounded-full bg-[#0f766e]" /> Jamaat
+          <span className="h-2.5 w-2.5 rounded-full bg-[#2a6aaa]" /> Jamaat
         </span>
         <span className="inline-flex items-center gap-2">
-          <span className="h-2.5 w-2.5 rounded-full bg-[#b45309]" /> Others
+          <span className="h-2.5 w-2.5 rounded-full bg-[#c0572a]" /> Others
         </span>
       </div>
     </div>

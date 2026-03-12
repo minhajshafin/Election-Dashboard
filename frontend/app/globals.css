@@ -1,15 +1,15 @@
 @import "tailwindcss";
 
 :root {
-  --background: #efe7da;
-  --foreground: #1d170f;
+  --background: #0d0d0b;
+  --foreground: #f0ece2;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-source-serif);
+  --font-mono: var(--font-plex-mono);
 }
 
 * {
@@ -23,7 +23,7 @@ html {
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-sans), sans-serif;
+  font-family: var(--font-source-serif), serif;
   margin: 0;
 }
 
@@ -33,7 +33,7 @@ a {
 }
 
 .leaflet-container {
-  font-family: var(--font-sans), sans-serif;
+  font-family: var(--font-source-serif), serif;
 }
 
 .leaflet-tooltip {
@@ -58,7 +58,7 @@ a {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(113, 90, 65, 0.35);
+  background: rgba(255, 255, 255, 0.2);
   border-radius: 999px;
 }
 

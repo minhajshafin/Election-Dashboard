@@ -33,14 +33,14 @@ function FitSelectedFeature({ feature }: { feature: BangladeshGeoFeature | null 
 export function ConstituencyMiniMap({ feature, alliance }: ConstituencyMiniMapProps) {
   if (!feature) {
     return (
-      <div className="flex h-48 items-center justify-center rounded-[22px] border border-dashed border-[#cebfa8] bg-[#f4ede1] text-sm text-[#6d5d4d]">
+      <div className="flex h-56 items-center justify-center border border-dashed border-white/15 bg-[#141412] px-4 text-center text-sm text-[#9c9888]">
         Select a constituency to preview its exact boundary.
       </div>
     );
   }
 
   return (
-    <div className="h-48 overflow-hidden rounded-[22px] border border-white/60 bg-[#efe7da] shadow-inner">
+    <div className="h-56 overflow-hidden border border-white/10 bg-[#141412]">
       <MapContainer
         center={[23.685, 90.3563]}
         zoom={10}
@@ -61,10 +61,10 @@ export function ConstituencyMiniMap({ feature, alliance }: ConstituencyMiniMapPr
         <GeoJSON
           data={feature as GeoJsonObject}
           style={{
-            color: "#fff7ed",
+            color: "#c9a84c",
             weight: 2,
             fillColor: getAllianceColor(alliance),
-            fillOpacity: 0.8,
+            fillOpacity: 0.86,
           }}
         />
       </MapContainer>
