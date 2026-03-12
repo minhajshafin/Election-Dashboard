@@ -283,7 +283,7 @@ export function LandingShell({ summaryDataset, constituencyDataset, geoJson }: L
             {/* Seat list panel */}
             <div className="flex w-70 shrink-0 flex-col border-l border-white/8">
               <div className="flex shrink-0 items-center justify-between border-b border-white/8 px-4 py-2.5">
-                <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-[#5a5848]">Constituencies</p>
+                <p className="font-mono text-[12px] py-2 uppercase tracking-[0.18em] text-[#5a5848]">Constituencies</p>
                 <span className="rounded bg-[#c9a84c]/15 px-2 py-0.5 font-mono text-[11px] text-[#c9a84c]">
                   {filteredSeats.length}
                 </span>
@@ -347,30 +347,35 @@ export function LandingShell({ summaryDataset, constituencyDataset, geoJson }: L
                   }}
                 >
                   <span className="h-2 w-2 rounded-full" style={{ backgroundColor: getAllianceColor(selectedSeat.alliance) }} />
-                  <span className="font-mono text-[11px] tracking-[0.08em]" style={{ color: getAllianceColor(selectedSeat.alliance) }}>
+                  <span className="font-mono text-[13px] tracking-[0.08em]" style={{ color: getAllianceColor(selectedSeat.alliance) }}>
                     {selectedSeat.winner_party} - {selectedSeat.winner_candidate}
                   </span>
                 </div>
+                <p className="mt-2 text-xs text-[#9c9888]">
+                  Runner-up: <span className="text-[#f0ece2]">{selectedSeat.runner_up_candidate}</span> ({selectedSeat.runner_up_party})
+                </p>
               </div>
 
               <ConstituencyMiniMap feature={selectedFeature} alliance={selectedSeat.alliance} />
 
               <section className="border border-white/10">
                 <div className="border-b border-white/10 bg-[#141412] px-4 py-2 font-mono text-[10px] uppercase tracking-[0.18em] text-[#5a5848]">
-                  Election Statistics
+                  Election Result
                 </div>
                 <div className="grid grid-cols-2 gap-3 p-4">
                   {[
-                    { label: "Victory Margin", value: formatPercent(selectedSeat.winning_margin_pct) },
-                    { label: "Voter Turnout", value: formatPercent(selectedSeat.turnout_pct) },
+                    { label: "Winner Votes", value: formatNumber(selectedSeat.winner_votes) },
+                    { label: "Runner-up Votes", value: formatNumber(selectedSeat.runner_up_votes) },
+                    { label: "Winner Vote Share", value: formatPercent(selectedSeat.winner_vote_share_pct) },
+                    { label: "Winning Margin", value: formatPercent(selectedSeat.winning_margin_pct) },
+                    { label: "Turnout", value: formatPercent(selectedSeat.turnout_pct) },
+                    { label: "Valid Votes", value: formatNumber(selectedSeat.total_valid_votes) },
                     { label: "Candidates", value: formatNumber(selectedSeat.candidate_count) },
-                    { label: "Cluster", value: selectedSeat.cluster === null ? "N/A" : `C${selectedSeat.cluster}` },
                   ].map((item) => (
                     <article key={item.label} className="border border-white/10 bg-[#141412] px-3 py-2">
                       <p className="font-mono text-[9px] uppercase tracking-[0.15em] text-[#5a5848]">{item.label}</p>
                       <p
-                        className="mt-1 text-xl font-semibold text-[#f0ece2]"
-                        style={{ fontFamily: "var(--font-playfair), serif" }}
+                        className="details-number mt-1 text-lg font-semibold text-[#f0ece2]"
                       >
                         {item.value}
                       </p>
@@ -381,30 +386,54 @@ export function LandingShell({ summaryDataset, constituencyDataset, geoJson }: L
 
               <section className="border border-white/10">
                 <div className="border-b border-white/10 bg-[#141412] px-4 py-2 font-mono text-[10px] uppercase tracking-[0.18em] text-[#5a5848]">
-                  Socioeconomic vs National
+                  Constituency Profile
+                </div>
+                <div className="grid grid-cols-2 gap-3 p-4">
+                  {[
+                    { label: "Population", value: formatNumber(selectedSeat.Population_Total) },
+                    { label: "Households", value: formatNumber(selectedSeat.Household_Total) },
+                    { label: "Population Density", value: selectedSeat.pop_density === null ? "N/A" : `${formatNumber(selectedSeat.pop_density)}/km2` },
+                    { label: "Urban Population", value: formatNumber(selectedSeat.pop_urban) },
+                    { label: "Rural Population", value: formatNumber(selectedSeat.pop_rural) },
+                    { label: "Female Share", value: formatPercent(selectedSeat.female_pct) },
+                  ].map((item) => (
+                    <article key={item.label} className="border border-white/10 bg-[#141412] px-3 py-2">
+                      <p className="font-mono text-[9px] uppercase tracking-[0.15em] text-[#5a5848]">{item.label}</p>
+                      <p
+                        className="details-number mt-1 text-lg font-semibold text-[#f0ece2]"
+                      >
+                        {item.value}
+                      </p>
+                    </article>
+                  ))}
+                </div>
+              </section>
+
+              <section className="border border-white/10">
+                <div className="border-b border-white/10 bg-[#141412] px-4 py-2 font-mono text-[10px] uppercase tracking-[0.18em] text-[#5a5848]">
+                  Key Indicators vs National
                 </div>
                 <div className="space-y-3 p-4">
                   {(
                     [
                       ["Literacy", selectedSeat.literacy_rate, summary.national_averages.literacy_rate],
-                      ["Internet", selectedSeat.internet_pct, summary.national_averages.internet_pct],
-                      ["Urbanization", selectedSeat.urbanization_index, summary.national_averages.urbanization_index],
-                      ["Employment", selectedSeat.employment_rate_pct, summary.national_averages.employment_rate_pct],
+                      ["Internet Access", selectedSeat.internet_pct, summary.national_averages.internet_pct],
+                      ["Employment Rate", selectedSeat.employment_rate_pct, summary.national_averages.employment_rate_pct],
                       ["NEET", selectedSeat.neet_pct, summary.national_averages.neet_pct],
                       ["Financial Account", selectedSeat.financial_account_pct, summary.national_averages.financial_account_pct],
                     ] as [string, number | null, number | null][]
                   ).map(([label, seatValue, nationalValue]) => {
-                    const width = seatValue ? Math.min(seatValue, 100) : 0;
+                    const width = seatValue === null ? 0 : Math.max(0, Math.min(seatValue, 100));
                     const comparison =
                       seatValue !== null && nationalValue !== null
-                        ? `${seatValue >= nationalValue ? "+" : ""}${(seatValue - nationalValue).toFixed(1)}`
+                        ? `${seatValue >= nationalValue ? "+" : ""}${(seatValue - nationalValue).toFixed(1)} pts`
                         : "N/A";
 
                     return (
                       <div key={label}>
                         <div className="flex items-center justify-between gap-2 text-xs text-[#9c9888]">
                           <span>{label}</span>
-                          <span className="font-mono text-[11px]">{formatPercent(seatValue)}</span>
+                          <span className="details-number text-[11px]">{formatPercent(seatValue)}</span>
                         </div>
                         <div className="mt-1.5 h-1.5 overflow-hidden bg-[#222220]">
                           <div
@@ -415,7 +444,7 @@ export function LandingShell({ summaryDataset, constituencyDataset, geoJson }: L
                             }}
                           />
                         </div>
-                        <p className="mt-0.5 font-mono text-[10px] text-[#5a5848]">{comparison} pts vs national</p>
+                        <p className="details-number mt-0.5 text-[10px] text-[#5a5848]">{comparison} vs national</p>
                       </div>
                     );
                   })}

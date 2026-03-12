@@ -21,6 +21,9 @@ interface BangladeshMapProps {
   onClearSelection: () => void;
 }
 
+const NCP_ORANGE = "#c0572a";
+const OTHERS_YELLOW = "#c9a84c";
+
 function MapBackgroundReset({ onClearSelection }: { onClearSelection: () => void }) {
   useMapEvents({
     click: () => {
@@ -101,6 +104,23 @@ export function BangladeshMap({
     return seatIndex.byName.get(normalizeGeoLookupName(feature.properties.cst_n)) ?? null;
   };
 
+  const getSeatFillColor = (seat: ConstituencyRow | null): string => {
+    if (!seat) {
+      return "#94a3b8";
+    }
+
+    const party = seat.winner_party.toLowerCase();
+    if (party.includes("national citizens party") || party.includes("ncp")) {
+      return NCP_ORANGE;
+    }
+
+    if (seat.alliance?.toLowerCase() === "others") {
+      return OTHERS_YELLOW;
+    }
+
+    return getAllianceColor(seat.alliance);
+  };
+
   return (
     <div className="relative h-full w-full overflow-hidden bg-[#141412]">
       <MapContainer
@@ -134,7 +154,7 @@ export function BangladeshMap({
             return {
               color: selected ? "#c9a84c" : "rgba(255,255,255,0.2)",
               weight: selected ? 2.4 : 0.7,
-              fillColor: seat ? getAllianceColor(seat.alliance) : "#94a3b8",
+              fillColor: getSeatFillColor(seat),
               fillOpacity: selected ? 0.95 : seat ? 0.8 : 0.35,
               opacity: 1,
             };
@@ -193,7 +213,10 @@ export function BangladeshMap({
           <span className="h-2.5 w-2.5 rounded-full bg-[#2a6aaa]" /> Jamaat
         </span>
         <span className="inline-flex items-center gap-2">
-          <span className="h-2.5 w-2.5 rounded-full bg-[#c0572a]" /> Others
+          <span className="h-2.5 w-2.5 rounded-full bg-[#c0572a]" /> NCP
+        </span>
+        <span className="inline-flex items-center gap-2">
+          <span className="h-2.5 w-2.5 rounded-full bg-[#c9a84c]" /> Other Parties
         </span>
       </div>
     </div>

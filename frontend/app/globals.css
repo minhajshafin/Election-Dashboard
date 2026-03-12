@@ -65,3 +65,8 @@ a {
 ::-webkit-scrollbar-track {
   background: transparent;
 }
+
+.details-number {
+  font-family: var(--font-inter), sans-serif;
+  font-variant-numeric: tabular-nums;
+}
