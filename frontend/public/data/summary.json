@@ -1,0 +1,258 @@
+{
+  "meta": {
+    "schema_version": "1.0.0",
+    "generated_at": "2026-03-12T19:05:40.904025+00:00",
+    "source_files": [
+      "data_science/data/processed/spark_output/analytics_base_csv/part-00000-75b102fe-2035-49b3-a857-9566d6822f69-c000.csv",
+      "data_science/data/processed/spark_output/cluster_assignments_csv/part-00000-d28c5818-beb4-431e-a23b-7e1700ae1302-c000.csv"
+    ]
+  },
+  "summary": {
+    "total_seats": 299,
+    "top_party": {
+      "party": "BNP",
+      "seat_count": 207,
+      "seat_share_pct": 69.23
+    },
+    "competitive_seats": {
+      "threshold_pct": 10.0,
+      "count": 92,
+      "share_pct": 30.77
+    },
+    "avg_turnout": 9.69,
+    "avg_margin": 20.5,
+    "avg_candidate_count": 6.69,
+    "seats_by_party": {
+      "Bangladesh Jamaat-e-Islami": 68,
+      "BNP": 207,
+      "Islamic Andolon Bangladesh": 2,
+      "Bangladesh National Party - BJP": 1,
+      "Jatiya Samajtantrik Dal (JSD Rab)": 1,
+      "Independent": 8,
+      "Ganosamhati Andolon": 1,
+      "Gono Odhikar Parishad": 2,
+      "National Citizens Party - NCP": 6,
+      "Bangladesh Khilafat Majlis": 2,
+      "Khilafat Majlis": 1
+    },
+    "seats_by_alliance": {
+      "jamaat": 77,
+      "bnp": 211,
+      "others": 11
+    },
+    "seats_by_division": {
+      "Barisal": {
+        "BNP": 16,
+        "Bangladesh Jamaat-e-Islami": 2,
+        "Bangladesh National Party - BJP": 1,
+        "Gono Odhikar Parishad": 1,
+        "Islamic Andolon Bangladesh": 1
+      },
+      "Chattogram": {
+        "BNP": 47,
+        "Bangladesh Jamaat-e-Islami": 3,
+        "Ganosamhati Andolon": 1,
+        "Gono Odhikar Parishad": 1,
+        "Independent": 4,
+        "National Citizens Party - NCP": 2
+      },
+      "Dhaka": {
+        "BNP": 57,
+        "Bangladesh Jamaat-e-Islami": 8,
+        "Bangladesh Khilafat Majlis": 1,
+        "Independent": 2,
+        "National Citizens Party - NCP": 2
+      },
+      "Khulna": {
+        "BNP": 11,
+        "Bangladesh Jamaat-e-Islami": 25
+      },
+      "Mymensingh": {
+        "BNP": 18,
+        "Bangladesh Jamaat-e-Islami": 3,
+        "Bangladesh Khilafat Majlis": 1,
+        "Independent": 1,
+        "Islamic Andolon Bangladesh": 1
+      },
+      "Rajshahi": {
+        "BNP": 26,
+        "Bangladesh Jamaat-e-Islami": 11,
+        "Jatiya Samajtantrik Dal (JSD Rab)": 1
+      },
+      "Rangpur": {
+        "BNP": 14,
+        "Bangladesh Jamaat-e-Islami": 16,
+        "Independent": 1,
+        "National Citizens Party - NCP": 2
+      },
+      "Sylhet": {
+        "BNP": 18,
+        "Khilafat Majlis": 1
+      }
+    },
+    "division_seat_counts": {
+      "Barisal": 21,
+      "Chattogram": 58,
+      "Dhaka": 70,
+      "Khulna": 36,
+      "Mymensingh": 24,
+      "Rajshahi": 38,
+      "Rangpur": 33,
+      "Sylhet": 19
+    },
+    "party_rankings": [
+      {
+        "party": "BNP",
+        "seat_count": 207,
+        "seat_share_pct": 69.23
+      },
+      {
+        "party": "Bangladesh Jamaat-e-Islami",
+        "seat_count": 68,
+        "seat_share_pct": 22.74
+      },
+      {
+        "party": "Independent",
+        "seat_count": 8,
+        "seat_share_pct": 2.68
+      },
+      {
+        "party": "National Citizens Party - NCP",
+        "seat_count": 6,
+        "seat_share_pct": 2.01
+      },
+      {
+        "party": "Islamic Andolon Bangladesh",
+        "seat_count": 2,
+        "seat_share_pct": 0.67
+      },
+      {
+        "party": "Gono Odhikar Parishad",
+        "seat_count": 2,
+        "seat_share_pct": 0.67
+      },
+      {
+        "party": "Bangladesh Khilafat Majlis",
+        "seat_count": 2,
+        "seat_share_pct": 0.67
+      },
+      {
+        "party": "Bangladesh National Party - BJP",
+        "seat_count": 1,
+        "seat_share_pct": 0.33
+      },
+      {
+        "party": "Jatiya Samajtantrik Dal (JSD Rab)",
+        "seat_count": 1,
+        "seat_share_pct": 0.33
+      },
+      {
+        "party": "Ganosamhati Andolon",
+        "seat_count": 1,
+        "seat_share_pct": 0.33
+      },
+      {
+        "party": "Khilafat Majlis",
+        "seat_count": 1,
+        "seat_share_pct": 0.33
+      }
+    ],
+    "divisions": [
+      {
+        "division": "Barisal",
+        "seat_count": 21,
+        "parties": {
+          "BNP": 16,
+          "Bangladesh Jamaat-e-Islami": 2,
+          "Bangladesh National Party - BJP": 1,
+          "Gono Odhikar Parishad": 1,
+          "Islamic Andolon Bangladesh": 1
+        }
+      },
+      {
+        "division": "Chattogram",
+        "seat_count": 58,
+        "parties": {
+          "BNP": 47,
+          "Bangladesh Jamaat-e-Islami": 3,
+          "Ganosamhati Andolon": 1,
+          "Gono Odhikar Parishad": 1,
+          "Independent": 4,
+          "National Citizens Party - NCP": 2
+        }
+      },
+      {
+        "division": "Dhaka",
+        "seat_count": 70,
+        "parties": {
+          "BNP": 57,
+          "Bangladesh Jamaat-e-Islami": 8,
+          "Bangladesh Khilafat Majlis": 1,
+          "Independent": 2,
+          "National Citizens Party - NCP": 2
+        }
+      },
+      {
+        "division": "Khulna",
+        "seat_count": 36,
+        "parties": {
+          "BNP": 11,
+          "Bangladesh Jamaat-e-Islami": 25
+        }
+      },
+      {
+        "division": "Mymensingh",
+        "seat_count": 24,
+        "parties": {
+          "BNP": 18,
+          "Bangladesh Jamaat-e-Islami": 3,
+          "Bangladesh Khilafat Majlis": 1,
+          "Independent": 1,
+          "Islamic Andolon Bangladesh": 1
+        }
+      },
+      {
+        "division": "Rajshahi",
+        "seat_count": 38,
+        "parties": {
+          "BNP": 26,
+          "Bangladesh Jamaat-e-Islami": 11,
+          "Jatiya Samajtantrik Dal (JSD Rab)": 1
+        }
+      },
+      {
+        "division": "Rangpur",
+        "seat_count": 33,
+        "parties": {
+          "BNP": 14,
+          "Bangladesh Jamaat-e-Islami": 16,
+          "Independent": 1,
+          "National Citizens Party - NCP": 2
+        }
+      },
+      {
+        "division": "Sylhet",
+        "seat_count": 19,
+        "parties": {
+          "BNP": 18,
+          "Khilafat Majlis": 1
+        }
+      }
+    ],
+    "national_averages": {
+      "turnout_pct": 9.69,
+      "winning_margin_pct": 20.5,
+      "candidate_count": 6.69,
+      "winner_vote_share_pct": 59.69,
+      "literacy_rate": 74.41,
+      "internet_pct": 29.64,
+      "urbanization_index": 30.37,
+      "employment_rate_pct": 30.96,
+      "neet_pct": 34.8,
+      "financial_account_pct": 25.03,
+      "pop_density": 1851.03,
+      "dependency_ratio": 53.79,
+      "female_pct": 50.99
+    }
+  }
+}

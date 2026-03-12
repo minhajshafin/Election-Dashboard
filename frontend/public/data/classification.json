@@ -1,0 +1,51 @@
+{
+  "meta": {
+    "schema_version": "1.0.0",
+    "generated_at": "2026-03-12T19:05:40.905344+00:00",
+    "source_files": [
+      "data_science/data/processed/spark_output/classification_results.json"
+    ]
+  },
+  "result": {
+    "model": "RandomForestClassifier",
+    "target": "winner_party",
+    "num_trees": 100,
+    "max_depth": 5,
+    "party_labels": [
+      "BNP",
+      "Bangladesh Jamaat-e-Islami",
+      "Independent",
+      "National Citizens Party - NCP",
+      "Bangladesh Khilafat Majlis",
+      "Gono Odhikar Parishad",
+      "Bangladesh National Party - BJP",
+      "Ganosamhati Andolon",
+      "Islamic Andolon Bangladesh",
+      "Jatiya Samajtantrik Dal (JSD Rab)",
+      "Khilafat Majlis"
+    ],
+    "metrics": {
+      "accuracy": 0.7619,
+      "weightedPrecision": 0.6481,
+      "weightedRecall": 0.7619,
+      "f1": 0.6974
+    },
+    "feature_importance": {
+      "employment_rate_pct": 0.0992,
+      "dependency_ratio": 0.0967,
+      "candidate_count": 0.0929,
+      "female_pct": 0.0883,
+      "internet_pct": 0.0864,
+      "sex_ratio": 0.0803,
+      "literacy_rate": 0.0764,
+      "literacy_female": 0.0559,
+      "pop_density": 0.0541,
+      "mobile_phone_pct": 0.0527,
+      "neet_pct": 0.0521,
+      "hindu_pct": 0.0463,
+      "muslim_majority_pct": 0.0453,
+      "financial_account_pct": 0.0378,
+      "urbanization_index": 0.0356
+    }
+  }
+}

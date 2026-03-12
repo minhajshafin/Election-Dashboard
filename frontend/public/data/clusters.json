@@ -1,0 +1,32 @@
+{
+  "meta": {
+    "schema_version": "1.0.0",
+    "generated_at": "2026-03-12T19:05:40.905876+00:00",
+    "source_files": [
+      "data_science/data/processed/spark_output/cluster_profiles.json",
+      "data_science/data/processed/spark_output/cluster_assignments_csv/part-00000-d28c5818-beb4-431e-a23b-7e1700ae1302-c000.csv"
+    ]
+  },
+  "profiles": [
+    {
+      "cluster": 0,
+      "n": 231,
+      "avg_literacy": 72.82,
+      "avg_internet": 26.28,
+      "avg_urban": 23.17,
+      "avg_density": 1115.37,
+      "avg_muslim": 88.91,
+      "avg_margin": 20.7
+    },
+    {
+      "cluster": 1,
+      "n": 44,
+      "avg_literacy": 82.63,
+      "avg_internet": 46.39,
+      "avg_urban": 63.53,
+      "avg_density": 6108.5,
+      "avg_muslim": 92.53,
+      "avg_margin": 20.32
+    }
+  ]
+}
