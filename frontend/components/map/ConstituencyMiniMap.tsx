@@ -5,12 +5,13 @@ import type { GeoJsonObject } from "geojson";
 import L from "leaflet";
 import { GeoJSON, MapContainer, TileLayer, useMap } from "react-leaflet";
 
-import { getAllianceColor } from "@/lib/colors";
+import { getSeatColor } from "@/lib/colors";
 import type { BangladeshGeoFeature } from "@/lib/geo";
 
 interface ConstituencyMiniMapProps {
   feature: BangladeshGeoFeature | null;
   alliance: string;
+  winnerParty: string;
 }
 
 function FitSelectedFeature({ feature }: { feature: BangladeshGeoFeature | null }) {
@@ -30,7 +31,7 @@ function FitSelectedFeature({ feature }: { feature: BangladeshGeoFeature | null 
   return null;
 }
 
-export function ConstituencyMiniMap({ feature, alliance }: ConstituencyMiniMapProps) {
+export function ConstituencyMiniMap({ feature, alliance, winnerParty }: ConstituencyMiniMapProps) {
   if (!feature) {
     return (
       <div className="flex h-56 items-center justify-center border border-dashed border-white/15 bg-[#141412] px-4 text-center text-sm text-[#9c9888]">
@@ -67,7 +68,7 @@ export function ConstituencyMiniMap({ feature, alliance }: ConstituencyMiniMapPr
           style={{
             color: "#c9a84c",
             weight: 2,
-            fillColor: getAllianceColor(alliance),
+            fillColor: getSeatColor({ alliance, winner_party: winnerParty }),
             fillOpacity: 0.86,
           }}
         />

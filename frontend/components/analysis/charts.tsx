@@ -89,26 +89,28 @@ export function HistogramChart({
   return (
     <article className="border border-white/10 bg-[#141412] p-4">
       <h2 className="font-mono text-[11px] uppercase tracking-[0.16em] text-[#c9a84c]">{title}</h2>
-      <div className="mt-4 grid h-56 grid-cols-6 items-end gap-2 sm:grid-cols-8 md:grid-cols-10">
-        {data.map((item) => {
-          const height = (item.count / max) * 100;
-          return (
-            <div key={item.label} className="flex min-w-0 flex-col items-center gap-1">
-              <div className="flex h-40 w-full items-end rounded-sm bg-[#252521]">
-                <div
-                  className="w-full rounded-sm"
-                  style={{
-                    height: `${Math.max(height, 2)}%`,
-                    background: color,
-                  }}
-                />
+      <div className="mt-4 overflow-x-auto pb-1">
+        <div className="flex h-56 min-w-max items-end gap-2">
+          {data.map((item) => {
+            const height = (item.count / max) * 100;
+            return (
+              <div key={item.label} className="flex w-12 shrink-0 flex-col items-center gap-1">
+                <div className="flex h-40 w-full items-end rounded-sm bg-[#252521]">
+                  <div
+                    className="w-full rounded-sm"
+                    style={{
+                      height: `${Math.max(height, 2)}%`,
+                      background: color,
+                    }}
+                  />
+                </div>
+                <p className="w-full truncate text-center text-[10px] text-[#9c9888]" title={item.label}>
+                  {item.label}
+                </p>
               </div>
-              <p className="truncate text-[10px] text-[#9c9888]" title={item.label}>
-                {item.label}
-              </p>
-            </div>
-          );
-        })}
+            );
+          })}
+        </div>
       </div>
     </article>
   );

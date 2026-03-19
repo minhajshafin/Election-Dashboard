@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useMemo, useState } from "react";
 
-import { getAllianceColor } from "@/lib/colors";
+import { getSeatColor } from "@/lib/colors";
 import type { ConstituencyRow } from "@/types/api";
 
 interface ExplorerShellProps {
@@ -164,7 +164,7 @@ export function ExplorerShell({ seats, divisions, alliances, parties }: Explorer
                   <td className="px-3 py-2 text-[#d8d3c6]">{seat.winner_party}</td>
                   <td className="px-3 py-2">
                     <span className="inline-flex items-center gap-2 text-[#d8d3c6]">
-                      <span className="h-2 w-2 rounded-full" style={{ backgroundColor: getAllianceColor(seat.alliance) }} />
+                      <span className="h-2 w-2 rounded-full" style={{ backgroundColor: getSeatColor(seat) }} />
                       {seat.alliance}
                     </span>
                   </td>

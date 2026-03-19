@@ -5,7 +5,7 @@ import type { GeoJsonObject } from "geojson";
 import L from "leaflet";
 import { GeoJSON, MapContainer, TileLayer, useMap, useMapEvents } from "react-leaflet";
 
-import { getAllianceColor } from "@/lib/colors";
+import { getSeatColor } from "@/lib/colors";
 import {
   type BangladeshGeoFeature,
   type BangladeshGeoJson,
@@ -20,9 +20,6 @@ interface BangladeshMapProps {
   onSelectSeat: (seatKey: string) => void;
   onClearSelection: () => void;
 }
-
-const NCP_ORANGE = "#c0572a";
-const OTHERS_YELLOW = "#c9a84c";
 
 function MapBackgroundReset({ onClearSelection }: { onClearSelection: () => void }) {
   useMapEvents({
@@ -109,16 +106,7 @@ export function BangladeshMap({
       return "#94a3b8";
     }
 
-    const party = seat.winner_party.toLowerCase();
-    if (party.includes("national citizens party") || party.includes("ncp")) {
-      return NCP_ORANGE;
-    }
-
-    if (seat.alliance?.toLowerCase() === "others") {
-      return OTHERS_YELLOW;
-    }
-
-    return getAllianceColor(seat.alliance);
+    return getSeatColor(seat);
   };
 
   const selectedFeature = useMemo(() => {
