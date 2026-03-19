@@ -247,7 +247,7 @@ export function LandingShell({ summaryDataset, constituencyDataset }: LandingShe
                   className="w-full border border-white/15 bg-[#0d0d0b] px-3 py-2 text-sm text-[#9c9888] outline-none transition focus:border-[#c9a84c] focus:text-[#f0ece2]"
                 />
               </div>
-              <div className="min-h-0 flex-1">
+              <div className="min-h-0 flex-1 px-4 pb-4 sm:px-5 sm:pb-5">
                 <BangladeshMap
                   seats={sortedSeats}
                   selectedSeatKey={selectedSeatKey}
