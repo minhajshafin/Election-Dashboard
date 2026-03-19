@@ -4,7 +4,7 @@ import dynamic from "next/dynamic";
 import { useSearchParams } from "next/navigation";
 import { useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
 
-import { getAllianceColor, getAllianceSoftColor } from "@/lib/colors";
+import { getSeatColor, getSeatSoftColor } from "@/lib/colors";
 import { findGeoFeatureForSeat, type BangladeshGeoJson } from "@/lib/geo";
 import type { ConstituencyDataset, ConstituencyRow, SummaryDataset } from "@/types/api";
 import { PrimaryNav } from "@/components/nav/PrimaryNav";
@@ -295,7 +295,7 @@ export function LandingShell({ summaryDataset, constituencyDataset, geoJson }: L
                     >
                       <span
                         className="mt-0.5 h-2 w-2 shrink-0 rounded-full"
-                        style={{ backgroundColor: getAllianceColor(seat.alliance) }}
+                        style={{ backgroundColor: getSeatColor(seat) }}
                       />
                       <div className="min-w-0">
                         <p className="truncate text-sm text-[#f0ece2]">{seat.constituency}</p>
@@ -332,12 +332,12 @@ export function LandingShell({ summaryDataset, constituencyDataset, geoJson }: L
                 <div
                   className="mt-3 inline-flex items-center gap-2 border px-3 py-1.5"
                   style={{
-                    backgroundColor: getAllianceSoftColor(selectedSeat.alliance),
-                    borderColor: `${getAllianceColor(selectedSeat.alliance)}66`,
+                    backgroundColor: getSeatSoftColor(selectedSeat),
+                    borderColor: `${getSeatColor(selectedSeat)}66`,
                   }}
                 >
-                  <span className="h-2 w-2 rounded-full" style={{ backgroundColor: getAllianceColor(selectedSeat.alliance) }} />
-                  <span className="font-mono text-[13px] tracking-[0.08em]" style={{ color: getAllianceColor(selectedSeat.alliance) }}>
+                  <span className="h-2 w-2 rounded-full" style={{ backgroundColor: getSeatColor(selectedSeat) }} />
+                  <span className="font-mono text-[13px] tracking-[0.08em]" style={{ color: getSeatColor(selectedSeat) }}>
                     {selectedSeat.winner_party} - {selectedSeat.winner_candidate}
                   </span>
                 </div>
@@ -346,7 +346,11 @@ export function LandingShell({ summaryDataset, constituencyDataset, geoJson }: L
                 </p>
               </div>
 
-              <ConstituencyMiniMap feature={selectedFeature} alliance={selectedSeat.alliance} />
+              <ConstituencyMiniMap
+                feature={selectedFeature}
+                alliance={selectedSeat.alliance}
+                winnerParty={selectedSeat.winner_party}
+              />
 
               <section className="border border-white/10">
                 <div className="border-b border-white/10 bg-[#141412] px-4 py-2 font-mono text-[10px] uppercase tracking-[0.18em] text-[#5a5848]">
@@ -430,7 +434,7 @@ export function LandingShell({ summaryDataset, constituencyDataset, geoJson }: L
                             className="h-full"
                             style={{
                               width: `${width}%`,
-                              background: `linear-gradient(90deg, ${getAllianceColor(selectedSeat.alliance)}, #c9a84c)`,
+                              background: `linear-gradient(90deg, ${getSeatColor(selectedSeat)}, #c9a84c)`,
                             }}
                           />
                         </div>
