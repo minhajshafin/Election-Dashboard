@@ -435,15 +435,15 @@ export function LandingShell({ summaryDataset, constituencyDataset }: LandingShe
               </section>
             </div>
           ) : (
-            <div className="flex flex-col justify-center gap-3 py-10">
-              <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-[#5a5848]">No Selection</p>
+            <div className="flex flex-col justify-center gap-3 px-10 py-10">
+              <p className="font-mono text-[25px] uppercase tracking-[0.18em] text-[#5a5848]">No Selection</p>
               <h3
-                className="max-w-60 text-xl font-medium leading-snug text-[#9c9888]"
+                className="max-w-90 text-3xl font-medium leading-snug text-[#9c9888]"
                 style={{ fontFamily: "var(--font-playfair), serif" }}
               >
                 Select a seat from the list or map
               </h3>
-              <p className="max-w-60 text-sm leading-6 text-[#5a5848]">
+              <p className="max-w-60 leading-6 text-[#5a5848]">
                 View candidate info, election stats, and socioeconomic comparison against national averages.
               </p>
             </div>
