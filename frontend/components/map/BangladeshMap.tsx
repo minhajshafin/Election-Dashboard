@@ -241,7 +241,7 @@ export function BangladeshMap({
           ) : null}
         </MapContainer>
       )}
-      <div className="absolute bottom-4 left-4 flex gap-4 border border-white/10 bg-[#0d0d0b]/90 px-3 py-2 font-mono text-[11px] uppercase tracking-[0.08em] text-[#9c9888]">
+      <div className="absolute bottom-4 left-4 z-[700] flex gap-4 border border-white/20 bg-[#0d0d0b] px-3 py-2 font-mono text-[11px] uppercase tracking-[0.08em] text-[#9c9888] shadow-[0_10px_24px_rgba(0,0,0,0.45)]">
         <span className="inline-flex items-center gap-2">
           <span className="h-2.5 w-2.5 rounded-full bg-[#4a9e7a]" /> BNP
         </span>
