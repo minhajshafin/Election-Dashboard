@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo } from "react";
+import { useCallback, useEffect, useMemo } from "react";
 import type { GeoJsonObject } from "geojson";
 import L from "leaflet";
 import { GeoJSON, MapContainer, TileLayer, useMap, useMapEvents } from "react-leaflet";
@@ -90,7 +90,7 @@ export function BangladeshMap({
     return { byGeoCode, byName };
   }, [seats]);
 
-  const getSeatForFeature = (feature?: BangladeshGeoFeature) => {
+  const getSeatForFeature = useCallback((feature?: BangladeshGeoFeature) => {
     if (!feature) {
       return null;
     }
@@ -102,7 +102,7 @@ export function BangladeshMap({
     }
 
     return seatIndex.byName.get(normalizeGeoLookupName(feature.properties.cst_n)) ?? null;
-  };
+  }, [seatIndex]);
 
   const getSeatFillColor = (seat: ConstituencyRow | null): string => {
     if (!seat) {
@@ -130,7 +130,7 @@ export function BangladeshMap({
       const seat = getSeatForFeature(feature);
       return seat?.seat_key === selectedSeatKey;
     }) ?? null;
-  }, [geoJson.features, seatIndex, selectedSeatKey]);
+  }, [geoJson.features, getSeatForFeature, selectedSeatKey]);
 
   return (
     <div className="relative h-full w-full overflow-hidden bg-[#141412]">
