@@ -173,16 +173,16 @@ export function LandingShell({ summaryDataset, constituencyDataset }: LandingShe
       <PrimaryNav />
 
       {/* ── Hero banner ──────────────────────────────────────── */}
-      <section className="relative shrink-0 overflow-hidden border-b border-white/8 px-4 py-4 sm:px-10 sm:py-5">
+      <section className="relative shrink-0 overflow-hidden border-b border-white/8 px-4 py-6 sm:px-10 sm:py-8">
         <div className="pointer-events-none absolute right-0 top-0 h-full w-1/3 bg-[radial-gradient(ellipse_at_top_right,rgba(201,168,76,0.07),transparent_70%)]" />
-        <p className="relative z-10 font-mono text-[10px] uppercase tracking-[0.22em] text-[#c9a84c]">
+        <p className="relative z-10 font-mono text-[11px] uppercase tracking-[0.24em] text-[#c9a84c]">
           Bangladesh General Election · National Results
         </p>
         <h1
-          className="relative z-10 mt-1 text-xl font-semibold leading-snug text-[#f0ece2] sm:text-2xl"
+          className="relative z-10 mt-2 text-2xl font-semibold leading-tight text-[#f0ece2] sm:text-4xl"
           style={{ fontFamily: "var(--font-playfair), serif" }}
         >
-          National result map with <em className="text-[#c9a84c]">synchronized</em> seat browsing
+          National Election <em className="text-[#c9a84c]">Dashboard</em>
         </h1>
       </section>
 
