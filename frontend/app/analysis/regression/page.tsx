@@ -1,71 +1,75 @@
-import { getRegressionDataset } from "@/lib/data";
+import {
+  DivergingBarChart,
+  MetricCards,
+  Panel,
+  ScatterPlot,
+} from "@/components/analysis/charts";
+import { getConstituencyDataset, getRegressionDataset } from "@/lib/data";
+import type { ConstituencyRow } from "@/types/api";
 
 function toSortedEntries(coefficients: Record<string, number>) {
   return Object.entries(coefficients).sort((left, right) => Math.abs(right[1]) - Math.abs(left[1]));
 }
 
+function resolveNumericFeature(seat: ConstituencyRow, feature: string): number | null {
+  const value = seat[feature as keyof ConstituencyRow];
+  return typeof value === "number" ? value : null;
+}
+
 export default async function RegressionPage() {
-  const dataset = await getRegressionDataset();
+  const [dataset, constituencyDataset] = await Promise.all([
+    getRegressionDataset(),
+    getConstituencyDataset(),
+  ]);
+
   const result = dataset.result;
   const sorted = toSortedEntries(result.coefficients);
-  const strongestPositive = sorted.filter(([, value]) => value > 0).slice(0, 5);
-  const strongestNegative = sorted.filter(([, value]) => value < 0).slice(0, 5);
+  const coefficientData = sorted.slice(0, 12).map(([feature, value]) => ({
+    label: feature,
+    value,
+  }));
+
+  const points = constituencyDataset.rows
+    .map((seat) => {
+      if (seat.turnout_pct === null) {
+        return null;
+      }
+
+      let prediction = result.intercept;
+      for (const feature of result.features) {
+        const featureValue = resolveNumericFeature(seat, feature);
+        if (featureValue === null) {
+          return null;
+        }
+
+        prediction += (result.coefficients[feature] ?? 0) * featureValue;
+      }
+
+      return {
+        x: seat.turnout_pct,
+        y: prediction,
+        group: seat.division,
+        label: seat.constituency,
+      };
+    })
+    .filter((point): point is { x: number; y: number; group: string; label: string } => point !== null);
 
   return (
     <main className="min-h-screen bg-[#0d0d0b] px-4 pb-10 text-[#f0ece2] sm:px-10">
-      <section className="grid gap-3 sm:grid-cols-3">
-        <article className="border border-white/10 bg-[#141412] px-4 py-3">
-          <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-[#5a5848]">Model</p>
-          <p className="mt-2 text-lg">{result.model}</p>
-        </article>
-        <article className="border border-white/10 bg-[#141412] px-4 py-3">
-          <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-[#5a5848]">R2</p>
-          <p className="mt-2 text-lg">{result.r2.toFixed(3)}</p>
-        </article>
-        <article className="border border-white/10 bg-[#141412] px-4 py-3">
-          <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-[#5a5848]">RMSE</p>
-          <p className="mt-2 text-lg">{result.rmse.toFixed(3)}</p>
-        </article>
-      </section>
+      <MetricCards
+        cards={[
+          { label: "Model", value: result.model, detail: `Target: ${result.target}` },
+          { label: "R2", value: result.r2.toFixed(3), detail: "Explained variance" },
+          { label: "RMSE", value: result.rmse.toFixed(3), detail: "Prediction error" },
+        ]}
+      />
 
       <section className="mt-6 grid gap-4 xl:grid-cols-2">
-        <article className="border border-white/10 bg-[#141412] p-4">
-          <h2 className="font-mono text-[11px] uppercase tracking-[0.16em] text-[#c9a84c]">Strongest Positive Coefficients</h2>
-          <div className="mt-3 space-y-2">
-            {strongestPositive.map(([feature, value]) => (
-              <div key={feature} className="space-y-1">
-                <div className="flex items-center justify-between text-sm">
-                  <span>{feature}</span>
-                  <span className="font-mono text-[#4a9e7a]">+{value.toFixed(4)}</span>
-                </div>
-                <div className="h-1.5 bg-[#252521]">
-                  <div className="h-full bg-[#4a9e7a]" style={{ width: `${Math.min(Math.abs(value) * 100, 100)}%` }} />
-                </div>
-              </div>
-            ))}
-          </div>
-        </article>
-
-        <article className="border border-white/10 bg-[#141412] p-4">
-          <h2 className="font-mono text-[11px] uppercase tracking-[0.16em] text-[#c9a84c]">Strongest Negative Coefficients</h2>
-          <div className="mt-3 space-y-2">
-            {strongestNegative.map(([feature, value]) => (
-              <div key={feature} className="space-y-1">
-                <div className="flex items-center justify-between text-sm">
-                  <span>{feature}</span>
-                  <span className="font-mono text-[#c0572a]">{value.toFixed(4)}</span>
-                </div>
-                <div className="h-1.5 bg-[#252521]">
-                  <div className="h-full bg-[#c0572a]" style={{ width: `${Math.min(Math.abs(value) * 100, 100)}%` }} />
-                </div>
-              </div>
-            ))}
-          </div>
-        </article>
+        <DivergingBarChart title="Coefficient Magnitude and Direction" data={coefficientData} />
+        <ScatterPlot title="Predicted vs Actual Turnout" points={points} />
       </section>
 
-      <section className="mt-6 border border-white/10 bg-[#141412] p-4">
-        <h2 className="font-mono text-[11px] uppercase tracking-[0.16em] text-[#c9a84c]">Model Formula Snapshot</h2>
+      <Panel title="Model Formula Snapshot">
         <p className="mt-3 text-sm text-[#d8d3c6]">
           turnout_pct = {result.intercept.toFixed(4)}
           {sorted
@@ -74,7 +78,7 @@ export default async function RegressionPage() {
             .join("")}
           ...
         </p>
-      </section>
+      </Panel>
     </main>
   );
 }
