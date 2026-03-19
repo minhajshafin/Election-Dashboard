@@ -70,10 +70,17 @@ export function LandingShell({ summaryDataset, constituencyDataset, geoJson }: L
   const { summary } = summaryDataset;
   const seats = constituencyDataset.rows;
   const searchParams = useSearchParams();
+  const initialSeatFromQuery = searchParams.get("seat");
   const [searchValue, setSearchValue] = useState("");
   const deferredSearchValue = useDeferredValue(searchValue);
   const [activeDivision, setActiveDivision] = useState<string>(ALL_DIVISIONS);
-  const [selectedSeatKey, setSelectedSeatKey] = useState<string | null>(null);
+  const [selectedSeatKey, setSelectedSeatKey] = useState<string | null>(() => {
+    if (!initialSeatFromQuery) {
+      return null;
+    }
+
+    return seats.some((seat) => seat.seat_key === initialSeatFromQuery) ? initialSeatFromQuery : null;
+  });
   const seatRefs = useRef<Record<string, HTMLButtonElement | null>>({});
 
   const normalizedSearch = deferredSearchValue.trim().toLowerCase();
@@ -126,18 +133,6 @@ export function LandingShell({ summaryDataset, constituencyDataset, geoJson }: L
 
     seatRefs.current[selectedSeatKey]?.scrollIntoView({ block: "nearest", behavior: "smooth" });
   }, [selectedSeatKey]);
-
-  useEffect(() => {
-    const seatParam = searchParams.get("seat");
-    if (!seatParam) {
-      return;
-    }
-
-    const matchesSeat = seats.some((seat) => seat.seat_key === seatParam);
-    if (matchesSeat) {
-      setSelectedSeatKey(seatParam);
-    }
-  }, [searchParams, seats]);
 
   const handleSearchChange = (value: string) => {
     setSearchValue(value);
