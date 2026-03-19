@@ -5,7 +5,6 @@ import { useSearchParams } from "next/navigation";
 import { useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
 
 import { getSeatColor, getSeatSoftColor } from "@/lib/colors";
-import { findGeoFeatureForSeat, type BangladeshGeoJson } from "@/lib/geo";
 import type { ConstituencyDataset, ConstituencyRow, SummaryDataset } from "@/types/api";
 import { PrimaryNav } from "@/components/nav/PrimaryNav";
 
@@ -22,7 +21,6 @@ const ConstituencyMiniMap = dynamic(() => import("../map/ConstituencyMiniMap").t
 interface LandingShellProps {
   summaryDataset: SummaryDataset;
   constituencyDataset: ConstituencyDataset;
-  geoJson: BangladeshGeoJson;
 }
 
 const ALL_DIVISIONS = "All Divisions";
@@ -66,7 +64,7 @@ function matchesSeatFilters(seat: ConstituencyRow, division: string, query: stri
   return divisionMatch && matchesSeatQuery(seat, query);
 }
 
-export function LandingShell({ summaryDataset, constituencyDataset, geoJson }: LandingShellProps) {
+export function LandingShell({ summaryDataset, constituencyDataset }: LandingShellProps) {
   const { summary } = summaryDataset;
   const seats = constituencyDataset.rows;
   const searchParams = useSearchParams();
@@ -117,14 +115,6 @@ export function LandingShell({ summaryDataset, constituencyDataset, geoJson }: L
   const selectedSeat = useMemo(() => {
     return sortedSeats.find((seat) => seat.seat_key === selectedSeatKey) ?? null;
   }, [selectedSeatKey, sortedSeats]);
-
-  const selectedFeature = useMemo(() => {
-    if (!selectedSeat) {
-      return null;
-    }
-
-    return findGeoFeatureForSeat(geoJson, selectedSeat);
-  }, [geoJson, selectedSeat]);
 
   useEffect(() => {
     if (!selectedSeatKey) {
@@ -259,7 +249,6 @@ export function LandingShell({ summaryDataset, constituencyDataset, geoJson }: L
               </div>
               <div className="min-h-0 flex-1">
                 <BangladeshMap
-                  geoJson={geoJson}
                   seats={sortedSeats}
                   selectedSeatKey={selectedSeatKey}
                   onSelectSeat={(seatKey) => {
@@ -347,7 +336,7 @@ export function LandingShell({ summaryDataset, constituencyDataset, geoJson }: L
               </div>
 
               <ConstituencyMiniMap
-                feature={selectedFeature}
+                seat={selectedSeat}
                 alliance={selectedSeat.alliance}
                 winnerParty={selectedSeat.winner_party}
               />

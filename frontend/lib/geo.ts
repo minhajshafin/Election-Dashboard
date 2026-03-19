@@ -24,6 +24,24 @@ export interface BangladeshGeoJson {
   features: BangladeshGeoFeature[];
 }
 
+export const BANGLADESH_GEOJSON_PUBLIC_PATH = "/geojson/GRED_20190215_Bangladesh_2008.geojson";
+
+let geoJsonFetchPromise: Promise<BangladeshGeoJson> | null = null;
+
+export function fetchBangladeshGeoJson(): Promise<BangladeshGeoJson> {
+  if (!geoJsonFetchPromise) {
+    geoJsonFetchPromise = fetch(BANGLADESH_GEOJSON_PUBLIC_PATH).then(async (response) => {
+      if (!response.ok) {
+        throw new Error(`Failed to load GeoJSON: ${response.status}`);
+      }
+
+      return (await response.json()) as BangladeshGeoJson;
+    });
+  }
+
+  return geoJsonFetchPromise;
+}
+
 export type GeoResolvableSeat = Pick<ConstituencyRow, "constituency" | "geo_name" | "geo_code">;
 
 const GEO_NAME_PREFIX_REPLACEMENTS: Record<string, string> = {

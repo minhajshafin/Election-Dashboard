@@ -1,15 +1,20 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import type { GeoJsonObject } from "geojson";
 import L from "leaflet";
 import { GeoJSON, MapContainer, TileLayer, useMap } from "react-leaflet";
 
 import { getSeatColor } from "@/lib/colors";
-import type { BangladeshGeoFeature } from "@/lib/geo";
+import {
+  fetchBangladeshGeoJson,
+  findGeoFeatureForSeat,
+  type BangladeshGeoFeature,
+  type GeoResolvableSeat,
+} from "@/lib/geo";
 
 interface ConstituencyMiniMapProps {
-  feature: BangladeshGeoFeature | null;
+  seat: GeoResolvableSeat | null;
   alliance: string;
   winnerParty: string;
 }
@@ -31,8 +36,30 @@ function FitSelectedFeature({ feature }: { feature: BangladeshGeoFeature | null 
   return null;
 }
 
-export function ConstituencyMiniMap({ feature, alliance, winnerParty }: ConstituencyMiniMapProps) {
-  if (!feature) {
+export function ConstituencyMiniMap({ seat, alliance, winnerParty }: ConstituencyMiniMapProps) {
+  const [geoJson, setGeoJson] = useState<import("@/lib/geo").BangladeshGeoJson | null>(null);
+
+  useEffect(() => {
+    let disposed = false;
+
+    fetchBangladeshGeoJson()
+      .then((data) => {
+        if (!disposed) {
+          setGeoJson(data);
+        }
+      })
+      .catch(() => {
+        if (!disposed) {
+          setGeoJson(null);
+        }
+      });
+
+    return () => {
+      disposed = true;
+    };
+  }, []);
+
+  if (!seat) {
     return (
       <div className="flex h-56 items-center justify-center border border-dashed border-white/15 bg-[#141412] px-4 text-center text-sm text-[#9c9888]">
         Select a constituency to preview its exact boundary.
@@ -40,7 +67,21 @@ export function ConstituencyMiniMap({ feature, alliance, winnerParty }: Constitu
     );
   }
 
-  const featureKey = `${feature.properties.cst}-${alliance}`;
+  if (!geoJson) {
+    return <div className="h-56 border border-white/10 bg-[#141412] animate-pulse" />;
+  }
+
+  const feature = findGeoFeatureForSeat(geoJson, seat);
+
+  if (!feature) {
+    return (
+      <div className="flex h-56 items-center justify-center border border-dashed border-white/15 bg-[#141412] px-4 text-center text-sm text-[#9c9888]">
+        Boundary geometry not found for this constituency.
+      </div>
+    );
+  }
+
+  const featureKey = `${feature.properties.cst}-${alliance}-${winnerParty}`;
 
   return (
     <div className="h-56 overflow-hidden border border-white/10 bg-[#141412]">

@@ -64,15 +64,13 @@ export const getBangladeshGeoJson = cache(async (): Promise<BangladeshGeoJson> =
 });
 
 export const getLandingPageData = cache(async () => {
-  const [summaryDataset, constituencyDataset, geoJson] = await Promise.all([
+  const [summaryDataset, constituencyDataset] = await Promise.all([
     getSummaryDataset(),
     getConstituencyDataset(),
-    getBangladeshGeoJson(),
   ]);
 
   return {
     summaryDataset,
     constituencyDataset,
-    geoJson,
   };
 });
