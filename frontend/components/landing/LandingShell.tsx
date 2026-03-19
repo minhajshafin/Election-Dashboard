@@ -1,11 +1,13 @@
 "use client";
 
 import dynamic from "next/dynamic";
+import { useSearchParams } from "next/navigation";
 import { useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
 
 import { getAllianceColor, getAllianceSoftColor } from "@/lib/colors";
 import { findGeoFeatureForSeat, type BangladeshGeoJson } from "@/lib/geo";
 import type { ConstituencyDataset, ConstituencyRow, SummaryDataset } from "@/types/api";
+import { PrimaryNav } from "@/components/nav/PrimaryNav";
 
 const BangladeshMap = dynamic(() => import("../map/BangladeshMap").then((mod) => mod.BangladeshMap), {
   ssr: false,
@@ -67,6 +69,7 @@ function matchesSeatFilters(seat: ConstituencyRow, division: string, query: stri
 export function LandingShell({ summaryDataset, constituencyDataset, geoJson }: LandingShellProps) {
   const { summary } = summaryDataset;
   const seats = constituencyDataset.rows;
+  const searchParams = useSearchParams();
   const [searchValue, setSearchValue] = useState("");
   const deferredSearchValue = useDeferredValue(searchValue);
   const [activeDivision, setActiveDivision] = useState<string>(ALL_DIVISIONS);
@@ -124,6 +127,18 @@ export function LandingShell({ summaryDataset, constituencyDataset, geoJson }: L
     seatRefs.current[selectedSeatKey]?.scrollIntoView({ block: "nearest", behavior: "smooth" });
   }, [selectedSeatKey]);
 
+  useEffect(() => {
+    const seatParam = searchParams.get("seat");
+    if (!seatParam) {
+      return;
+    }
+
+    const matchesSeat = seats.some((seat) => seat.seat_key === seatParam);
+    if (matchesSeat) {
+      setSelectedSeatKey(seatParam);
+    }
+  }, [searchParams, seats]);
+
   const handleSearchChange = (value: string) => {
     setSearchValue(value);
 
@@ -170,27 +185,7 @@ export function LandingShell({ summaryDataset, constituencyDataset, geoJson }: L
 
   return (
     <main className="min-h-screen bg-[#0d0d0b] text-[#f0ece2]">
-      {/* ── Top bar ──────────────────────────────────────────── */}
-      <header className="flex h-12 shrink-0 items-center justify-between border-b border-white/12 px-4 sm:px-10">
-        <div className="flex min-w-0 items-center gap-4 sm:gap-6">
-          <span className="truncate font-mono text-[11px] uppercase tracking-[0.18em] text-[#5a5848]">BD Election Dashboard</span>
-          <span className="hidden h-4 w-px bg-white/15 sm:block" />
-          <span className="hidden font-mono text-[11px] tracking-[0.05em] text-[#5a5848] sm:block">
-            National Constituency Results · 2026
-          </span>
-        </div>
-        <nav className="hidden h-full items-center sm:flex">
-          <span className="flex h-full items-center border-l border-white/8 px-5 font-mono text-[11px] uppercase tracking-widest text-[#c9a84c]">
-            Overview
-          </span>
-          <span className="flex h-full items-center border-l border-white/8 px-5 font-mono text-[11px] uppercase tracking-widest text-[#9c9888]">
-            Explorer
-          </span>
-          <span className="flex h-full items-center border-l border-white/8 px-5 font-mono text-[11px] uppercase tracking-widest text-[#9c9888]">
-            Analysis
-          </span>
-        </nav>
-      </header>
+      <PrimaryNav />
 
       {/* ── Hero banner ──────────────────────────────────────── */}
       <section className="relative shrink-0 overflow-hidden border-b border-white/8 px-4 py-4 sm:px-10 sm:py-5">
