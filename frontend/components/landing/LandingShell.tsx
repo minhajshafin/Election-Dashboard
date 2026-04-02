@@ -1,7 +1,6 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { useSearchParams } from "next/navigation";
 import { useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
 
 import { getSeatColor, getSeatSoftColor } from "@/lib/colors";
@@ -67,18 +66,10 @@ function matchesSeatFilters(seat: ConstituencyRow, division: string, query: stri
 export function LandingShell({ summaryDataset, constituencyDataset }: LandingShellProps) {
   const { summary } = summaryDataset;
   const seats = constituencyDataset.rows;
-  const searchParams = useSearchParams();
-  const initialSeatFromQuery = searchParams.get("seat");
   const [searchValue, setSearchValue] = useState("");
   const deferredSearchValue = useDeferredValue(searchValue);
   const [activeDivision, setActiveDivision] = useState<string>(ALL_DIVISIONS);
-  const [selectedSeatKey, setSelectedSeatKey] = useState<string | null>(() => {
-    if (!initialSeatFromQuery) {
-      return null;
-    }
-
-    return seats.some((seat) => seat.seat_key === initialSeatFromQuery) ? initialSeatFromQuery : null;
-  });
+  const [selectedSeatKey, setSelectedSeatKey] = useState<string | null>(null);
   const seatRefs = useRef<Record<string, HTMLButtonElement | null>>({});
 
   const normalizedSearch = deferredSearchValue.trim().toLowerCase();
@@ -123,6 +114,17 @@ export function LandingShell({ summaryDataset, constituencyDataset }: LandingShe
 
     seatRefs.current[selectedSeatKey]?.scrollIntoView({ block: "nearest", behavior: "smooth" });
   }, [selectedSeatKey]);
+
+  useEffect(() => {
+    const seatFromQuery = new URLSearchParams(window.location.search).get("seat");
+    if (!seatFromQuery) {
+      return;
+    }
+
+    if (seats.some((seat) => seat.seat_key === seatFromQuery)) {
+      setSelectedSeatKey((current) => current ?? seatFromQuery);
+    }
+  }, [seats]);
 
   const handleSearchChange = (value: string) => {
     setSearchValue(value);
