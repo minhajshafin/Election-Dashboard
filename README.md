@@ -13,6 +13,9 @@
 
 ### [🚀 **Visit Live Dashboard**](https://bd-election-dashboard.vercel.app) · [📖 Full Setup](build.md) · [📋 Architecture](docs/dashboard-plan.md)
 
+<img src="landingPage.png" alt="National Election Dashboard screenshot">
+
+
 </div>
 
 
