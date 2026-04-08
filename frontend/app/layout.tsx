@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { IBM_Plex_Mono, Inter, Playfair_Display, Source_Serif_4 } from "next/font/google";
+import { Analytics } from "@vercel/analytics/next";
 import "leaflet/dist/leaflet.css";
 import "./globals.css";
 
@@ -43,6 +44,7 @@ export default function RootLayout({
         className={`${headlineSerif.variable} ${bodySerif.variable} ${uiMono.variable} ${detailsInter.variable} antialiased`}
       >
         {children}
+        <Analytics />
       </body>
     </html>
   );
