@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useMemo, useState } from "react";
 
 import { getSeatColor } from "@/lib/colors";
+import { getSeatElectionStatus } from "@/lib/electionStatus";
 import type { ConstituencyRow } from "@/types/api";
 
 interface ExplorerShellProps {
@@ -151,28 +152,36 @@ export function ExplorerShell({ seats, divisions, alliances, parties }: Explorer
               </tr>
             </thead>
             <tbody>
-              {filteredSeats.map((seat) => (
-                <tr key={seat.seat_key} className="border-t border-white/10 hover:bg-[#151512]">
-                  <td className="px-3 py-2 font-medium text-[#f0ece2]">
-                    <Link className="underline-offset-4 hover:underline" href={`/?seat=${encodeURIComponent(seat.seat_key)}`}>
-                      {seat.constituency}
-                    </Link>
-                  </td>
-                  <td className="px-3 py-2 text-[#d8d3c6]">{seat.district}</td>
-                  <td className="px-3 py-2 text-[#d8d3c6]">{seat.division}</td>
-                  <td className="px-3 py-2 text-[#d8d3c6]">{seat.winner_candidate}</td>
-                  <td className="px-3 py-2 text-[#d8d3c6]">{seat.winner_party}</td>
-                  <td className="px-3 py-2">
-                    <span className="inline-flex items-center gap-2 text-[#d8d3c6]">
-                      <span className="h-2 w-2 rounded-full" style={{ backgroundColor: getSeatColor(seat) }} />
-                      {seat.alliance}
-                    </span>
-                  </td>
-                  <td className="px-3 py-2 text-[#d8d3c6]">{formatPercent(seat.turnout_pct)}</td>
-                  <td className="px-3 py-2 text-[#d8d3c6]">{formatPercent(seat.winning_margin_pct)}</td>
-                  <td className="px-3 py-2 text-[#d8d3c6]">{formatNumber(seat.candidate_count)}</td>
-                </tr>
-              ))}
+              {filteredSeats.map((seat) => {
+                const status = getSeatElectionStatus(seat);
+
+                return (
+                  <tr key={seat.seat_key} className="border-t border-white/10 hover:bg-[#151512]">
+                    <td className="px-3 py-2 font-medium text-[#f0ece2]">
+                      <Link className="underline-offset-4 hover:underline" href={`/?seat=${encodeURIComponent(seat.seat_key)}`}>
+                        {seat.constituency}
+                      </Link>
+                    </td>
+                    <td className="px-3 py-2 text-[#d8d3c6]">{seat.district}</td>
+                    <td className="px-3 py-2 text-[#d8d3c6]">{seat.division}</td>
+                    <td className="px-3 py-2 text-[#d8d3c6]">
+                      {status.isPostponed ? status.label : seat.winner_candidate}
+                    </td>
+                    <td className="px-3 py-2 text-[#d8d3c6]">
+                      {status.isPostponed ? status.reason : seat.winner_party}
+                    </td>
+                    <td className="px-3 py-2">
+                      <span className="inline-flex items-center gap-2 text-[#d8d3c6]">
+                        <span className="h-2 w-2 rounded-full" style={{ backgroundColor: getSeatColor(seat) }} />
+                        {seat.alliance}
+                      </span>
+                    </td>
+                    <td className="px-3 py-2 text-[#d8d3c6]">{formatPercent(seat.turnout_pct)}</td>
+                    <td className="px-3 py-2 text-[#d8d3c6]">{formatPercent(seat.winning_margin_pct)}</td>
+                    <td className="px-3 py-2 text-[#d8d3c6]">{formatNumber(seat.candidate_count)}</td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>
