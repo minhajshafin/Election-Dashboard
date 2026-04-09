@@ -6,6 +6,7 @@ import L from "leaflet";
 import { GeoJSON, MapContainer, TileLayer, useMap, useMapEvents } from "react-leaflet";
 
 import { getSeatColor } from "@/lib/colors";
+import { getSeatElectionStatus } from "@/lib/electionStatus";
 import {
   type BangladeshGeoFeature,
   type BangladeshGeoJson,
@@ -20,6 +21,8 @@ interface BangladeshMapProps {
   onSelectSeat: (seatKey: string) => void;
   onClearSelection: () => void;
 }
+
+const POSTPONED_SEAT_FILL_COLOR = "#6b7280";
 
 function MapBackgroundReset({ onClearSelection }: { onClearSelection: () => void }) {
   useMapEvents({
@@ -127,6 +130,10 @@ export function BangladeshMap({
       return "#94a3b8";
     }
 
+    if (getSeatElectionStatus(seat).isPostponed) {
+      return POSTPONED_SEAT_FILL_COLOR;
+    }
+
     return getSeatColor(seat);
   };
 
@@ -183,8 +190,11 @@ export function BangladeshMap({
             }}
             onEachFeature={(feature, layer) => {
               const seat = getSeatForFeature(feature as BangladeshGeoFeature);
+              const status = seat ? getSeatElectionStatus(seat) : null;
               const title = seat
-                ? `${seat.constituency} · ${seat.winner_party} · ${seat.winner_vote_share_pct ?? "N/A"}%`
+                ? status?.isPostponed
+                  ? `${seat.constituency} · ${status.label} · ${status.reason}`
+                  : `${seat.constituency} · ${seat.winner_party} · ${seat.winner_vote_share_pct ?? "N/A"}%`
                 : `${feature.properties.cst_n} · No election data`;
 
               const styleLayer = layer instanceof L.Path ? layer : null;

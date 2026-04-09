@@ -4,6 +4,7 @@ import dynamic from "next/dynamic";
 import { useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
 
 import { getSeatColor, getSeatSoftColor } from "@/lib/colors";
+import { getSeatElectionStatus } from "@/lib/electionStatus";
 import type { ConstituencyDataset, ConstituencyRow, SummaryDataset } from "@/types/api";
 import { PrimaryNav } from "@/components/nav/PrimaryNav";
 
@@ -69,7 +70,18 @@ export function LandingShell({ summaryDataset, constituencyDataset }: LandingShe
   const [searchValue, setSearchValue] = useState("");
   const deferredSearchValue = useDeferredValue(searchValue);
   const [activeDivision, setActiveDivision] = useState<string>(ALL_DIVISIONS);
-  const [selectedSeatKey, setSelectedSeatKey] = useState<string | null>(null);
+  const [selectedSeatKey, setSelectedSeatKey] = useState<string | null>(() => {
+    if (typeof window === "undefined") {
+      return null;
+    }
+
+    const seatFromQuery = new URLSearchParams(window.location.search).get("seat");
+    if (!seatFromQuery) {
+      return null;
+    }
+
+    return seats.some((seat) => seat.seat_key === seatFromQuery) ? seatFromQuery : null;
+  });
   const seatRefs = useRef<Record<string, HTMLButtonElement | null>>({});
 
   const normalizedSearch = deferredSearchValue.trim().toLowerCase();
@@ -107,6 +119,14 @@ export function LandingShell({ summaryDataset, constituencyDataset }: LandingShe
     return sortedSeats.find((seat) => seat.seat_key === selectedSeatKey) ?? null;
   }, [selectedSeatKey, sortedSeats]);
 
+  const selectedSeatStatus = useMemo(() => {
+    if (!selectedSeat) {
+      return null;
+    }
+
+    return getSeatElectionStatus(selectedSeat);
+  }, [selectedSeat]);
+
   useEffect(() => {
     if (!selectedSeatKey) {
       return;
@@ -114,17 +134,6 @@ export function LandingShell({ summaryDataset, constituencyDataset }: LandingShe
 
     seatRefs.current[selectedSeatKey]?.scrollIntoView({ block: "nearest", behavior: "smooth" });
   }, [selectedSeatKey]);
-
-  useEffect(() => {
-    const seatFromQuery = new URLSearchParams(window.location.search).get("seat");
-    if (!seatFromQuery) {
-      return;
-    }
-
-    if (seats.some((seat) => seat.seat_key === seatFromQuery)) {
-      setSelectedSeatKey((current) => current ?? seatFromQuery);
-    }
-  }, [seats]);
 
   const handleSearchChange = (value: string) => {
     setSearchValue(value);
@@ -329,12 +338,18 @@ export function LandingShell({ summaryDataset, constituencyDataset }: LandingShe
                 >
                   <span className="h-2 w-2 rounded-full" style={{ backgroundColor: getSeatColor(selectedSeat) }} />
                   <span className="font-mono text-[13px] tracking-[0.08em]" style={{ color: getSeatColor(selectedSeat) }}>
-                    {selectedSeat.winner_party} - {selectedSeat.winner_candidate}
+                    {selectedSeatStatus?.isPostponed
+                      ? selectedSeatStatus.label
+                      : `${selectedSeat.winner_party} - ${selectedSeat.winner_candidate}`}
                   </span>
                 </div>
-                <p className="mt-2 text-xs text-[#9c9888]">
-                  Runner-up: <span className="text-[#f0ece2]">{selectedSeat.runner_up_candidate}</span> ({selectedSeat.runner_up_party})
-                </p>
+                {selectedSeatStatus?.isPostponed ? (
+                  <p className="mt-2 text-xs text-[#d9c38d]">Reason: {selectedSeatStatus.reason}</p>
+                ) : (
+                  <p className="mt-2 text-xs text-[#9c9888]">
+                    Runner-up: <span className="text-[#f0ece2]">{selectedSeat.runner_up_candidate}</span> ({selectedSeat.runner_up_party})
+                  </p>
+                )}
               </div>
 
               <ConstituencyMiniMap
@@ -349,6 +364,7 @@ export function LandingShell({ summaryDataset, constituencyDataset }: LandingShe
                 </div>
                 <div className="grid grid-cols-2 gap-3 p-4">
                   {[
+                    { label: "Election Status", value: selectedSeatStatus?.label ?? "Completed" },
                     { label: "Winner Votes", value: formatNumber(selectedSeat.winner_votes) },
                     { label: "Runner-up Votes", value: formatNumber(selectedSeat.runner_up_votes) },
                     { label: "Winner Vote Share", value: formatPercent(selectedSeat.winner_vote_share_pct) },
@@ -356,6 +372,9 @@ export function LandingShell({ summaryDataset, constituencyDataset }: LandingShe
                     { label: "Turnout", value: formatPercent(selectedSeat.turnout_pct) },
                     { label: "Valid Votes", value: formatNumber(selectedSeat.total_valid_votes) },
                     { label: "Candidates", value: formatNumber(selectedSeat.candidate_count) },
+                    ...(selectedSeatStatus?.isPostponed
+                      ? [{ label: "Postponement Reason", value: selectedSeatStatus.reason ?? "N/A" }]
+                      : []),
                   ].map((item) => (
                     <article key={item.label} className="border border-white/10 bg-[#141412] px-3 py-2">
                       <p className="font-mono text-[9px] uppercase tracking-[0.15em] text-[#5a5848]">{item.label}</p>
