@@ -26,7 +26,7 @@
       "Bangladesh Jamaat-e-Islami": 68,
       "BNP": 207,
       "Islamic Andolon Bangladesh": 2,
-      "Bangladesh National Party - BJP": 1,
+      "Bangladesh Jatiya Party": 1,
       "Jatiya Samajtantrik Dal (JSD Rab)": 1,
       "Independent": 8,
       "Ganosamhati Andolon": 1,
@@ -44,7 +44,7 @@
       "Barisal": {
         "BNP": 16,
         "Bangladesh Jamaat-e-Islami": 2,
-        "Bangladesh National Party - BJP": 1,
+        "Bangladesh Jatiya Party": 1,
         "Gono Odhikar Parishad": 1,
         "Islamic Andolon Bangladesh": 1
       },
@@ -137,7 +137,7 @@
         "seat_share_pct": 0.67
       },
       {
-        "party": "Bangladesh National Party - BJP",
+        "party": "Bangladesh Jatiya Party",
         "seat_count": 1,
         "seat_share_pct": 0.33
       },
@@ -164,7 +164,7 @@
         "parties": {
           "BNP": 16,
           "Bangladesh Jamaat-e-Islami": 2,
-          "Bangladesh National Party - BJP": 1,
+          "Bangladesh Jatiya Party": 1,
           "Gono Odhikar Parishad": 1,
           "Islamic Andolon Bangladesh": 1
         }
