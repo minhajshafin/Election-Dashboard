@@ -1,7 +1,7 @@
 {
   "meta": {
     "schema_version": "1.0.0",
-    "generated_at": "2026-04-18T09:28:06.231103+00:00",
+    "generated_at": "2026-04-18T13:37:39.498538+00:00",
     "source_files": [
       "data_science/data/processed/spark_output/regression_results.json"
     ]
@@ -9,42 +9,28 @@
   "result": {
     "model": "LinearRegression",
     "target": "turnout_pct",
-    "r2": 0.4709,
-    "rmse": 5.5164,
-    "intercept": 9.3207,
+    "r2": 0.2334,
+    "rmse": 14.0873,
+    "intercept": 46.0599,
     "coefficients": {
-      "literacy_rate": 0.0,
-      "literacy_female": 0.4402,
-      "internet_pct": -2.5625,
-      "pop_density": 0.1907,
-      "urbanization_index": -1.6988,
-      "employment_rate_pct": 3.0458,
-      "neet_pct": 3.5669,
-      "financial_account_pct": 1.4124,
-      "muslim_majority_pct": -5.522,
-      "hindu_pct": -2.6387,
-      "sex_ratio": 0.0,
-      "dependency_ratio": -1.8596,
-      "female_pct": 3.9052,
-      "mobile_phone_pct": -0.1166,
-      "candidate_count": -0.0413
+      "literacy_rate": -5.841945,
+      "internet_pct": -22.541984,
+      "mobile_pct": 6.977014,
+      "urban_pct": -3.352018,
+      "pop_density": -7.812683,
+      "electricity_pct": 9.457833,
+      "neet_pct": -0.19701,
+      "financial_inclusion_pct": 25.324433
     },
     "features": [
       "literacy_rate",
-      "literacy_female",
       "internet_pct",
+      "mobile_pct",
+      "urban_pct",
       "pop_density",
-      "urbanization_index",
-      "employment_rate_pct",
+      "electricity_pct",
       "neet_pct",
-      "financial_account_pct",
-      "muslim_majority_pct",
-      "hindu_pct",
-      "sex_ratio",
-      "dependency_ratio",
-      "female_pct",
-      "mobile_phone_pct",
-      "candidate_count"
+      "financial_inclusion_pct"
     ]
   }
 }

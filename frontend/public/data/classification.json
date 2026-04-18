@@ -1,7 +1,7 @@
 {
   "meta": {
     "schema_version": "1.0.0",
-    "generated_at": "2026-04-18T09:28:06.230652+00:00",
+    "generated_at": "2026-04-18T13:37:39.498258+00:00",
     "source_files": [
       "data_science/data/processed/spark_output/classification_results.json"
     ]
@@ -15,37 +15,31 @@
       "BNP",
       "Bangladesh Jamaat-e-Islami",
       "Independent",
-      "National Citizens Party - NCP",
-      "Bangladesh Khilafat Majlis",
-      "Gono Odhikar Parishad",
-      "Bangladesh Jatiya Party",
-      "Ganosamhati Andolon",
-      "Islamic Andolon Bangladesh",
-      "Jatiya Samajtantrik Dal (JSD Rab)",
-      "Khilafat Majlis"
+      "NCP",
+      "Other"
     ],
     "metrics": {
-      "accuracy": 0.7619,
-      "weightedPrecision": 0.6481,
-      "weightedRecall": 0.7619,
-      "f1": 0.6974
+      "accuracy": 0.8276,
+      "weightedPrecision": 0.761,
+      "weightedRecall": 0.8276,
+      "f1": 0.786
     },
     "feature_importance": {
-      "employment_rate_pct": 0.0992,
-      "dependency_ratio": 0.0967,
-      "candidate_count": 0.0929,
-      "female_pct": 0.0883,
-      "internet_pct": 0.0864,
-      "sex_ratio": 0.0803,
-      "literacy_rate": 0.0764,
-      "literacy_female": 0.0559,
-      "pop_density": 0.0541,
-      "mobile_phone_pct": 0.0527,
-      "neet_pct": 0.0521,
-      "hindu_pct": 0.0463,
-      "muslim_majority_pct": 0.0453,
-      "financial_account_pct": 0.0378,
-      "urbanization_index": 0.0356
+      "literacy_rate": 0.075082,
+      "internet_pct": 0.067734,
+      "mobile_pct": 0.027382,
+      "urban_pct": 0.067149,
+      "pop_density": 0.052175,
+      "electricity_pct": 0.033713,
+      "neet_pct": 0.048698,
+      "financial_inclusion_pct": 0.034967,
+      "agri_share_pct": 0.085046,
+      "industry_share_pct": 0.067449,
+      "service_share_pct": 0.055767,
+      "pucca_house_pct": 0.120409,
+      "sex_ratio": 0.055777,
+      "referendum_approval_pct": 0.082505,
+      "gender_ratio": 0.126147
     }
   }
 }

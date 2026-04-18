@@ -23,10 +23,12 @@ GEO_NAME_REPLACEMENTS = {
     "Barisal ": "Barishal ",
     "Bogra ": "Bogura ",
     "Chapai Nababganj ": "Chapainawabganj ",
+    "Chapainababganj ": "Chapainawabganj ",
     "Chittagong ": "Chattogram ",
     "Comilla ": "Cumilla ",
     "Jessore ": "Jashore ",
     "Cox's Bazar ": "Coxs Bazar ",
+    "Cox’s Bazar ": "Coxs Bazar ",
     "Cox?s Bazar ": "Coxs Bazar ",
     "Maulvibazar ": "Moulvibazar ",
 }
@@ -228,6 +230,10 @@ def normalize_referendum_constituency_name(name: str) -> str:
     return normalize_constituency_name(name, REFERENDUM_NAME_REPLACEMENTS, REFERENDUM_NAME_EXACT_REPLACEMENTS)
 
 
+def normalize_analytics_constituency_name(name: str) -> str:
+    return normalize_geo_constituency_name(name)
+
+
 def load_geo_lookup(geojson_path: Path) -> dict[str, dict[str, Any]]:
     with geojson_path.open(encoding="utf-8") as file_obj:
         payload = json.load(file_obj)
@@ -324,9 +330,13 @@ def normalize_row(
     referendum_lookup: dict[str, dict[str, Any]],
 ) -> dict[str, Any]:
     constituency = row["constituency"].strip()
-    geo_ref = geo_lookup.get(constituency)
+    lookup_constituency = normalize_analytics_constituency_name(constituency)
+    geo_ref = geo_lookup.get(lookup_constituency)
     alliance = row["alliance"].strip().lower() or "others"
-    referendum_ref = referendum_lookup.get(constituency)
+    referendum_ref = referendum_lookup.get(lookup_constituency)
+    cluster_value = cluster_lookup.get(constituency)
+    if cluster_value is None:
+        cluster_value = cluster_lookup.get(lookup_constituency)
 
     normalized: dict[str, Any] = {
         "seat_key": slugify_constituency(constituency),
@@ -338,7 +348,7 @@ def normalize_row(
         "winner_party": row["winner_party"].strip(),
         "runner_up_candidate": row["runner_up_candidate"].strip(),
         "runner_up_party": row["runner_up_party"].strip(),
-        "cluster": cluster_lookup.get(constituency),
+        "cluster": cluster_value,
         "geo_name": geo_ref["geo_name"] if geo_ref else None,
         "geo_code": geo_ref["geo_code"] if geo_ref else None,
         "referendum_yes": referendum_ref["referendum_yes"] if referendum_ref else None,
@@ -488,7 +498,10 @@ def build_frontend_data() -> None:
         for row in analytics_rows
     ]
 
-    analytics_constituencies = {row["constituency"].strip() for row in analytics_rows}
+    analytics_constituencies = {
+        normalize_analytics_constituency_name(row["constituency"].strip())
+        for row in analytics_rows
+    }
     referendum_constituencies = set(referendum_lookup)
 
     referendum_without_seat_match = sorted(referendum_constituencies - analytics_constituencies)

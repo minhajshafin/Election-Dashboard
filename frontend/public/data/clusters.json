@@ -1,32 +1,62 @@
 {
   "meta": {
     "schema_version": "1.0.0",
-    "generated_at": "2026-04-18T09:28:06.231521+00:00",
+    "generated_at": "2026-04-18T13:37:39.498767+00:00",
     "source_files": [
       "data_science/data/processed/spark_output/cluster_profiles.json",
-      "data_science/data/processed/spark_output/cluster_assignments_csv/part-00000-d28c5818-beb4-431e-a23b-7e1700ae1302-c000.csv"
+      "data_science/data/processed/spark_output/cluster_assignments_csv/part-00000-4f7add55-ac24-4923-b881-1da6112f6a33-c000.csv"
     ]
   },
   "profiles": [
     {
       "cluster": 0,
-      "n": 231,
-      "avg_literacy": 72.82,
-      "avg_internet": 26.28,
-      "avg_urban": 23.17,
-      "avg_density": 1115.37,
-      "avg_muslim": 88.91,
-      "avg_margin": 20.7
+      "n": 73,
+      "avg_literacy": 68.02,
+      "avg_internet": 21.09,
+      "avg_urban": 23.21,
+      "avg_density": 1098.75,
+      "avg_muslim": 0.0,
+      "avg_margin": 22.13
     },
     {
       "cluster": 1,
-      "n": 44,
-      "avg_literacy": 82.63,
-      "avg_internet": 46.39,
-      "avg_urban": 63.53,
-      "avg_density": 6108.5,
-      "avg_muslim": 92.53,
-      "avg_margin": 20.32
+      "n": 20,
+      "avg_literacy": 84.88,
+      "avg_internet": 52.98,
+      "avg_urban": 76.26,
+      "avg_density": 10067.0,
+      "avg_muslim": 0.0,
+      "avg_margin": 11.77
+    },
+    {
+      "cluster": 2,
+      "n": 114,
+      "avg_literacy": 74.39,
+      "avg_internet": 24.75,
+      "avg_urban": 22.79,
+      "avg_density": 1015.4,
+      "avg_muslim": 0.0,
+      "avg_margin": 17.53
+    },
+    {
+      "cluster": 3,
+      "n": 32,
+      "avg_literacy": 80.76,
+      "avg_internet": 39.27,
+      "avg_urban": 50.67,
+      "avg_density": 2327.38,
+      "avg_muslim": 0.0,
+      "avg_margin": 20.52
+    },
+    {
+      "cluster": 4,
+      "n": 61,
+      "avg_literacy": 75.3,
+      "avg_internet": 36.24,
+      "avg_urban": 27.34,
+      "avg_density": 1360.08,
+      "avg_muslim": 0.0,
+      "avg_margin": 21.38
     }
   ]
 }
