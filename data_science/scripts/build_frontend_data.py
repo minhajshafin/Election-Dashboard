@@ -14,6 +14,11 @@ from typing import Any
 
 SCHEMA_VERSION = "1.0.0"
 
+REFERENDUM_SOURCE_PATTERNS = [
+    "dhaka_tribune_referendum_raw_*.csv",
+    "dhaka_tribune_seats_raw_*.csv",
+]
+
 GEO_NAME_REPLACEMENTS = {
     "Barisal ": "Barishal ",
     "Bogra ": "Bogura ",
@@ -30,6 +35,19 @@ GEO_NAME_EXACT_REPLACEMENTS = {
     "Parbatya Bandarban": "Bandarban 1",
     "Parbatya Khagrachari": "Khagrachhari 1",
     "Parbatya Rangamati": "Rangamati 1",
+}
+
+REFERENDUM_NAME_REPLACEMENTS = {
+    **GEO_NAME_REPLACEMENTS,
+    "Jhalakathi ": "Jhalokathi ",
+    "KIshoreganj ": "Kishoreganj ",
+    "Netrokona ": "Netrakona ",
+}
+
+REFERENDUM_NAME_EXACT_REPLACEMENTS = {
+    "Bandarban": "Bandarban 1",
+    "Khagrachari": "Khagrachhari 1",
+    "Rangamati": "Rangamati 1",
 }
 
 INT_FIELDS = {
@@ -96,6 +114,7 @@ class ArtifactPaths:
     root: Path
     analytics_csv: Path
     cluster_assignments_csv: Path
+    referendum_csv: Path
     classification_json: Path
     regression_json: Path
     cluster_profiles_json: Path
@@ -108,9 +127,20 @@ class ArtifactPaths:
 def parse_args() -> argparse.Namespace:
     root = Path(__file__).resolve().parents[2]
     spark_output = root / "data_science" / "data" / "processed" / "spark_output"
+    referendum_dir = root / "data_science" / "data" / "raw" / "news_scrape"
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--root", type=Path, default=root)
     parser.add_argument("--spark-output", type=Path, default=spark_output)
+    parser.add_argument(
+        "--referendum-csv",
+        type=Path,
+        default=None,
+        help=(
+            "Optional explicit referendum CSV path. If omitted, the newest file matching "
+            "dhaka_tribune_referendum_raw_*.csv or dhaka_tribune_seats_raw_*.csv from "
+            f"{referendum_dir} is used."
+        ),
+    )
     parser.add_argument(
         "--geojson",
         type=Path,
@@ -130,6 +160,7 @@ def resolve_artifact_paths(args: argparse.Namespace) -> ArtifactPaths:
         root=args.root,
         analytics_csv=find_part_csv(args.spark_output / "analytics_base_csv"),
         cluster_assignments_csv=find_part_csv(args.spark_output / "cluster_assignments_csv"),
+        referendum_csv=resolve_referendum_csv(args.root, args.referendum_csv),
         classification_json=args.spark_output / "classification_results.json",
         regression_json=args.spark_output / "regression_results.json",
         cluster_profiles_json=args.spark_output / "cluster_profiles.json",
@@ -147,6 +178,26 @@ def find_part_csv(directory: Path) -> Path:
     return matches[0]
 
 
+def resolve_referendum_csv(root: Path, explicit_csv: Path | None) -> Path:
+    if explicit_csv is not None:
+        if not explicit_csv.exists():
+            raise FileNotFoundError(f"Referendum CSV not found: {explicit_csv}")
+        return explicit_csv
+
+    referendum_dir = root / "data_science" / "data" / "raw" / "news_scrape"
+    matches: list[Path] = []
+    for pattern in REFERENDUM_SOURCE_PATTERNS:
+        matches.extend(referendum_dir.glob(pattern))
+
+    if not matches:
+        raise FileNotFoundError(
+            "No referendum CSV found. Expected one of: "
+            + ", ".join(str(referendum_dir / pattern) for pattern in REFERENDUM_SOURCE_PATTERNS)
+        )
+
+    return sorted(matches, key=lambda path: path.stat().st_mtime, reverse=True)[0]
+
+
 def build_meta(root: Path, source_files: list[Path]) -> dict[str, Any]:
     return {
         "schema_version": SCHEMA_VERSION,
@@ -155,14 +206,26 @@ def build_meta(root: Path, source_files: list[Path]) -> dict[str, Any]:
     }
 
 
-def normalize_geo_constituency_name(name: str) -> str:
-    normalized = name.replace("-", " ").strip()
-    if normalized in GEO_NAME_EXACT_REPLACEMENTS:
-        return GEO_NAME_EXACT_REPLACEMENTS[normalized]
-    for old, new in GEO_NAME_REPLACEMENTS.items():
+def normalize_constituency_name(
+    name: str,
+    prefix_replacements: dict[str, str],
+    exact_replacements: dict[str, str],
+) -> str:
+    normalized = " ".join(name.replace("-", " ").split())
+    if normalized in exact_replacements:
+        return exact_replacements[normalized]
+    for old, new in prefix_replacements.items():
         if normalized.startswith(old):
             return normalized.replace(old, new, 1)
     return normalized
+
+
+def normalize_geo_constituency_name(name: str) -> str:
+    return normalize_constituency_name(name, GEO_NAME_REPLACEMENTS, GEO_NAME_EXACT_REPLACEMENTS)
+
+
+def normalize_referendum_constituency_name(name: str) -> str:
+    return normalize_constituency_name(name, REFERENDUM_NAME_REPLACEMENTS, REFERENDUM_NAME_EXACT_REPLACEMENTS)
 
 
 def load_geo_lookup(geojson_path: Path) -> dict[str, dict[str, Any]]:
@@ -194,14 +257,14 @@ def load_json(path: Path) -> Any:
 
 
 def parse_int(value: str) -> int | None:
-    value = (value or "").strip()
+    value = (value or "").replace(",", "").strip()
     if not value:
         return None
     return int(float(value))
 
 
 def parse_float(value: str) -> float | None:
-    value = (value or "").strip()
+    value = (value or "").replace(",", "").strip()
     if not value:
         return None
     return round(float(value), 4)
@@ -211,10 +274,59 @@ def slugify_constituency(name: str) -> str:
     return "-".join(name.lower().split())
 
 
-def normalize_row(row: dict[str, str], geo_lookup: dict[str, dict[str, Any]], cluster_lookup: dict[str, int]) -> dict[str, Any]:
+def derive_referendum_result(yes_votes: int | None, no_votes: int | None) -> str | None:
+    if yes_votes is None or no_votes is None:
+        return None
+    if yes_votes > no_votes:
+        return "yes"
+    if no_votes > yes_votes:
+        return "no"
+    return None
+
+
+def build_referendum_lookup(referendum_rows: list[dict[str, str]]) -> dict[str, dict[str, Any]]:
+    lookup: dict[str, dict[str, Any]] = {}
+
+    for row in referendum_rows:
+        constituency = normalize_referendum_constituency_name(row.get("seat_name", ""))
+        if not constituency:
+            continue
+
+        yes_votes = parse_int(row.get("yes", ""))
+        no_votes = parse_int(row.get("no", ""))
+        referendum_result = derive_referendum_result(yes_votes, no_votes)
+
+        current_value = {
+            "referendum_yes": yes_votes,
+            "referendum_no": no_votes,
+            "referendum_result": referendum_result,
+        }
+
+        existing_value = lookup.get(constituency)
+        if existing_value is None:
+            lookup[constituency] = current_value
+            continue
+
+        existing_completeness = int(existing_value["referendum_yes"] is not None) + int(
+            existing_value["referendum_no"] is not None
+        )
+        current_completeness = int(yes_votes is not None) + int(no_votes is not None)
+        if current_completeness > existing_completeness:
+            lookup[constituency] = current_value
+
+    return lookup
+
+
+def normalize_row(
+    row: dict[str, str],
+    geo_lookup: dict[str, dict[str, Any]],
+    cluster_lookup: dict[str, int],
+    referendum_lookup: dict[str, dict[str, Any]],
+) -> dict[str, Any]:
     constituency = row["constituency"].strip()
     geo_ref = geo_lookup.get(constituency)
     alliance = row["alliance"].strip().lower() or "others"
+    referendum_ref = referendum_lookup.get(constituency)
 
     normalized: dict[str, Any] = {
         "seat_key": slugify_constituency(constituency),
@@ -229,6 +341,9 @@ def normalize_row(row: dict[str, str], geo_lookup: dict[str, dict[str, Any]], cl
         "cluster": cluster_lookup.get(constituency),
         "geo_name": geo_ref["geo_name"] if geo_ref else None,
         "geo_code": geo_ref["geo_code"] if geo_ref else None,
+        "referendum_yes": referendum_ref["referendum_yes"] if referendum_ref else None,
+        "referendum_no": referendum_ref["referendum_no"] if referendum_ref else None,
+        "referendum_result": referendum_ref["referendum_result"] if referendum_ref else None,
     }
 
     for field, value in row.items():
@@ -363,10 +478,34 @@ def build_frontend_data() -> None:
 
     analytics_rows = load_csv_rows(paths.analytics_csv)
     cluster_rows = load_csv_rows(paths.cluster_assignments_csv)
+    referendum_rows = load_csv_rows(paths.referendum_csv)
     geo_lookup = load_geo_lookup(paths.geojson)
     cluster_lookup = build_cluster_lookup(cluster_rows)
+    referendum_lookup = build_referendum_lookup(referendum_rows)
 
-    normalized_rows = [normalize_row(row, geo_lookup, cluster_lookup) for row in analytics_rows]
+    normalized_rows = [
+        normalize_row(row, geo_lookup, cluster_lookup, referendum_lookup)
+        for row in analytics_rows
+    ]
+
+    analytics_constituencies = {row["constituency"].strip() for row in analytics_rows}
+    referendum_constituencies = set(referendum_lookup)
+
+    referendum_without_seat_match = sorted(referendum_constituencies - analytics_constituencies)
+    if referendum_without_seat_match:
+        print(
+            "Warning: "
+            f"{len(referendum_without_seat_match)} referendum seat names do not match analytics seats: "
+            f"{referendum_without_seat_match}"
+        )
+
+    seats_without_referendum_row = sorted(analytics_constituencies - referendum_constituencies)
+    if seats_without_referendum_row:
+        print(
+            "Warning: "
+            f"{len(seats_without_referendum_row)} analytics seats have no referendum row: "
+            f"{seats_without_referendum_row}"
+        )
 
     unmatched_geo = [row["constituency"] for row in normalized_rows if row["geo_name"] is None]
     if unmatched_geo:
@@ -382,7 +521,10 @@ def build_frontend_data() -> None:
     write_json(
         paths.output_dir / "constituencies.json",
         {
-            "meta": build_meta(paths.root, [paths.analytics_csv, paths.cluster_assignments_csv, paths.geojson]),
+            "meta": build_meta(
+                paths.root,
+                [paths.analytics_csv, paths.cluster_assignments_csv, paths.referendum_csv, paths.geojson],
+            ),
             "rows": normalized_rows,
         },
     )

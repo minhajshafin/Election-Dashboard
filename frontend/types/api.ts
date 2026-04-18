@@ -4,6 +4,8 @@ export interface DatasetMeta {
   source_files: string[];
 }
 
+export type ReferendumResult = "yes" | "no" | null;
+
 export interface ConstituencyRow {
   seat_key: string;
   constituency: string;
@@ -21,6 +23,9 @@ export interface ConstituencyRow {
   cluster: number | null;
   geo_name: string | null;
   geo_code: number | null;
+  referendum_yes: number | null;
+  referendum_no: number | null;
+  referendum_result: ReferendumResult;
   Population_Total: number | null;
   Household_Total: number | null;
   pop_density: number | null;

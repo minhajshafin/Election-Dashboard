@@ -3,7 +3,13 @@
 import dynamic from "next/dynamic";
 import { useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
 
-import { getSeatColor, getSeatSoftColor } from "@/lib/colors";
+import {
+  getReferendumSeatColor,
+  getReferendumSeatResult,
+  getReferendumSeatSoftColor,
+  getSeatColor,
+  getSeatSoftColor,
+} from "@/lib/colors";
 import { getSeatElectionStatus } from "@/lib/electionStatus";
 import type { ConstituencyDataset, ConstituencyRow, SummaryDataset } from "@/types/api";
 import { PrimaryNav } from "@/components/nav/PrimaryNav";
@@ -24,6 +30,7 @@ interface LandingShellProps {
 }
 
 const ALL_DIVISIONS = "All Divisions";
+type MapMode = "election" | "referendum";
 
 function formatNumber(value: number | null | undefined): string {
   if (value === null || value === undefined) {
@@ -67,6 +74,7 @@ function matchesSeatFilters(seat: ConstituencyRow, division: string, query: stri
 export function LandingShell({ summaryDataset, constituencyDataset }: LandingShellProps) {
   const { summary } = summaryDataset;
   const seats = constituencyDataset.rows;
+  const [mapMode, setMapMode] = useState<MapMode>("election");
   const [searchValue, setSearchValue] = useState("");
   const deferredSearchValue = useDeferredValue(searchValue);
   const [activeDivision, setActiveDivision] = useState<string>(ALL_DIVISIONS);
@@ -126,6 +134,25 @@ export function LandingShell({ summaryDataset, constituencyDataset }: LandingShe
 
     return getSeatElectionStatus(selectedSeat);
   }, [selectedSeat]);
+
+  const getSeatDisplayColor = (seat: ConstituencyRow): string => {
+    return mapMode === "election" ? getSeatColor(seat) : getReferendumSeatColor(seat);
+  };
+
+  const getSeatDisplaySoftColor = (seat: ConstituencyRow): string => {
+    return mapMode === "election" ? getSeatSoftColor(seat) : getReferendumSeatSoftColor(seat);
+  };
+
+  const getReferendumBadgeLabel = (seat: ConstituencyRow): string => {
+    const result = getReferendumSeatResult(seat);
+    if (result === "yes") {
+      return "Referendum · Majority Yes";
+    }
+    if (result === "no") {
+      return "Referendum · Majority No";
+    }
+    return "Referendum · Result Missing";
+  };
 
   useEffect(() => {
     if (!selectedSeatKey) {
@@ -246,21 +273,53 @@ export function LandingShell({ summaryDataset, constituencyDataset }: LandingShe
             {/* Map panel */}
             <div className="flex min-w-0 flex-1 flex-col">
               <div className="shrink-0 border-b border-white/8 px-4 py-2.5 sm:px-5">
-                <label className="sr-only" htmlFor="seatSearch">
-                  Search constituency, district, division, party, or candidate
-                </label>
-                <input
-                  id="seatSearch"
-                  type="search"
-                  value={searchValue}
-                  onChange={(event) => handleSearchChange(event.target.value)}
-                  placeholder="Search constituency, district, division..."
-                  className="w-full border border-white/15 bg-[#0d0d0b] px-3 py-2 text-sm text-[#9c9888] outline-none transition focus:border-[#c9a84c] focus:text-[#f0ece2]"
-                />
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <div className="inline-flex overflow-hidden rounded border border-white/15 bg-[#121210]">
+                    <button
+                      type="button"
+                      onClick={() => setMapMode("election")}
+                      className={`px-3 py-1.5 font-mono text-[11px] uppercase tracking-widest transition ${
+                        mapMode === "election"
+                          ? "bg-[#c9a84c] text-[#0d0d0b]"
+                          : "text-[#9c9888] hover:bg-white/5"
+                      }`}
+                    >
+                      Election
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setMapMode("referendum")}
+                      className={`px-3 py-1.5 font-mono text-[11px] uppercase tracking-widest transition ${
+                        mapMode === "referendum"
+                          ? "bg-[#c9a84c] text-[#0d0d0b]"
+                          : "text-[#9c9888] hover:bg-white/5"
+                      }`}
+                    >
+                      Referendum
+                    </button>
+                  </div>
+                  <p className="font-mono text-[10px] uppercase tracking-[0.12em] text-[#5a5848]">
+                    Map Mode: {mapMode === "election" ? "Election" : "Referendum"}
+                  </p>
+                </div>
+                <div className="mt-2">
+                  <label className="sr-only" htmlFor="seatSearch">
+                    Search constituency, district, division, party, or candidate
+                  </label>
+                  <input
+                    id="seatSearch"
+                    type="search"
+                    value={searchValue}
+                    onChange={(event) => handleSearchChange(event.target.value)}
+                    placeholder="Search constituency, district, division..."
+                    className="w-full border border-white/15 bg-[#0d0d0b] px-3 py-2 text-sm text-[#9c9888] outline-none transition focus:border-[#c9a84c] focus:text-[#f0ece2]"
+                  />
+                </div>
               </div>
               <div className="min-h-0 flex-1 px-4 pb-4 sm:px-5 sm:pb-5">
                 <BangladeshMap
                   seats={sortedSeats}
+                  mode={mapMode}
                   selectedSeatKey={selectedSeatKey}
                   onSelectSeat={(seatKey) => {
                     setSelectedSeatKey(seatKey);
@@ -295,7 +354,7 @@ export function LandingShell({ summaryDataset, constituencyDataset }: LandingShe
                     >
                       <span
                         className="mt-0.5 h-2 w-2 shrink-0 rounded-full"
-                        style={{ backgroundColor: getSeatColor(seat) }}
+                        style={{ backgroundColor: getSeatDisplayColor(seat) }}
                       />
                       <div className="min-w-0">
                         <p className="truncate text-sm text-[#f0ece2]">{seat.constituency}</p>
@@ -332,30 +391,35 @@ export function LandingShell({ summaryDataset, constituencyDataset }: LandingShe
                 <div
                   className="mt-3 inline-flex items-center gap-2 border px-3 py-1.5"
                   style={{
-                    backgroundColor: getSeatSoftColor(selectedSeat),
-                    borderColor: `${getSeatColor(selectedSeat)}66`,
+                    backgroundColor: getSeatDisplaySoftColor(selectedSeat),
+                    borderColor: `${getSeatDisplayColor(selectedSeat)}66`,
                   }}
                 >
-                  <span className="h-2 w-2 rounded-full" style={{ backgroundColor: getSeatColor(selectedSeat) }} />
-                  <span className="font-mono text-[13px] tracking-[0.08em]" style={{ color: getSeatColor(selectedSeat) }}>
-                    {selectedSeatStatus?.isPostponed
-                      ? selectedSeatStatus.label
-                      : `${selectedSeat.winner_party} - ${selectedSeat.winner_candidate}`}
+                  <span className="h-2 w-2 rounded-full" style={{ backgroundColor: getSeatDisplayColor(selectedSeat) }} />
+                  <span className="font-mono text-[13px] tracking-[0.08em]" style={{ color: getSeatDisplayColor(selectedSeat) }}>
+                    {mapMode === "election"
+                      ? selectedSeatStatus?.isPostponed
+                        ? selectedSeatStatus.label
+                        : `${selectedSeat.winner_party} - ${selectedSeat.winner_candidate}`
+                      : getReferendumBadgeLabel(selectedSeat)}
                   </span>
                 </div>
-                {selectedSeatStatus?.isPostponed ? (
+                {mapMode === "election" && selectedSeatStatus?.isPostponed ? (
                   <p className="mt-2 text-xs text-[#d9c38d]">Reason: {selectedSeatStatus.reason}</p>
-                ) : (
+                ) : mapMode === "election" ? (
                   <p className="mt-2 text-xs text-[#9c9888]">
                     Runner-up: <span className="text-[#f0ece2]">{selectedSeat.runner_up_candidate}</span> ({selectedSeat.runner_up_party})
+                  </p>
+                ) : (
+                  <p className="mt-2 text-xs text-[#9c9888]">
+                    Referendum Votes: <span className="text-[#f0ece2]">Yes {formatNumber(selectedSeat.referendum_yes)} · No {formatNumber(selectedSeat.referendum_no)}</span>
                   </p>
                 )}
               </div>
 
               <ConstituencyMiniMap
                 seat={selectedSeat}
-                alliance={selectedSeat.alliance}
-                winnerParty={selectedSeat.winner_party}
+                mode={mapMode}
               />
 
               <section className="border border-white/10">
@@ -444,7 +508,7 @@ export function LandingShell({ summaryDataset, constituencyDataset }: LandingShe
                             className="h-full"
                             style={{
                               width: `${width}%`,
-                              background: `linear-gradient(90deg, ${getSeatColor(selectedSeat)}, #c9a84c)`,
+                              background: `linear-gradient(90deg, ${getSeatDisplayColor(selectedSeat)}, #c9a84c)`,
                             }}
                           />
                         </div>

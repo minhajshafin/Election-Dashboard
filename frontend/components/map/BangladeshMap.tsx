@@ -5,7 +5,7 @@ import type { GeoJsonObject } from "geojson";
 import L from "leaflet";
 import { GeoJSON, MapContainer, TileLayer, useMap, useMapEvents } from "react-leaflet";
 
-import { getSeatColor } from "@/lib/colors";
+import { getReferendumSeatColor, getReferendumSeatResult, getSeatColor } from "@/lib/colors";
 import { getSeatElectionStatus } from "@/lib/electionStatus";
 import {
   type BangladeshGeoFeature,
@@ -17,12 +17,23 @@ import type { ConstituencyRow } from "@/types/api";
 
 interface BangladeshMapProps {
   seats: ConstituencyRow[];
+  mode: "election" | "referendum";
   selectedSeatKey: string | null;
   onSelectSeat: (seatKey: string) => void;
   onClearSelection: () => void;
 }
 
+const ELECTION_NO_DATA_FILL_COLOR = "#94a3b8";
 const POSTPONED_SEAT_FILL_COLOR = "#6b7280";
+const REFERENDUM_NULL_FILL_COLOR = "#6b7280";
+
+function formatVotes(value: number | null | undefined): string {
+  if (value === null || value === undefined) {
+    return "N/A";
+  }
+
+  return new Intl.NumberFormat("en-US").format(value);
+}
 
 function MapBackgroundReset({ onClearSelection }: { onClearSelection: () => void }) {
   useMapEvents({
@@ -68,6 +79,7 @@ function FitBoundsAfterResize({ geoJson }: { geoJson: BangladeshGeoJson }) {
 
 export function BangladeshMap({
   seats,
+  mode,
   selectedSeatKey,
   onSelectSeat,
   onClearSelection,
@@ -127,7 +139,11 @@ export function BangladeshMap({
 
   const getSeatFillColor = (seat: ConstituencyRow | null): string => {
     if (!seat) {
-      return "#94a3b8";
+      return mode === "referendum" ? REFERENDUM_NULL_FILL_COLOR : ELECTION_NO_DATA_FILL_COLOR;
+    }
+
+    if (mode === "referendum") {
+      return getReferendumSeatColor(seat);
     }
 
     if (getSeatElectionStatus(seat).isPostponed) {
@@ -136,6 +152,41 @@ export function BangladeshMap({
 
     return getSeatColor(seat);
   };
+
+  const getSeatTooltip = (seat: ConstituencyRow | null, fallbackSeatName: string): string => {
+    if (!seat) {
+      return mode === "referendum"
+        ? `${fallbackSeatName} · No constituency match`
+        : `${fallbackSeatName} · No election data`;
+    }
+
+    if (mode === "election") {
+      const status = getSeatElectionStatus(seat);
+
+      if (status.isPostponed) {
+        return `${seat.constituency} · ${status.label} · ${status.reason}`;
+      }
+
+      return `${seat.constituency} · ${seat.winner_party} · ${seat.winner_vote_share_pct ?? "N/A"}%`;
+    }
+
+    const result = getReferendumSeatResult(seat);
+    const yesVotes = formatVotes(seat.referendum_yes);
+    const noVotes = formatVotes(seat.referendum_no);
+
+    if (result === "yes") {
+      return `${seat.constituency} · Majority YES · Yes ${yesVotes} / No ${noVotes}`;
+    }
+
+    if (result === "no") {
+      return `${seat.constituency} · Majority NO · Yes ${yesVotes} / No ${noVotes}`;
+    }
+
+    return `${seat.constituency} · Referendum unavailable · Yes ${yesVotes} / No ${noVotes}`;
+  };
+
+  const fillOpacity = mode === "referendum" ? 0.82 : 0.8;
+  const emptyFillOpacity = mode === "referendum" ? 0.5 : 0.35;
 
   const selectedFeature = useMemo(() => {
     if (!geoJson || !selectedSeatKey) {
@@ -184,18 +235,13 @@ export function BangladeshMap({
                 color: "rgba(255,255,255,0.2)",
                 weight: 0.7,
                 fillColor: getSeatFillColor(seat),
-                fillOpacity: seat ? 0.8 : 0.35,
+                fillOpacity: seat ? fillOpacity : emptyFillOpacity,
                 opacity: 1,
               };
             }}
             onEachFeature={(feature, layer) => {
               const seat = getSeatForFeature(feature as BangladeshGeoFeature);
-              const status = seat ? getSeatElectionStatus(seat) : null;
-              const title = seat
-                ? status?.isPostponed
-                  ? `${seat.constituency} · ${status.label} · ${status.reason}`
-                  : `${seat.constituency} · ${seat.winner_party} · ${seat.winner_vote_share_pct ?? "N/A"}%`
-                : `${feature.properties.cst_n} · No election data`;
+              const title = getSeatTooltip(seat, feature.properties.cst_n);
 
               const styleLayer = layer instanceof L.Path ? layer : null;
 
@@ -228,7 +274,7 @@ export function BangladeshMap({
                   }
                   styleLayer.setStyle({
                     weight: 0.7,
-                    fillOpacity: seat ? 0.8 : 0.35,
+                    fillOpacity: seat ? fillOpacity : emptyFillOpacity,
                   });
                 },
               });
@@ -251,19 +297,38 @@ export function BangladeshMap({
           ) : null}
         </MapContainer>
       )}
-      <div className="absolute bottom-4 left-4 z-[700] flex gap-4 border border-white/20 bg-[#0d0d0b] px-3 py-2 font-mono text-[11px] uppercase tracking-[0.08em] text-[#9c9888] shadow-[0_10px_24px_rgba(0,0,0,0.45)]">
-        <span className="inline-flex items-center gap-2">
-          <span className="h-2.5 w-2.5 rounded-full bg-[#4a9e7a]" /> BNP
-        </span>
-        <span className="inline-flex items-center gap-2">
-          <span className="h-2.5 w-2.5 rounded-full bg-[#2a6aaa]" /> Jamaat
-        </span>
-        <span className="inline-flex items-center gap-2">
-          <span className="h-2.5 w-2.5 rounded-full bg-[#c0572a]" /> NCP
-        </span>
-        <span className="inline-flex items-center gap-2">
-          <span className="h-2.5 w-2.5 rounded-full bg-[#c9a84c]" /> Other Parties
-        </span>
+      <div className="absolute bottom-4 left-4 z-700 flex flex-wrap gap-4 border border-white/20 bg-[#0d0d0b] px-3 py-2 font-mono text-[11px] uppercase tracking-[0.08em] text-[#9c9888] shadow-[0_10px_24px_rgba(0,0,0,0.45)]">
+        {mode === "election" ? (
+          <>
+            <span className="inline-flex items-center gap-2">
+              <span className="h-2.5 w-2.5 rounded-full bg-[#4a9e7a]" /> BNP
+            </span>
+            <span className="inline-flex items-center gap-2">
+              <span className="h-2.5 w-2.5 rounded-full bg-[#2a6aaa]" /> Jamaat
+            </span>
+            <span className="inline-flex items-center gap-2">
+              <span className="h-2.5 w-2.5 rounded-full bg-[#c0572a]" /> NCP
+            </span>
+            <span className="inline-flex items-center gap-2">
+              <span className="h-2.5 w-2.5 rounded-full bg-[#c9a84c]" /> Other Parties
+            </span>
+            <span className="inline-flex items-center gap-2">
+              <span className="h-2.5 w-2.5 rounded-full bg-[#6b7280]" /> Postponed
+            </span>
+          </>
+        ) : (
+          <>
+            <span className="inline-flex items-center gap-2">
+              <span className="h-2.5 w-2.5 rounded-full bg-[#2f9e44]" /> Majority Yes
+            </span>
+            <span className="inline-flex items-center gap-2">
+              <span className="h-2.5 w-2.5 rounded-full bg-[#d94841]" /> Majority No
+            </span>
+            <span className="inline-flex items-center gap-2">
+              <span className="h-2.5 w-2.5 rounded-full bg-[#6b7280]" /> Null / Missing
+            </span>
+          </>
+        )}
       </div>
     </div>
   );

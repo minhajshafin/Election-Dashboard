@@ -5,7 +5,7 @@ import type { GeoJsonObject } from "geojson";
 import L from "leaflet";
 import { GeoJSON, MapContainer, TileLayer, useMap } from "react-leaflet";
 
-import { getSeatColor } from "@/lib/colors";
+import { getReferendumSeatColor, getSeatColor } from "@/lib/colors";
 import {
   fetchBangladeshGeoJson,
   findGeoFeatureForSeat,
@@ -13,10 +13,17 @@ import {
   type GeoResolvableSeat,
 } from "@/lib/geo";
 
+type MiniMapSeat = GeoResolvableSeat & {
+  alliance?: string | null;
+  winner_party?: string | null;
+  referendum_result?: "yes" | "no" | null;
+  referendum_yes?: number | null;
+  referendum_no?: number | null;
+};
+
 interface ConstituencyMiniMapProps {
-  seat: GeoResolvableSeat | null;
-  alliance: string;
-  winnerParty: string;
+  seat: MiniMapSeat | null;
+  mode: "election" | "referendum";
 }
 
 function FitSelectedFeature({ feature }: { feature: BangladeshGeoFeature | null }) {
@@ -36,7 +43,7 @@ function FitSelectedFeature({ feature }: { feature: BangladeshGeoFeature | null 
   return null;
 }
 
-export function ConstituencyMiniMap({ seat, alliance, winnerParty }: ConstituencyMiniMapProps) {
+export function ConstituencyMiniMap({ seat, mode }: ConstituencyMiniMapProps) {
   const [geoJson, setGeoJson] = useState<import("@/lib/geo").BangladeshGeoJson | null>(null);
 
   useEffect(() => {
@@ -81,7 +88,12 @@ export function ConstituencyMiniMap({ seat, alliance, winnerParty }: Constituenc
     );
   }
 
-  const featureKey = `${feature.properties.cst}-${alliance}-${winnerParty}`;
+  const featureKey =
+    mode === "referendum"
+      ? `${feature.properties.cst}-${mode}-${seat.referendum_result ?? "null"}-${seat.referendum_yes ?? "na"}-${seat.referendum_no ?? "na"}`
+      : `${feature.properties.cst}-${mode}-${seat.alliance ?? "none"}-${seat.winner_party ?? "none"}`;
+
+  const fillColor = mode === "referendum" ? getReferendumSeatColor(seat) : getSeatColor(seat);
 
   return (
     <div className="h-56 overflow-hidden border border-white/10 bg-[#141412]">
@@ -109,7 +121,7 @@ export function ConstituencyMiniMap({ seat, alliance, winnerParty }: Constituenc
           style={{
             color: "#c9a84c",
             weight: 2,
-            fillColor: getSeatColor({ alliance, winner_party: winnerParty }),
+            fillColor,
             fillOpacity: 0.86,
           }}
         />

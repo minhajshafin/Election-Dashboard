@@ -20,6 +20,18 @@ const PARTY_SOFT_COLORS = {
   ncp: "rgba(192, 87, 42, 0.14)",
 } as const;
 
+const REFERENDUM_COLORS = {
+  yes: "#2f9e44",
+  no: "#d94841",
+  null: "#6b7280",
+} as const;
+
+const REFERENDUM_SOFT_COLORS = {
+  yes: "rgba(47, 158, 68, 0.14)",
+  no: "rgba(217, 72, 65, 0.14)",
+  null: "rgba(107, 114, 128, 0.18)",
+} as const;
+
 export type AllianceKey = keyof typeof ALLIANCE_COLORS;
 
 export function getAllianceColor(alliance: string | null | undefined): string {
@@ -65,4 +77,60 @@ export function getSeatSoftColor(seat: { winner_party?: string | null; alliance?
   return getAllianceSoftColor(seat.alliance);
 }
 
-export { ALLIANCE_COLORS };
+type ReferendumSeat = {
+  referendum_result?: "yes" | "no" | null;
+  referendum_yes?: number | null;
+  referendum_no?: number | null;
+};
+
+export function getReferendumSeatResult(seat: ReferendumSeat | null | undefined): "yes" | "no" | null {
+  if (!seat) {
+    return null;
+  }
+
+  if (seat.referendum_result === "yes" || seat.referendum_result === "no") {
+    return seat.referendum_result;
+  }
+
+  if (seat.referendum_yes === null || seat.referendum_no === null) {
+    return null;
+  }
+
+  if (seat.referendum_yes === undefined || seat.referendum_no === undefined) {
+    return null;
+  }
+
+  if (seat.referendum_yes > seat.referendum_no) {
+    return "yes";
+  }
+
+  if (seat.referendum_no > seat.referendum_yes) {
+    return "no";
+  }
+
+  return null;
+}
+
+export function getReferendumSeatColor(seat: ReferendumSeat | null | undefined): string {
+  const result = getReferendumSeatResult(seat);
+  if (result === "yes") {
+    return REFERENDUM_COLORS.yes;
+  }
+  if (result === "no") {
+    return REFERENDUM_COLORS.no;
+  }
+  return REFERENDUM_COLORS.null;
+}
+
+export function getReferendumSeatSoftColor(seat: ReferendumSeat | null | undefined): string {
+  const result = getReferendumSeatResult(seat);
+  if (result === "yes") {
+    return REFERENDUM_SOFT_COLORS.yes;
+  }
+  if (result === "no") {
+    return REFERENDUM_SOFT_COLORS.no;
+  }
+  return REFERENDUM_SOFT_COLORS.null;
+}
+
+export { ALLIANCE_COLORS, REFERENDUM_COLORS };
