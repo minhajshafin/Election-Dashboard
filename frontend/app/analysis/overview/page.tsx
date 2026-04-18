@@ -4,7 +4,9 @@ import {
   HorizontalBarChart,
   MetricCards,
   Panel,
+  VerticalBarChart,
 } from "@/components/analysis/charts";
+import { getAllianceColor } from "@/lib/colors";
 
 function formatPercent(value: number | null): string {
   if (value === null) {
@@ -14,23 +16,34 @@ function formatPercent(value: number | null): string {
   return `${value.toFixed(2)}%`;
 }
 
-function buildBuckets(values: Array<number | null>, bucketSize: number) {
-  const buckets = new Map<string, number>();
-
-  for (const value of values) {
-    if (value === null) {
-      continue;
-    }
-
-    const floor = Math.floor(value / bucketSize) * bucketSize;
-    const ceil = floor + bucketSize;
-    const label = `${floor}-${ceil}`;
-    buckets.set(label, (buckets.get(label) ?? 0) + 1);
+function buildDynamicBins(values: Array<number | null>, binCount: number) {
+  const cleanValues = values.filter((value): value is number => value !== null);
+  if (cleanValues.length === 0) {
+    return [];
   }
 
-  return Array.from(buckets.entries())
-    .map(([label, count]) => ({ label, count }))
-    .sort((left, right) => Number(left.label.split("-")[0]) - Number(right.label.split("-")[0]));
+  const min = Math.min(...cleanValues);
+  const max = Math.max(...cleanValues);
+  if (min === max) {
+    return [{ label: `${min.toFixed(1)}-${max.toFixed(1)}`, count: cleanValues.length }];
+  }
+
+  const width = (max - min) / binCount;
+  const counts = new Array(binCount).fill(0);
+
+  for (const value of cleanValues) {
+    const index = Math.min(binCount - 1, Math.floor((value - min) / width));
+    counts[index] += 1;
+  }
+
+  return counts.map((count, index) => {
+    const start = min + index * width;
+    const end = index === binCount - 1 ? max : start + width;
+    return {
+      label: `${start.toFixed(1)}-${end.toFixed(1)}`,
+      count,
+    };
+  });
 }
 
 export default async function AnalysisOverviewPage() {
@@ -42,28 +55,53 @@ export default async function AnalysisOverviewPage() {
   const summary = summaryDataset.summary;
   const seats = constituencyDataset.rows;
 
-  const turnoutBuckets = buildBuckets(
+  const turnoutBuckets = buildDynamicBins(
     seats.map((seat) => seat.turnout_pct),
+    8,
+  );
+  const marginBuckets = buildDynamicBins(
+    seats.map((seat) => seat.winning_margin_pct),
     10,
   );
-  const marginBuckets = buildBuckets(
-    seats.map((seat) => seat.winning_margin_pct),
-    5,
-  );
 
-  const partyData = summary.party_rankings.map((party) => ({
-    label: party.party,
-    value: party.seat_count,
-    color: "#c9a84c",
-    valueLabel: `${party.seat_count} seats`,
-  }));
+  const partyAllianceCounts = new Map<string, Map<string, number>>();
+  for (const seat of seats) {
+    if (!seat.winner_party) {
+      continue;
+    }
 
-  const divisionData = summary.divisions.map((division) => ({
-    label: division.division,
-    value: division.seat_count,
-    color: "#2a6aaa",
-    valueLabel: `${division.seat_count}`,
-  }));
+    const existing = partyAllianceCounts.get(seat.winner_party) ?? new Map<string, number>();
+    const allianceKey = (seat.alliance ?? "others").toLowerCase();
+    existing.set(allianceKey, (existing.get(allianceKey) ?? 0) + 1);
+    partyAllianceCounts.set(seat.winner_party, existing);
+  }
+
+  function allianceForParty(party: string): string {
+    const counts = partyAllianceCounts.get(party);
+    if (!counts) {
+      return "others";
+    }
+
+    return [...counts.entries()].sort((left, right) => right[1] - left[1])[0]?.[0] ?? "others";
+  }
+
+  const partyData = [...summary.party_rankings]
+    .sort((left, right) => right.seat_count - left.seat_count)
+    .map((party) => ({
+      label: party.party,
+      value: party.seat_count,
+      color: getAllianceColor(allianceForParty(party.party)),
+      valueLabel: `${party.seat_count} seats`,
+    }));
+
+  const divisionData = [...summary.divisions]
+    .sort((left, right) => right.seat_count - left.seat_count)
+    .map((division) => ({
+      label: division.division,
+      value: division.seat_count,
+      color: "#2a6aaa",
+      valueLabel: `${division.seat_count}`,
+    }));
 
   const threshold = summary.competitive_seats.threshold_pct;
   const competitiveSeats = seats.filter(
@@ -137,13 +175,42 @@ export default async function AnalysisOverviewPage() {
       </section>
 
       <section className="mt-6 grid gap-4 xl:grid-cols-2">
-        <HorizontalBarChart title="Seats by Party" data={partyData} />
-        <HorizontalBarChart title="Seats by Division" data={divisionData} />
+        <HorizontalBarChart
+          title="Seats by Party"
+          data={partyData}
+          xAxisLabel="Seats"
+          yAxisLabel="Party"
+          height={320}
+          valueDecimals={0}
+          maxBarFillPercent={88}
+        />
+        <VerticalBarChart
+          title="Seats by Division"
+          data={divisionData}
+          xAxisLabel="Division"
+          yAxisLabel="Seat Count"
+          height={320}
+          valueDecimals={0}
+        />
       </section>
 
       <section className="mt-6 grid gap-4 xl:grid-cols-2">
-        <HistogramChart title="Turnout Distribution" data={turnoutBuckets} color="#4a9e7a" />
-        <HistogramChart title="Margin Distribution" data={marginBuckets} color="#2a6aaa" />
+        <HistogramChart
+          title="Turnout Distribution"
+          data={turnoutBuckets}
+          color="#4a9e7a"
+          xAxisLabel="Voter Turnout (%)"
+          yAxisLabel="Number of Constituencies"
+          height={320}
+        />
+        <HistogramChart
+          title="Winning Margin Distribution"
+          data={marginBuckets}
+          color="#2a6aaa"
+          xAxisLabel="Winning Margin (%)"
+          yAxisLabel="Number of Constituencies"
+          height={320}
+        />
       </section>
 
       <section className="mt-6 grid gap-4 xl:grid-cols-2">
