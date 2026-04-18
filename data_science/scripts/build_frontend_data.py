@@ -94,6 +94,17 @@ FLOAT_FIELDS = {
     "female_pct",
 }
 
+PARTY_ALLIANCE_OVERRIDES = {
+    "ncp": "jamaat",
+    "national citizens party - ncp": "jamaat",
+    "national citizen party (ncp)": "jamaat",
+    "bangladesh jatiya party (bjp)": "bnp",
+    "bangladesh khilafat majlis": "jamaat",
+    "bangladesh khelafat majlish": "jamaat",
+    "khilafat majlis": "jamaat",
+    "khelafat majlish": "jamaat",
+}
+
 SUMMARY_AVERAGE_FIELDS = [
     "turnout_pct",
     "winning_margin_pct",
@@ -280,6 +291,10 @@ def slugify_constituency(name: str) -> str:
     return "-".join(name.lower().split())
 
 
+def normalize_party_key(name: str) -> str:
+    return " ".join(name.lower().split())
+
+
 def derive_referendum_result(yes_votes: int | None, no_votes: int | None) -> str | None:
     if yes_votes is None or no_votes is None:
         return None
@@ -332,7 +347,11 @@ def normalize_row(
     constituency = row["constituency"].strip()
     lookup_constituency = normalize_analytics_constituency_name(constituency)
     geo_ref = geo_lookup.get(lookup_constituency)
+    winner_party = row["winner_party"].strip()
     alliance = row["alliance"].strip().lower() or "others"
+    winner_party_key = normalize_party_key(winner_party)
+    if winner_party_key in PARTY_ALLIANCE_OVERRIDES:
+        alliance = PARTY_ALLIANCE_OVERRIDES[winner_party_key]
     referendum_ref = referendum_lookup.get(lookup_constituency)
     cluster_value = cluster_lookup.get(constituency)
     if cluster_value is None:
@@ -345,7 +364,7 @@ def normalize_row(
         "division": row["division"].strip(),
         "alliance": alliance,
         "winner_candidate": row["winner_candidate"].strip(),
-        "winner_party": row["winner_party"].strip(),
+        "winner_party": winner_party,
         "runner_up_candidate": row["runner_up_candidate"].strip(),
         "runner_up_party": row["runner_up_party"].strip(),
         "cluster": cluster_value,

@@ -1,7 +1,7 @@
 {
   "meta": {
     "schema_version": "1.0.0",
-    "generated_at": "2026-04-18T13:37:39.497300+00:00",
+    "generated_at": "2026-04-18T14:02:19.453900+00:00",
     "source_files": [
       "data_science/data/processed/spark_output/analytics_base_csv/part-00000-9bf8d168-f96c-49a4-8741-552a6327d54f-c000.csv",
       "data_science/data/processed/spark_output/cluster_assignments_csv/part-00000-4f7add55-ac24-4923-b881-1da6112f6a33-c000.csv"
@@ -36,9 +36,9 @@
       "Khelafat Majlish": 1
     },
     "seats_by_alliance": {
-      "jamaat": 69,
-      "bnp": 208,
-      "others": 23
+      "jamaat": 78,
+      "bnp": 209,
+      "others": 13
     },
     "seats_by_division": {
       "Barishal": {

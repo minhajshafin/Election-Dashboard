@@ -61,11 +61,10 @@ export function ExplorerShell({ seats, divisions, alliances, parties }: Explorer
       <section className="border-b border-white/8 px-4 py-5 sm:px-10 sm:py-6">
         <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-[#c9a84c]">Constituency Explorer</p>
         <h1 className="mt-2 text-2xl leading-tight sm:text-3xl" style={{ fontFamily: "var(--font-playfair), serif" }}>
-          Search, filter, and compare all 299 constituencies
+          Search, filter, and compare all 300 constituencies
         </h1>
         <p className="mt-3 max-w-3xl text-sm text-[#9c9888]">
-          Use filters to slice by division, alliance, or winning party. Selecting a seat opens the landing map with that
-          constituency pre-selected.
+          Use filters to slice by division, alliance, or winning party.
         </p>
       </section>
 

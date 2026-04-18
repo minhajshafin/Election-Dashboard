@@ -1,7 +1,7 @@
 {
   "meta": {
     "schema_version": "1.0.0",
-    "generated_at": "2026-04-18T13:37:39.498767+00:00",
+    "generated_at": "2026-04-18T14:02:19.455593+00:00",
     "source_files": [
       "data_science/data/processed/spark_output/cluster_profiles.json",
       "data_science/data/processed/spark_output/cluster_assignments_csv/part-00000-4f7add55-ac24-4923-b881-1da6112f6a33-c000.csv"
