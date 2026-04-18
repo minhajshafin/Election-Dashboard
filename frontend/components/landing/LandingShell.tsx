@@ -31,6 +31,14 @@ interface LandingShellProps {
 
 const ALL_DIVISIONS = "All Divisions";
 type MapMode = "election" | "referendum";
+const NATIONAL_TURNOUT_BASELINE = 58.2;
+
+interface CompetitivenessBadge {
+  label: "Highly Contested" | "Competitive" | "Safe Seat" | "Data Missing";
+  backgroundColor: string;
+  borderColor: string;
+  textColor: string;
+}
 
 function formatNumber(value: number | null | undefined): string {
   if (value === null || value === undefined) {
@@ -46,6 +54,69 @@ function formatPercent(value: number | null | undefined): string {
   }
 
   return `${value.toFixed(2)}%`;
+}
+
+function getSeatRuralPopulation(seat: ConstituencyRow): number | null {
+  if (seat.pop_rural !== null) {
+    return seat.pop_rural;
+  }
+  if (seat.pop_total_loc !== null && seat.pop_urban !== null) {
+    return Math.max(0, Math.round(seat.pop_total_loc - seat.pop_urban));
+  }
+  return null;
+}
+
+function getSeatFemaleSharePct(seat: ConstituencyRow): number | null {
+  if (seat.female_pct !== null) {
+    return seat.female_pct;
+  }
+  if (seat.pop_female !== null && seat.pop_total_loc !== null && seat.pop_total_loc > 0) {
+    return (seat.pop_female / seat.pop_total_loc) * 100;
+  }
+  if (seat.sex_ratio !== null && seat.sex_ratio > 0) {
+    return 10000 / (100 + seat.sex_ratio);
+  }
+  return null;
+}
+
+function getRunnerUpVoteSharePct(seat: ConstituencyRow): number | null {
+  if (seat.runner_up_votes === null || seat.total_valid_votes === null || seat.total_valid_votes <= 0) {
+    return null;
+  }
+  return (seat.runner_up_votes / seat.total_valid_votes) * 100;
+}
+
+function getCompetitivenessBadge(seat: ConstituencyRow): CompetitivenessBadge {
+  if (seat.competitiveness_index === null) {
+    return {
+      label: "Data Missing",
+      backgroundColor: "rgba(115, 115, 115, 0.22)",
+      borderColor: "rgba(156, 152, 136, 0.55)",
+      textColor: "#d1d5db",
+    };
+  }
+  if (seat.competitiveness_index > 5) {
+    return {
+      label: "Highly Contested",
+      backgroundColor: "rgba(220, 38, 38, 0.18)",
+      borderColor: "rgba(248, 113, 113, 0.5)",
+      textColor: "#fecaca",
+    };
+  }
+  if (seat.competitiveness_index >= 2) {
+    return {
+      label: "Competitive",
+      backgroundColor: "rgba(201, 168, 76, 0.18)",
+      borderColor: "rgba(217, 195, 141, 0.5)",
+      textColor: "#f6e7c0",
+    };
+  }
+  return {
+    label: "Safe Seat",
+    backgroundColor: "rgba(115, 115, 115, 0.22)",
+    borderColor: "rgba(156, 152, 136, 0.55)",
+    textColor: "#d1d5db",
+  };
 }
 
 function matchesSeatQuery(seat: ConstituencyRow, query: string): boolean {
@@ -134,6 +205,10 @@ export function LandingShell({ summaryDataset, constituencyDataset }: LandingShe
 
     return getSeatElectionStatus(selectedSeat);
   }, [selectedSeat]);
+  const selectedSeatRuralPopulation = selectedSeat ? getSeatRuralPopulation(selectedSeat) : null;
+  const selectedSeatFemalePct = selectedSeat ? getSeatFemaleSharePct(selectedSeat) : null;
+  const selectedSeatRunnerUpSharePct = selectedSeat ? getRunnerUpVoteSharePct(selectedSeat) : null;
+  const selectedSeatCompetitivenessBadge = selectedSeat ? getCompetitivenessBadge(selectedSeat) : null;
 
   const getSeatDisplayColor = (seat: ConstituencyRow): string => {
     return mapMode === "election" ? getSeatColor(seat) : getReferendumSeatColor(seat);
@@ -432,7 +507,7 @@ export function LandingShell({ summaryDataset, constituencyDataset }: LandingShe
                     { label: "Winner Votes", value: formatNumber(selectedSeat.winner_votes) },
                     { label: "Runner-up Votes", value: formatNumber(selectedSeat.runner_up_votes) },
                     { label: "Winner Vote Share", value: formatPercent(selectedSeat.winner_vote_share_pct) },
-                    { label: "Winning Margin", value: formatPercent(selectedSeat.winning_margin_pct) },
+                    { label: "Runner-up Vote Share", value: formatPercent(selectedSeatRunnerUpSharePct) },
                     { label: "Turnout", value: formatPercent(selectedSeat.turnout_pct) },
                     { label: "Valid Votes", value: formatNumber(selectedSeat.total_valid_votes) },
                     { label: "Candidates", value: formatNumber(selectedSeat.candidate_count) },
@@ -450,6 +525,21 @@ export function LandingShell({ summaryDataset, constituencyDataset }: LandingShe
                     </article>
                   ))}
                 </div>
+                {selectedSeatCompetitivenessBadge && (
+                  <div className="px-4 pb-4">
+                    <div
+                      className="inline-flex items-center gap-2 border px-3 py-1.5 font-mono text-[11px] uppercase tracking-[0.12em]"
+                      style={{
+                        backgroundColor: selectedSeatCompetitivenessBadge.backgroundColor,
+                        borderColor: selectedSeatCompetitivenessBadge.borderColor,
+                        color: selectedSeatCompetitivenessBadge.textColor,
+                      }}
+                    >
+                      <span>Competitiveness</span>
+                      <span className="font-semibold">{selectedSeatCompetitivenessBadge.label}</span>
+                    </div>
+                  </div>
+                )}
               </section>
 
               <section className="border border-white/10">
@@ -462,8 +552,8 @@ export function LandingShell({ summaryDataset, constituencyDataset }: LandingShe
                     { label: "Households", value: formatNumber(selectedSeat.Household_Total) },
                     { label: "Population Density", value: selectedSeat.pop_density === null ? "N/A" : `${formatNumber(selectedSeat.pop_density)}/km2` },
                     { label: "Urban Population", value: formatNumber(selectedSeat.pop_urban) },
-                    { label: "Rural Population", value: formatNumber(selectedSeat.pop_rural) },
-                    { label: "Female Share", value: formatPercent(selectedSeat.female_pct) },
+                    { label: "Rural Population", value: formatNumber(selectedSeatRuralPopulation) },
+                    { label: "Female Share", value: formatPercent(selectedSeatFemalePct) },
                   ].map((item) => (
                     <article key={item.label} className="border border-white/10 bg-[#141412] px-3 py-2">
                       <p className="font-mono text-[9px] uppercase tracking-[0.15em] text-[#5a5848]">{item.label}</p>
@@ -484,6 +574,7 @@ export function LandingShell({ summaryDataset, constituencyDataset }: LandingShe
                 <div className="space-y-3 p-4">
                   {(
                     [
+                      ["Voter Turnout", selectedSeat.turnout_pct, NATIONAL_TURNOUT_BASELINE],
                       ["Literacy", selectedSeat.literacy_rate, summary.national_averages.literacy_rate],
                       ["Internet Access", selectedSeat.internet_pct, summary.national_averages.internet_pct],
                       ["Employment Rate", selectedSeat.employment_rate_pct, summary.national_averages.employment_rate_pct],
