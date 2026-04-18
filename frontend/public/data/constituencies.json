@@ -1,7 +1,7 @@
 {
   "meta": {
     "schema_version": "1.0.0",
-    "generated_at": "2026-04-18T14:02:19.440342+00:00",
+    "generated_at": "2026-04-18T14:20:09.181487+00:00",
     "source_files": [
       "data_science/data/processed/spark_output/analytics_base_csv/part-00000-9bf8d168-f96c-49a4-8741-552a6327d54f-c000.csv",
       "data_science/data/processed/spark_output/cluster_assignments_csv/part-00000-4f7add55-ac24-4923-b881-1da6112f6a33-c000.csv",
@@ -1552,7 +1552,7 @@
       "constituency": "Brahmanbaria 6",
       "district": "Brahmanbaria",
       "division": "Chattogram",
-      "alliance": "others",
+      "alliance": "bnp",
       "winner_candidate": "Md. Jonaed Abdur Rahim Saki",
       "winner_party": "Gonoshonghoti Andolon",
       "runner_up_candidate": "Md. Mohsin",
@@ -12841,7 +12841,7 @@
       "constituency": "Patuakhali 3",
       "district": "Patuakhali",
       "division": "Barishal",
-      "alliance": "others",
+      "alliance": "bnp",
       "winner_candidate": "Md. Nurul Haque",
       "winner_party": "Gono Odhikar Parishad (GOP)",
       "runner_up_candidate": "Md. Hasan Mamun",

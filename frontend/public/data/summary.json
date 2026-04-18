@@ -1,7 +1,7 @@
 {
   "meta": {
     "schema_version": "1.0.0",
-    "generated_at": "2026-04-18T14:02:19.453900+00:00",
+    "generated_at": "2026-04-18T14:20:09.195203+00:00",
     "source_files": [
       "data_science/data/processed/spark_output/analytics_base_csv/part-00000-9bf8d168-f96c-49a4-8741-552a6327d54f-c000.csv",
       "data_science/data/processed/spark_output/cluster_assignments_csv/part-00000-4f7add55-ac24-4923-b881-1da6112f6a33-c000.csv"
@@ -37,8 +37,8 @@
     },
     "seats_by_alliance": {
       "jamaat": 78,
-      "bnp": 209,
-      "others": 13
+      "bnp": 211,
+      "others": 11
     },
     "seats_by_division": {
       "Barishal": {

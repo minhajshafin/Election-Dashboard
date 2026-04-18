@@ -103,6 +103,10 @@ PARTY_ALLIANCE_OVERRIDES = {
     "bangladesh khelafat majlish": "jamaat",
     "khilafat majlis": "jamaat",
     "khelafat majlish": "jamaat",
+    "gonoshonghoti andolon": "bnp",
+    "ganosamhati andolon": "bnp",
+    "gono odhikar parishad (gop)": "bnp",
+    "gono odhikar parishad": "bnp",
 }
 
 SUMMARY_AVERAGE_FIELDS = [
