@@ -9,7 +9,7 @@
 [![Python](https://img.shields.io/badge/Python-3.10+-3776AB?logo=python&logoColor=white&style=flat-square)](https://www.python.org/)
 [![Spark](https://img.shields.io/badge/Apache_Spark-MLlib-E25A1C?logo=apachespark&logoColor=white&style=flat-square)](https://spark.apache.org/)
 
-**Data journalism meets machine learning** — An interactive platform for exploring Bangladesh National Election 2026 through the lens of constituency-level outcomes and socio-economic indicators.
+**Data journalism meets machine learning** — An interactive platform for exploring Bangladesh National Election 2026 through constituency-level outcomes and socio-economic indicators, built with production-style engineering constraints in mind.
 
 ### [🚀 **Visit Live Dashboard**](https://bd-election-dashboard.vercel.app) · [📖 Full Setup](build.md) · [📋 Architecture](docs/dashboard-plan.md)
 
@@ -23,11 +23,22 @@
 
 | Metric | Value |
 |--------|-------|
-| **Constituencies** | 299 seats analyzed |
+| **Constituencies** | 300 seats analyzed |
 | **Data Points** | 19 socio-economic indicators |
 | **ML Models** | Correlation, Regression, Classification, Clustering |
+| **Data Coverage Guardrail** | 300/300 constituency validation before export |
 | **Response Time** | <100ms static prerender |
 | **Deployment** | Vercel (production-ready) |
+
+
+## 🧭 Engineering Signals
+
+This repository is designed to be easy to evaluate from both product and engineering perspectives:
+
+- **Clear system boundaries** between ingestion, feature generation, and UI contracts
+- **Schema-adapter pattern** to absorb upstream data drift without breaking frontend code
+- **Reproducible analytics workflow** using Spark MLlib + deterministic export artifacts
+- **Deployment-first architecture** with static prerendering and CDN-friendly assets
 
 
 ## ✨ What This Does
@@ -41,7 +52,7 @@
 <td width="50%">
 
 🗺️ **Interactive Maps**
-- 299 constituencies in real-time
+- 300 constituencies in real-time
 - Division-based filtering  
 - Seat selection sync
 
@@ -84,7 +95,7 @@
 
 1. Click a constituency on the map
 2. Explore analysis views (5+ analysis pages)
-3. Search and filter across all 299 seats
+3. Search and filter across all 300 seats
 
 ### Option 2: Run Locally
 
@@ -134,7 +145,7 @@ Next.js Components (Deployment-Ready UI)
 | Route | Purpose |
 |-------|---------|
 | `/` | Landing map + seat drill-down interface |
-| `/explorer` | Searchable table of all 299 constituencies |
+| `/explorer` | Searchable table of all 300 constituencies |
 | `/analysis/overview` | National summary stats and distributions |
 | `/analysis/correlation` | Pearson/Spearman correlation matrices |
 | `/analysis/regression` | Turnout prediction model insights |
@@ -146,11 +157,11 @@ Next.js Components (Deployment-Ready UI)
 
 > A production-grade data journalism platform that doesn't compromise on rigor.
 
-✅ **End-to-End Deployment** — Raw data → ML models → live dashboard in <5s load time  
-✅ **Type-Safe** — TypeScript contracts between data layer and UI prevent runtime errors  
-✅ **Explainable Models** — Correlation matrices, regression coefficients, feature importance—not black boxes  
-✅ **Academic Grade** — Meets CSE488 Big Data requirements; Spark + Spark MLlib core  
-✅ **Production Ready** — Static pre-rendering, instant geographic queries, sub-100ms response  
+✅ **End-to-End Ownership** — Data collection, cleaning, modeling, adaptation, and frontend delivery in one coherent pipeline  
+✅ **Type-Safe Contracts** — TypeScript interfaces isolate UI behavior from source volatility  
+✅ **Model Transparency** — Correlation matrices, coefficients, and feature importance are exposed directly in the product  
+✅ **Operational Guardrails** — Constituency completeness checks prevent silent data regressions  
+✅ **Performance by Design** — Static pre-rendering and optimized data contracts keep interactions near-instant  
 
 
 ## 📦 Data Layer
@@ -158,7 +169,7 @@ Next.js Components (Deployment-Ready UI)
 Frontend consumes 6 stable JSON files from `frontend/public/data/`:
 
 ```
-constituencies.json       → All 299 seats + metadata
+constituencies.json       → All 300 seats + metadata
 summary.json             → National totals + party stats
 correlation.json         → Feature correlation matrices
 regression.json          → Turnout model coefficients
@@ -178,6 +189,18 @@ Live on **Vercel** with:
 - CDN-cached GeoJSON and analytics files
 
 Deploy your own fork in <2 minutes using [Vercel](https://vercel.com/).
+
+
+## 🧩 Scope of Work
+
+The implementation spans the full lifecycle rather than a single layer:
+
+- Data ingestion from heterogeneous public sources
+- Cleaning and harmonization of election + socio-economic datasets
+- ML analysis pipeline (correlation, regression, classification, clustering)
+- Data-contract shaping for frontend stability
+- Interactive map and analytics experience in Next.js
+- Production deployment and iterative refinements
 
 
 ## 🤝 Contributing
