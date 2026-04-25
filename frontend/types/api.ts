@@ -26,6 +26,7 @@ export interface ConstituencyRow {
   referendum_yes: number | null;
   referendum_no: number | null;
   referendum_result: ReferendumResult;
+  seats_area: string | null;
   Population_Total: number | null;
   Household_Total: number | null;
   pop_density: number | null;

@@ -291,6 +291,13 @@ def parse_float(value: str) -> float | None:
     return round(float(value), 4)
 
 
+def parse_text(value: str) -> str | None:
+    value = (value or "").strip()
+    if not value:
+        return None
+    return value
+
+
 def slugify_constituency(name: str) -> str:
     return "-".join(name.lower().split())
 
@@ -320,11 +327,13 @@ def build_referendum_lookup(referendum_rows: list[dict[str, str]]) -> dict[str, 
         yes_votes = parse_int(row.get("yes", ""))
         no_votes = parse_int(row.get("no", ""))
         referendum_result = derive_referendum_result(yes_votes, no_votes)
+        seats_area = parse_text(row.get("seats_area", ""))
 
         current_value = {
             "referendum_yes": yes_votes,
             "referendum_no": no_votes,
             "referendum_result": referendum_result,
+            "seats_area": seats_area,
         }
 
         existing_value = lookup.get(constituency)
@@ -332,10 +341,12 @@ def build_referendum_lookup(referendum_rows: list[dict[str, str]]) -> dict[str, 
             lookup[constituency] = current_value
             continue
 
-        existing_completeness = int(existing_value["referendum_yes"] is not None) + int(
-            existing_value["referendum_no"] is not None
+        existing_completeness = (
+            int(existing_value["referendum_yes"] is not None)
+            + int(existing_value["referendum_no"] is not None)
+            + int(existing_value["seats_area"] is not None)
         )
-        current_completeness = int(yes_votes is not None) + int(no_votes is not None)
+        current_completeness = int(yes_votes is not None) + int(no_votes is not None) + int(seats_area is not None)
         if current_completeness > existing_completeness:
             lookup[constituency] = current_value
 
@@ -377,6 +388,7 @@ def normalize_row(
         "referendum_yes": referendum_ref["referendum_yes"] if referendum_ref else None,
         "referendum_no": referendum_ref["referendum_no"] if referendum_ref else None,
         "referendum_result": referendum_ref["referendum_result"] if referendum_ref else None,
+        "seats_area": referendum_ref["seats_area"] if referendum_ref else None,
     }
 
     for field, value in row.items():
