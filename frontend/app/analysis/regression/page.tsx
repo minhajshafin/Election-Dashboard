@@ -114,7 +114,7 @@ export default async function RegressionPage() {
       />
 
       {/* Main Charts: Diverging Coefficients and Scatter Canvas */}
-      <section className="grid gap-6 lg:grid-cols-2">
+      <section className="grid gap-4 sm:gap-6 lg:grid-cols-2">
         <DivergingBarChart
           title="Turnout Feature Coefficients (Marginal Impact)"
           data={coefficientData}
@@ -136,7 +136,7 @@ export default async function RegressionPage() {
       </section>
 
       {/* Editorial Methodology & Takeaways */}
-      <section className="grid gap-6 lg:grid-cols-2">
+      <section className="grid gap-4 sm:gap-6 lg:grid-cols-2">
         <Panel
           title="Coefficient Direction & Magnitude"
           subtitle="Understanding statistical turnout drivers"

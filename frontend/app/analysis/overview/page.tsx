@@ -145,11 +145,11 @@ export default async function AnalysisOverviewPage() {
       />
 
       {/* Editorial Key Findings Dossier */}
-      <section className="grid gap-3 md:grid-cols-3">
-        <article className="border border-[var(--border)] bg-[var(--bg-surface)] p-4 rounded-none">
+      <section className="grid gap-2.5 sm:gap-3 md:grid-cols-3">
+        <article className="border border-[var(--border)] bg-[var(--bg-surface)] p-3.5 sm:p-4 rounded-none">
           <div className="flex items-center gap-2 mb-2">
             <span className="h-1.5 w-1.5 bg-emerald-500 shrink-0" />
-            <h3 className="font-mono text-[10px] uppercase tracking-wider text-[var(--text-muted)] font-semibold">
+            <h3 className="font-mono text-[9px] sm:text-[10px] uppercase tracking-wider text-[var(--text-muted)] font-semibold">
               01 · Coalition Stance
             </h3>
           </div>
@@ -160,10 +160,10 @@ export default async function AnalysisOverviewPage() {
           </p>
         </article>
 
-        <article className="border border-[var(--border)] bg-[var(--bg-surface)] p-4 rounded-none">
+        <article className="border border-[var(--border)] bg-[var(--bg-surface)] p-3.5 sm:p-4 rounded-none">
           <div className="flex items-center gap-2 mb-2">
             <span className="h-1.5 w-1.5 bg-amber-500 shrink-0" />
-            <h3 className="font-mono text-[10px] uppercase tracking-wider text-[var(--text-muted)] font-semibold">
+            <h3 className="font-mono text-[9px] sm:text-[10px] uppercase tracking-wider text-[var(--text-muted)] font-semibold">
               02 · Battleground Volatility
             </h3>
           </div>
@@ -172,10 +172,10 @@ export default async function AnalysisOverviewPage() {
           </p>
         </article>
 
-        <article className="border border-[var(--border)] bg-[var(--bg-surface)] p-4 rounded-none">
+        <article className="border border-[var(--border)] bg-[var(--bg-surface)] p-3.5 sm:p-4 rounded-none">
           <div className="flex items-center gap-2 mb-2">
             <span className="h-1.5 w-1.5 bg-blue-500 shrink-0" />
-            <h3 className="font-mono text-[10px] uppercase tracking-wider text-[var(--text-muted)] font-semibold">
+            <h3 className="font-mono text-[9px] sm:text-[10px] uppercase tracking-wider text-[var(--text-muted)] font-semibold">
               03 · Regional Participation
             </h3>
           </div>
@@ -186,7 +186,7 @@ export default async function AnalysisOverviewPage() {
       </section>
 
       {/* Power Distribution Charts */}
-      <section className="grid gap-6 lg:grid-cols-2">
+      <section className="grid gap-4 sm:gap-6 lg:grid-cols-2">
         <HorizontalBarChart
           title="Parliamentary Seats by Party"
           data={partyData}
@@ -207,7 +207,7 @@ export default async function AnalysisOverviewPage() {
       </section>
 
       {/* Histograms: Turnout & Winning Margin Distributions */}
-      <section className="grid gap-6 lg:grid-cols-2">
+      <section className="grid gap-4 sm:gap-6 lg:grid-cols-2">
         <HistogramChart
           title="Constituency Voter Turnout Distribution"
           data={turnoutBuckets}
@@ -227,7 +227,7 @@ export default async function AnalysisOverviewPage() {
       </section>
 
       {/* Methodological Guidance Panels */}
-      <section className="grid gap-6 lg:grid-cols-2">
+      <section className="grid gap-4 sm:gap-6 lg:grid-cols-2">
         <Panel
           title="Turnout Distribution Dynamics"
           subtitle="Interpreting voter participation spread"

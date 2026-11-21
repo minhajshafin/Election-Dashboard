@@ -47,39 +47,39 @@ export default async function CorrelationPage() {
       </section>
 
       {/* Top Positive and Negative Associations */}
-      <section className="grid gap-6 lg:grid-cols-2">
+      <section className="grid gap-4 sm:gap-6 lg:grid-cols-2">
         {/* Positive Pairings */}
-        <article className="border border-[var(--border)] bg-[var(--bg-surface)] p-5 rounded-none">
-          <div className="flex items-center justify-between border-b border-[var(--border-subtle)] pb-3">
+        <article className="border border-[var(--border)] bg-[var(--bg-surface)] p-3.5 sm:p-5 rounded-none w-full max-w-full overflow-hidden">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-[var(--border-subtle)] pb-2.5 sm:pb-3 gap-1 sm:gap-2">
             <div className="flex items-center gap-2">
               <span className="h-2 w-2 bg-emerald-500 shrink-0" />
-              <h2 className="font-mono text-[11px] uppercase tracking-[0.16em] font-semibold text-[var(--text-primary)]">
+              <h2 className="font-mono text-[10px] sm:text-[11px] uppercase tracking-[0.16em] font-semibold text-[var(--text-primary)]">
                 Highest Positive Linear Associations
               </h2>
             </div>
-            <span className="font-mono text-[10px] text-emerald-600 dark:text-emerald-400 font-bold uppercase tracking-wider">
+            <span className="font-mono text-[9px] sm:text-[10px] text-emerald-600 dark:text-emerald-400 font-bold uppercase tracking-wider">
               r &gt; 0
             </span>
           </div>
 
-          <div className="mt-4 space-y-2.5">
+          <div className="mt-3.5 sm:mt-4 space-y-2 sm:space-y-2.5">
             {topPositive.map((pair) => (
               <div
                 key={`${pair.left}-${pair.right}`}
-                className="flex items-center justify-between p-3 border border-[var(--border-subtle)] bg-[var(--bg-subtle)]/40 hover:bg-[var(--bg-subtle)] transition-colors rounded-none"
+                className="flex items-center justify-between p-2.5 sm:p-3 border border-[var(--border-subtle)] bg-[var(--bg-subtle)]/40 hover:bg-[var(--bg-subtle)] transition-colors rounded-none"
               >
-                <div className="min-w-0 pr-3">
-                  <p className="font-sans text-xs font-semibold text-[var(--text-primary)] truncate">
+                <div className="min-w-0 flex-1 pr-2">
+                  <p className="font-sans text-xs font-semibold text-[var(--text-primary)] truncate" title={`${getAnalysisLabel(pair.left)} and ${getAnalysisLabel(pair.right)}`}>
                     {getAnalysisLabel(pair.left)}{" "}
                     <span className="text-[var(--text-muted)] font-normal">and</span>{" "}
                     {getAnalysisLabel(pair.right)}
                   </p>
-                  <p className="mt-0.5 font-mono text-[10px] text-[var(--text-muted)]">
+                  <p className="mt-0.5 font-mono text-[9px] sm:text-[10px] text-[var(--text-muted)] truncate">
                     Positive co-movement across 300 constituencies
                   </p>
                 </div>
-                <div className="shrink-0 text-right">
-                  <span className="font-mono text-xs font-bold text-emerald-600 dark:text-emerald-400 tabular-nums px-2 py-0.5 bg-emerald-500/10 border border-emerald-500/20">
+                <div className="shrink-0 text-right ml-2">
+                  <span className="font-mono text-[11px] sm:text-xs font-bold text-emerald-600 dark:text-emerald-400 tabular-nums px-2 py-0.5 bg-emerald-500/10 border border-emerald-500/20 inline-block">
                     +{pair.value.toFixed(3)}
                   </span>
                 </div>
@@ -89,37 +89,37 @@ export default async function CorrelationPage() {
         </article>
 
         {/* Negative Pairings */}
-        <article className="border border-[var(--border)] bg-[var(--bg-surface)] p-5 rounded-none">
-          <div className="flex items-center justify-between border-b border-[var(--border-subtle)] pb-3">
+        <article className="border border-[var(--border)] bg-[var(--bg-surface)] p-3.5 sm:p-5 rounded-none w-full max-w-full overflow-hidden">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-[var(--border-subtle)] pb-2.5 sm:pb-3 gap-1 sm:gap-2">
             <div className="flex items-center gap-2">
               <span className="h-2 w-2 bg-red-500 shrink-0" />
-              <h2 className="font-mono text-[11px] uppercase tracking-[0.16em] font-semibold text-[var(--text-primary)]">
+              <h2 className="font-mono text-[10px] sm:text-[11px] uppercase tracking-[0.16em] font-semibold text-[var(--text-primary)]">
                 Strongest Inverse Relationships
               </h2>
             </div>
-            <span className="font-mono text-[10px] text-red-600 dark:text-red-400 font-bold uppercase tracking-wider">
+            <span className="font-mono text-[9px] sm:text-[10px] text-red-600 dark:text-red-400 font-bold uppercase tracking-wider">
               r &lt; 0
             </span>
           </div>
 
-          <div className="mt-4 space-y-2.5">
+          <div className="mt-3.5 sm:mt-4 space-y-2 sm:space-y-2.5">
             {topNegative.map((pair) => (
               <div
                 key={`${pair.left}-${pair.right}`}
-                className="flex items-center justify-between p-3 border border-[var(--border-subtle)] bg-[var(--bg-subtle)]/40 hover:bg-[var(--bg-subtle)] transition-colors rounded-none"
+                className="flex items-center justify-between p-2.5 sm:p-3 border border-[var(--border-subtle)] bg-[var(--bg-subtle)]/40 hover:bg-[var(--bg-subtle)] transition-colors rounded-none"
               >
-                <div className="min-w-0 pr-3">
-                  <p className="font-sans text-xs font-semibold text-[var(--text-primary)] truncate">
+                <div className="min-w-0 flex-1 pr-2">
+                  <p className="font-sans text-xs font-semibold text-[var(--text-primary)] truncate" title={`${getAnalysisLabel(pair.left)} vs. ${getAnalysisLabel(pair.right)}`}>
                     {getAnalysisLabel(pair.left)}{" "}
                     <span className="text-[var(--text-muted)] font-normal">vs.</span>{" "}
                     {getAnalysisLabel(pair.right)}
                   </p>
-                  <p className="mt-0.5 font-mono text-[10px] text-[var(--text-muted)]">
+                  <p className="mt-0.5 font-mono text-[9px] sm:text-[10px] text-[var(--text-muted)] truncate">
                     Inverse trade-off across electoral returns
                   </p>
                 </div>
-                <div className="shrink-0 text-right">
-                  <span className="font-mono text-xs font-bold text-red-600 dark:text-red-400 tabular-nums px-2 py-0.5 bg-red-500/10 border border-red-500/20">
+                <div className="shrink-0 text-right ml-2">
+                  <span className="font-mono text-[11px] sm:text-xs font-bold text-red-600 dark:text-red-400 tabular-nums px-2 py-0.5 bg-red-500/10 border border-red-500/20 inline-block">
                     {pair.value.toFixed(3)}
                   </span>
                 </div>

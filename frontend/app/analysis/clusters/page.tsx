@@ -180,27 +180,30 @@ export default async function ClustersPage() {
   return (
     <div className="space-y-4">
       {/* 5 Socioeconomic Archetype Dossier Cards */}
-      <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
-        {CLUSTER_PROFILES.map((profile) => {
+      <section className="grid gap-2.5 sm:gap-3 grid-cols-1 sm:grid-cols-2 xl:grid-cols-5">
+        {CLUSTER_PROFILES.map((profile, idx) => {
           const partyStats = PARTY_BY_CLUSTER.find((row) => row.cluster === profile.cluster);
           const dominant = partyStats ? dominantParty(partyStats) : { name: "N/A", sharePct: 0 };
           const color = CLUSTER_COLORS[profile.cluster];
+          const isLast = idx === CLUSTER_PROFILES.length - 1;
 
           return (
             <article
               key={profile.cluster}
-              className="border border-[var(--border)] bg-[var(--bg-surface)] p-4 rounded-none transition-all hover:border-[var(--border-active)]"
+              className={`border border-[var(--border)] bg-[var(--bg-surface)] p-3.5 sm:p-4 rounded-none transition-all hover:border-[var(--border-active)] ${
+                isLast ? "sm:col-span-2 xl:col-span-1" : ""
+              }`}
             >
               <div className="flex items-center justify-between">
-                <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-[var(--text-muted)]">
+                <span className="font-mono text-[9px] sm:text-[10px] uppercase tracking-[0.16em] text-[var(--text-muted)]">
                   Archetype {profile.cluster}
                 </span>
                 <span className="h-2 w-2 shrink-0" style={{ backgroundColor: color }} />
               </div>
-              <p className="mt-2 font-serif text-sm font-bold text-[var(--text-primary)]">
+              <p className="mt-1.5 sm:mt-2 font-serif text-sm font-bold text-[var(--text-primary)]">
                 {profile.label}
               </p>
-              <div className="mt-3 space-y-1 font-mono text-[11px] text-[var(--text-secondary)] border-t border-[var(--border-subtle)] pt-2">
+              <div className="mt-2.5 sm:mt-3 space-y-1 font-mono text-[10px] sm:text-[11px] text-[var(--text-secondary)] border-t border-[var(--border-subtle)] pt-2">
                 <div className="flex justify-between">
                   <span className="text-[var(--text-muted)]">Seats:</span>
                   <span className="font-bold text-[var(--text-primary)]">{profile.n}</span>
@@ -224,7 +227,7 @@ export default async function ClustersPage() {
       </section>
 
       {/* Signature Radar & Grouped Political Control */}
-      <section className="grid gap-6 lg:grid-cols-2">
+      <section className="grid gap-4 sm:gap-6 lg:grid-cols-2">
         <RadarComparison
           title="Socioeconomic Signature Radar (K-Means Normalized)"
           axes={axes}
@@ -260,7 +263,7 @@ export default async function ClustersPage() {
       </section>
 
       {/* Editorial Typology Takeaways */}
-      <section className="grid gap-6 lg:grid-cols-2">
+      <section className="grid gap-4 sm:gap-6 lg:grid-cols-2">
         <Panel
           title="Cluster Characteristics & Polarization"
           subtitle="How demographic clusters define election battlegrounds"

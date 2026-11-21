@@ -55,7 +55,7 @@ export default async function ClassificationPage() {
       />
 
       {/* Main Analysis: Feature Importance & Confusion Matrix */}
-      <section className="grid gap-6 lg:grid-cols-2">
+      <section className="grid gap-4 sm:gap-6 lg:grid-cols-2">
         <HorizontalBarChart
           title="Random Forest Feature Importance Weights"
           data={featureData}
@@ -68,37 +68,37 @@ export default async function ClassificationPage() {
         />
 
         {/* Confusion Matrix Card */}
-        <article className="border border-[var(--border)] bg-[var(--bg-surface)] p-5 rounded-none flex flex-col justify-between">
+        <article className="border border-[var(--border)] bg-[var(--bg-surface)] p-3.5 sm:p-5 rounded-none flex flex-col justify-between">
           <div>
-            <div className="flex items-center justify-between border-b border-[var(--border-subtle)] pb-3">
-              <h2 className="font-mono text-[11px] uppercase tracking-[0.16em] font-semibold text-[var(--text-primary)]">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-[var(--border-subtle)] pb-2.5 sm:pb-3 gap-1 sm:gap-2">
+              <h2 className="font-mono text-[10px] sm:text-[11px] uppercase tracking-[0.16em] font-semibold text-[var(--text-primary)]">
                 Classification Confusion Matrix
               </h2>
-              <span className="font-mono text-[10px] text-[var(--text-muted)] uppercase tracking-wider">
+              <span className="font-mono text-[9px] sm:text-[10px] text-[var(--text-muted)] uppercase tracking-wider">
                 Actual vs. Predicted
               </span>
             </div>
 
-            <p className="mt-2 text-xs text-[var(--text-secondary)] font-sans">
+            <p className="mt-2 text-[11px] sm:text-xs text-[var(--text-secondary)] font-sans">
               Rows represent true election winners; columns represent Random Forest ensemble predictions.
             </p>
 
-            <div className="mt-4 overflow-x-auto no-scrollbar">
+            <div className="mt-3.5 sm:mt-4 overflow-x-auto no-scrollbar">
               <div
-                className="min-w-[340px]"
+                className="w-full min-w-0"
                 style={{
                   display: "grid",
-                  gridTemplateColumns: "90px repeat(4, 1fr)",
+                  gridTemplateColumns: "minmax(65px, 85px) repeat(4, 1fr)",
                 }}
               >
                 {/* Header Row */}
-                <div className="border border-[var(--border)] bg-[var(--bg-subtle)] p-2 font-mono text-[10px] font-bold text-[var(--text-muted)] uppercase">
+                <div className="border border-[var(--border)] bg-[var(--bg-subtle)] p-1.5 sm:p-2 font-mono text-[9px] sm:text-[10px] font-bold text-[var(--text-muted)] uppercase flex items-center justify-center">
                   True \ Pred
                 </div>
                 {labels.map((label) => (
                   <div
                     key={`pred-${label}`}
-                    className="border border-[var(--border)] bg-[var(--bg-subtle)] p-2 text-center font-mono text-[10px] font-bold text-[var(--text-primary)] uppercase"
+                    className="border border-[var(--border)] bg-[var(--bg-subtle)] p-1.5 sm:p-2 text-center font-mono text-[9px] sm:text-[10px] font-bold text-[var(--text-primary)] uppercase flex items-center justify-center"
                   >
                     {label}
                   </div>
@@ -107,7 +107,7 @@ export default async function ClassificationPage() {
                 {/* Matrix Rows */}
                 {labels.map((actualLabel, rowIndex) => (
                   <Fragment key={`row-${actualLabel}`}>
-                    <div className="border border-[var(--border)] bg-[var(--bg-subtle)] p-2 font-mono text-[10px] font-bold text-[var(--text-primary)] uppercase flex items-center">
+                    <div className="border border-[var(--border)] bg-[var(--bg-subtle)] p-1.5 sm:p-2 font-mono text-[9px] sm:text-[10px] font-bold text-[var(--text-primary)] uppercase flex items-center justify-center">
                       {actualLabel}
                     </div>
                     {confusionMatrix[rowIndex].map((val, colIndex) => {
@@ -117,7 +117,7 @@ export default async function ClassificationPage() {
                       return (
                         <div
                           key={`${actualLabel}-${labels[colIndex]}`}
-                          className={`h-11 flex flex-col items-center justify-center border border-[var(--border)] font-mono text-xs font-bold tabular-nums transition-transform ${
+                          className={`h-10 sm:h-11 flex flex-col items-center justify-center border border-[var(--border)] font-mono text-[11px] sm:text-xs font-bold tabular-nums transition-transform ${
                             isDiagonal ? "ring-1 ring-[var(--border-active)] z-10" : ""
                           }`}
                           style={{
@@ -127,7 +127,7 @@ export default async function ClassificationPage() {
                         >
                           <span>{val}</span>
                           {val > 0 ? (
-                            <span className="text-[9px] opacity-75 font-normal">
+                            <span className="text-[8px] sm:text-[9px] opacity-75 font-normal">
                               ({((val / 300) * 100).toFixed(0)}%)
                             </span>
                           ) : null}
@@ -140,14 +140,14 @@ export default async function ClassificationPage() {
             </div>
           </div>
 
-          <div className="mt-4 p-3 bg-[var(--bg-subtle)] border border-[var(--border)] font-mono text-[10px] text-[var(--text-muted)] leading-relaxed">
+          <div className="mt-3.5 sm:mt-4 p-2.5 sm:p-3 bg-[var(--bg-subtle)] border border-[var(--border)] font-mono text-[9px] sm:text-[10px] text-[var(--text-muted)] leading-relaxed">
             <strong className="text-[var(--text-primary)]">Class Imbalance Insight:</strong> The model achieves high overall accuracy primarily by correctly capturing BNP victories (119/132), but struggles with minority parties due to low sample support in the training distribution.
           </div>
         </article>
       </section>
 
       {/* Methodological Context */}
-      <section className="grid gap-6 lg:grid-cols-2">
+      <section className="grid gap-4 sm:gap-6 lg:grid-cols-2">
         <Panel
           title="Gini Impurity & Feature Importance"
           subtitle="How tree splits measure predictive strength"

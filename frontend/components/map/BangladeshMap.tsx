@@ -28,6 +28,9 @@ interface BangladeshMapProps {
   mode: "election" | "referendum";
   selectedSeatKey: string | null;
   activeDivision?: string;
+  searchQuery?: string;
+  matchingDivision?: string | null;
+  matchingSeatKeys?: string[] | null;
   onSelectSeat: (seatKey: string) => void;
   onClearSelection: () => void;
 }
@@ -80,10 +83,12 @@ function FlyToActiveDivision({
   activeDivision,
   geoJson,
   getSeatForFeature,
+  isSearchActive,
 }: {
   activeDivision: string | undefined;
   geoJson: BangladeshGeoJson | null;
   getSeatForFeature: (feature?: BangladeshGeoFeature) => ConstituencyRow | null;
+  isSearchActive: boolean;
 }) {
   const map = useMap();
   const prevDivisionRef = useRef<string | undefined>(undefined);
@@ -118,7 +123,7 @@ function FlyToActiveDivision({
   }, [geoJson, getSeatForFeature]);
 
   useEffect(() => {
-    if (!geoJson || !activeDivision) {
+    if (!geoJson || !activeDivision || isSearchActive) {
       return;
     }
 
@@ -149,7 +154,86 @@ function FlyToActiveDivision({
         easeLinearity: 0.25,
       });
     }
-  }, [activeDivision, divisionBoundsMap, geoJson, map]);
+  }, [activeDivision, divisionBoundsMap, geoJson, isSearchActive, map]);
+
+  return null;
+}
+
+function FlyToSearchHighlight({
+  matchingDivision,
+  matchingDivisionFeatures,
+  matchingSeatFeatures,
+  geoJson,
+  selectedSeatKey,
+}: {
+  matchingDivision: string | null;
+  matchingDivisionFeatures: BangladeshGeoFeature[];
+  matchingSeatFeatures: BangladeshGeoFeature[];
+  geoJson: BangladeshGeoJson | null;
+  selectedSeatKey: string | null;
+}) {
+  const map = useMap();
+  const prevTargetRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    if (!geoJson) return;
+
+    // 1. Division match
+    if (matchingDivision && matchingDivisionFeatures.length > 0) {
+      const targetKey = `div:${matchingDivision.toLowerCase()}`;
+      if (prevTargetRef.current === targetKey) return;
+      prevTargetRef.current = targetKey;
+
+      const bounds = L.geoJSON({
+        type: "FeatureCollection",
+        features: matchingDivisionFeatures,
+      } as unknown as GeoJsonObject).getBounds();
+
+      if (bounds.isValid()) {
+        map.flyToBounds(bounds.pad(0.06), {
+          duration: 0.7,
+          easeLinearity: 0.25,
+        });
+      }
+      return;
+    }
+
+    // 2. Seat match (1 to 15 seats)
+    if (!matchingDivision && matchingSeatFeatures.length >= 1 && matchingSeatFeatures.length <= 15) {
+      const targetKey = `seats:${matchingSeatFeatures.map((f) => f.properties.cst).sort().join(",")}`;
+      if (prevTargetRef.current === targetKey) return;
+      prevTargetRef.current = targetKey;
+
+      const bounds = L.geoJSON({
+        type: "FeatureCollection",
+        features: matchingSeatFeatures,
+      } as unknown as GeoJsonObject).getBounds();
+
+      if (bounds.isValid()) {
+        const pad = matchingSeatFeatures.length === 1 ? 0.9 : 0.2;
+        map.flyToBounds(bounds.pad(pad), {
+          duration: 0.7,
+          easeLinearity: 0.25,
+        });
+      }
+      return;
+    }
+
+    // 3. Search was cleared -> fly back to country bounds if no seat is selected
+    if (!matchingDivision && matchingSeatFeatures.length === 0 && prevTargetRef.current !== null) {
+      prevTargetRef.current = null;
+      if (!selectedSeatKey) {
+        const countryBounds = L.geoJSON(geoJson as unknown as GeoJsonObject).getBounds();
+        if (countryBounds.isValid()) {
+          map.flyToBounds(countryBounds, {
+            padding: [4, 4],
+            duration: 0.7,
+            easeLinearity: 0.25,
+          });
+        }
+      }
+    }
+  }, [matchingDivision, matchingDivisionFeatures, matchingSeatFeatures, geoJson, map, selectedSeatKey]);
 
   return null;
 }
@@ -231,6 +315,8 @@ export function BangladeshMap({
   mode,
   selectedSeatKey,
   activeDivision,
+  matchingDivision = null,
+  matchingSeatKeys = null,
   onSelectSeat,
   onClearSelection,
 }: BangladeshMapProps) {
@@ -375,9 +461,86 @@ export function BangladeshMap({
 
   const geoJsonLayerRef = useRef<L.GeoJSON | null>(null);
 
+  const matchingDivisionFeatures = useMemo(() => {
+    if (!geoJson || !matchingDivision) {
+      return [];
+    }
+
+    return geoJson.features.filter((feature) => {
+      const seat = getSeatForFeature(feature);
+      return seat?.division.toLowerCase() === matchingDivision.toLowerCase();
+    });
+  }, [geoJson, matchingDivision, getSeatForFeature]);
+
+  const matchingSeatFeatures = useMemo(() => {
+    if (!geoJson || !matchingSeatKeys || matchingSeatKeys.length === 0) {
+      return [];
+    }
+
+    const keysSet = new Set(matchingSeatKeys);
+    return geoJson.features.filter((feature) => {
+      const seat = getSeatForFeature(feature);
+      return seat && keysSet.has(seat.seat_key);
+    });
+  }, [geoJson, matchingSeatKeys, getSeatForFeature]);
+
+  const isSearchActive = Boolean(
+    (matchingDivision && matchingDivisionFeatures.length > 0) ||
+    (matchingSeatKeys && matchingSeatKeys.length > 0)
+  );
+
+  const matchingSeatKeysSet = useMemo(() => {
+    return matchingSeatKeys && matchingSeatKeys.length > 0 ? new Set(matchingSeatKeys) : null;
+  }, [matchingSeatKeys]);
+
   const getFeatureStyle = useCallback(
     (feature?: BangladeshGeoFeature | GeoJsonObject | unknown): L.PathOptions => {
       const seat = getSeatForFeature(feature as BangladeshGeoFeature | undefined);
+      const isSelected = selectedSeatKey && seat?.seat_key === selectedSeatKey;
+
+      if (isSelected) {
+        return {
+          color: theme === "dark" ? "#ffffff" : "#000000",
+          weight: 2.0,
+          fillColor: getSeatFillColor(seat),
+          fillOpacity: 1.0,
+          opacity: 1,
+        };
+      }
+
+      if (isSearchActive) {
+        if (matchingDivision) {
+          const isDivisionMatch =
+            seat && seat.division.toLowerCase() === matchingDivision.toLowerCase();
+          return {
+            color: isDivisionMatch
+              ? (theme === "dark" ? "rgba(255,255,255,0.45)" : "rgba(0,0,0,0.4)")
+              : (theme === "dark" ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.06)"),
+            weight: isDivisionMatch ? 0.9 : 0.3,
+            fillColor: getSeatFillColor(seat),
+            fillOpacity: isDivisionMatch
+              ? (seat ? fillOpacity : emptyFillOpacity)
+              : (seat ? fillOpacity : emptyFillOpacity) * 0.12,
+            opacity: isDivisionMatch ? 1 : 0.2,
+          };
+        }
+
+        if (matchingSeatKeysSet) {
+          const isSeatMatch = seat && matchingSeatKeysSet.has(seat.seat_key);
+          return {
+            color: isSeatMatch
+              ? (theme === "dark" ? "#ffffff" : "#000000")
+              : (theme === "dark" ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.06)"),
+            weight: isSeatMatch ? 1.8 : 0.3,
+            fillColor: getSeatFillColor(seat),
+            fillOpacity: isSeatMatch
+              ? 0.95
+              : (seat ? fillOpacity : emptyFillOpacity) * 0.12,
+            opacity: isSeatMatch ? 1 : 0.2,
+          };
+        }
+      }
+
       const isOtherDivision =
         activeDivision && activeDivision !== "All Divisions" && seat && seat.division !== activeDivision;
 
@@ -391,7 +554,18 @@ export function BangladeshMap({
         opacity: isOtherDivision ? 0.35 : 1,
       };
     },
-    [activeDivision, emptyFillOpacity, fillOpacity, getSeatFillColor, getSeatForFeature, theme]
+    [
+      selectedSeatKey,
+      isSearchActive,
+      matchingDivision,
+      matchingSeatKeysSet,
+      activeDivision,
+      emptyFillOpacity,
+      fillOpacity,
+      getSeatFillColor,
+      getSeatForFeature,
+      theme,
+    ]
   );
 
   // Update styles smoothly without tearing down the GeoJSON layer
@@ -451,6 +625,14 @@ export function BangladeshMap({
             activeDivision={activeDivision}
             geoJson={geoJson}
             getSeatForFeature={getSeatForFeature}
+            isSearchActive={isSearchActive}
+          />
+          <FlyToSearchHighlight
+            matchingDivision={matchingDivision}
+            matchingDivisionFeatures={matchingDivisionFeatures}
+            matchingSeatFeatures={matchingSeatFeatures}
+            geoJson={geoJson}
+            selectedSeatKey={selectedSeatKey}
           />
           <MapZoomControls geoJson={geoJson} />
           <MapBackgroundReset onClearSelection={onClearSelection} />
@@ -522,7 +704,7 @@ export function BangladeshMap({
             }}
           />
 
-          {activeDivisionFeatures.length > 0 ? (
+          {!isSearchActive && activeDivisionFeatures.length > 0 ? (
             <GeoJSON
               key={`division-outline-${activeDivision}-${theme}`}
               data={
@@ -535,6 +717,44 @@ export function BangladeshMap({
               style={{
                 color: theme === "dark" ? "#f3f4f6" : "#0f172a",
                 weight: 1.8,
+                opacity: 1,
+                fillOpacity: 0,
+              }}
+            />
+          ) : null}
+
+          {matchingDivision && matchingDivisionFeatures.length > 0 ? (
+            <GeoJSON
+              key={`search-division-${matchingDivision}-${theme}`}
+              data={
+                {
+                  type: "FeatureCollection",
+                  features: matchingDivisionFeatures,
+                } as unknown as GeoJsonObject
+              }
+              interactive={false}
+              style={{
+                color: theme === "dark" ? "#f3f4f6" : "#0f172a",
+                weight: 2.2,
+                opacity: 1,
+                fillOpacity: 0,
+              }}
+            />
+          ) : null}
+
+          {!matchingDivision && matchingSeatFeatures.length > 0 && matchingSeatFeatures.length <= 15 ? (
+            <GeoJSON
+              key={`search-seats-${matchingSeatFeatures.map((f) => f.properties.cst).join("-")}-${theme}`}
+              data={
+                {
+                  type: "FeatureCollection",
+                  features: matchingSeatFeatures,
+                } as unknown as GeoJsonObject
+              }
+              interactive={false}
+              style={{
+                color: theme === "dark" ? "#38bdf8" : "#0284c7",
+                weight: 2.2,
                 opacity: 1,
                 fillOpacity: 0,
               }}
@@ -559,7 +779,7 @@ export function BangladeshMap({
       )}
 
       {/* Sharp Boxy Legend */}
-      <div className="absolute bottom-3 left-3 z-700 flex flex-wrap items-center gap-3 border border-[var(--border)] bg-[var(--bg-surface)] px-3 py-1.5 font-mono text-[10px] uppercase tracking-wider text-[var(--text-secondary)] shadow-sm">
+      <div className="absolute bottom-2 left-2 sm:bottom-3 sm:left-3 z-700 flex flex-wrap items-center gap-2 sm:gap-3 max-w-[calc(100%-16px)] sm:max-w-none border border-[var(--border)] bg-[var(--bg-surface)] px-2 sm:px-3 py-1 sm:py-1.5 font-mono text-[9px] sm:text-[10px] uppercase tracking-wider text-[var(--text-secondary)] shadow-sm">
         {mode === "election" ? (
           <>
             <span className="inline-flex items-center gap-1.5">

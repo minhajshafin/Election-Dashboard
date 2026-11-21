@@ -15,24 +15,26 @@ export function AnalysisSubNav() {
   const pathname = usePathname();
 
   return (
-    <nav className="flex h-9 items-center overflow-x-auto no-scrollbar">
-      {ANALYSIS_LINKS.map((link) => {
-        const isActive = pathname === link.href || pathname.startsWith(`${link.href}/`);
+    <div className="relative w-full overflow-hidden after:content-[''] after:absolute after:right-0 after:top-0 after:bottom-0 after:w-8 after:bg-gradient-to-l after:from-[var(--bg-surface)] after:to-transparent after:pointer-events-none sm:after:hidden">
+      <nav className="flex h-9 items-center overflow-x-auto no-scrollbar touch-pan-x scroll-smooth">
+        {ANALYSIS_LINKS.map((link) => {
+          const isActive = pathname === link.href || pathname.startsWith(`${link.href}/`);
 
-        return (
-          <Link
-            key={link.href}
-            href={link.href}
-            className={`group flex h-9 items-center px-3.5 font-mono text-[11px] tracking-wide transition-colors whitespace-nowrap rounded-none border-b-2 cursor-pointer ${
-              isActive
-                ? "border-[var(--text-primary)] text-[var(--text-primary)] font-medium bg-[var(--bg-subtle)]"
-                : "border-transparent text-[var(--text-muted)] hover:text-[var(--text-primary)]"
-            }`}
-          >
-            <span>{link.label}</span>
-          </Link>
-        );
-      })}
-    </nav>
+          return (
+            <Link
+              key={link.href}
+              href={link.href}
+              className={`group flex h-9 items-center px-3 sm:px-3.5 font-mono text-[10px] sm:text-[11px] tracking-wide transition-colors whitespace-nowrap rounded-none border-b-2 cursor-pointer ${
+                isActive
+                  ? "border-[var(--text-primary)] text-[var(--text-primary)] font-semibold bg-[var(--bg-subtle)]"
+                  : "border-transparent text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+              }`}
+            >
+              <span>{link.label}</span>
+            </Link>
+          );
+        })}
+      </nav>
+    </div>
   );
 }

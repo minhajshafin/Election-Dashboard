@@ -34,6 +34,7 @@ const ANALYSIS_LABELS: Record<string, string> = {
   industry_share_pct: "Industry Employment Share (%)",
   service_share_pct: "Service Employment Share (%)",
   pucca_house_pct: "Pucca Housing (%)",
+  electricity_pct: "Electricity Access (%)",
   gender_ratio: "Gender Voter Ratio (M/F)",
   referendum_approval_pct: "Referendum Approval (%)",
 };

@@ -17,10 +17,10 @@ export function PrimaryNav() {
   const theme = useTheme();
 
   return (
-    <header className="sticky top-0 z-50 flex h-[42px] shrink-0 items-center justify-between border-b border-[var(--border)] bg-[var(--bg-surface)] px-4 sm:px-6">
-      <div className="flex h-full min-w-0 items-center gap-3 sm:gap-3.5">
-        <Link href="/" className="flex h-full items-center gap-2.5 group">
-          <div className="relative flex h-5 w-5 shrink-0 items-center justify-center">
+    <header className="sticky top-0 z-50 flex h-[42px] shrink-0 items-center justify-between border-b border-[var(--border)] bg-[var(--bg-surface)] pl-3 sm:pl-6 pr-0">
+      <div className="flex h-full min-w-0 items-center gap-2 sm:gap-3.5">
+        <Link href="/" className="flex h-full items-center gap-2 sm:gap-2.5 group min-w-0">
+          <div className="relative flex h-5 w-5 shrink-0 items-center justify-center -translate-y-[0.5px]">
             {/* Light mode: dark/black icon */}
             <Image
               src="/logo-dark.svg"
@@ -41,9 +41,10 @@ export function PrimaryNav() {
             />
           </div>
           <span
-            className="truncate text-base font-semibold tracking-tight text-[var(--text-primary)] group-hover:opacity-90 transition-opacity font-serif leading-none"
+            className="truncate text-sm sm:text-base font-semibold tracking-tight text-[var(--text-primary)] group-hover:opacity-90 transition-opacity font-serif leading-none"
           >
-            Bangladesh Election 2026
+            <span className="hidden sm:inline">Bangladesh Election 2026</span>
+            <span className="sm:hidden">BD Election 2026</span>
           </span>
         </Link>
         <span className="hidden h-3 w-px bg-[var(--border)] sm:block shrink-0" />
@@ -52,7 +53,7 @@ export function PrimaryNav() {
         </span>
       </div>
 
-      <div className="flex h-full items-center">
+      <div className="flex h-full items-center shrink-0">
         <nav className="flex h-full items-center">
           {LINKS.map((link) => {
             const normalizedPrefix = link.matchPrefix.replace(/\/$/, "") || "/";
@@ -61,12 +62,17 @@ export function PrimaryNav() {
                 ? normalizedPath === "/"
                 : normalizedPath === normalizedPrefix || normalizedPath.startsWith(`${normalizedPrefix}/`);
 
+            // On mobile, hide the link to the current active page to eliminate clutter
+            const isRedundantMobileLink = isActive && link.href === "/";
+
             return (
               <Link
                 key={link.href}
                 href={link.href}
                 aria-current={isActive ? "page" : undefined}
-                className={`relative flex h-full items-center border-l border-[var(--border)] px-4 font-mono text-[11px] uppercase tracking-wider transition-colors ${
+                className={`relative h-full items-center border-l border-[var(--border)] px-2.5 sm:px-4 font-mono text-[10px] sm:text-[11px] uppercase tracking-wider transition-colors ${
+                  isRedundantMobileLink ? "hidden sm:flex" : "flex"
+                } ${
                   isActive
                     ? "bg-[var(--bg-subtle)] text-[var(--text-primary)] font-semibold"
                     : "text-[var(--text-secondary)] hover:bg-[var(--bg-subtle)] hover:text-[var(--text-primary)]"
@@ -81,26 +87,26 @@ export function PrimaryNav() {
           })}
         </nav>
 
-        {/* Sharp Boxy Theme Toggle */}
+        {/* Sharp Boxy Theme Toggle - Perfectly centered box */}
         <button
           type="button"
           onClick={toggleThemeMode}
           aria-label="Toggle light/dark theme"
-          className="flex h-full items-center gap-1.5 border-l border-[var(--border)] px-3 font-mono text-[10px] uppercase tracking-widest text-[var(--text-secondary)] hover:bg-[var(--bg-subtle)] hover:text-[var(--text-primary)] transition-colors cursor-pointer"
+          className="flex h-full w-[42px] sm:w-auto items-center justify-center sm:gap-1.5 border-l border-[var(--border)] sm:px-3.5 font-mono text-[10px] uppercase tracking-widest text-[var(--text-secondary)] hover:bg-[var(--bg-subtle)] hover:text-[var(--text-primary)] transition-colors cursor-pointer"
         >
           {theme === "light" ? (
             <>
-              <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
+              <svg className="h-3.5 w-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
                 <path strokeLinecap="square" strokeLinejoin="miter" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
               </svg>
-              <span>Dark</span>
+              <span className="hidden sm:inline">Dark</span>
             </>
           ) : (
             <>
-              <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
+              <svg className="h-3.5 w-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
                 <path strokeLinecap="square" strokeLinejoin="miter" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
               </svg>
-              <span>Light</span>
+              <span className="hidden sm:inline">Light</span>
             </>
           )}
         </button>

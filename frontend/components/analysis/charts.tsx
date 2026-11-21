@@ -54,48 +54,55 @@ function formatMetric(value: number, decimals: number, unit: string): string {
 }
 
 export function MetricCards({ cards }: { cards: MetricCard[] }) {
+  const isOdd = cards.length % 2 === 1;
+
   return (
-    <section className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-3">
-      {cards.map((card, idx) => (
-        <article
-          key={card.label}
-          className="border border-[var(--border)] bg-[var(--bg-surface)] p-4 rounded-none transition-all hover:border-[var(--border-active)]"
-          style={{ animationDelay: `${idx * 60}ms` }}
-        >
-          <div className="flex items-center justify-between gap-2">
-            <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-[var(--text-muted)] truncate">
-              {card.label}
+    <section className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-2.5 sm:gap-3">
+      {cards.map((card, idx) => {
+        const isLastOdd = isOdd && idx === cards.length - 1;
+        return (
+          <article
+            key={card.label}
+            className={`border border-[var(--border)] bg-[var(--bg-surface)] p-3 sm:p-4 rounded-none transition-all hover:border-[var(--border-active)] ${
+              isLastOdd ? "col-span-2 md:col-span-1" : ""
+            }`}
+            style={{ animationDelay: `${idx * 60}ms` }}
+          >
+            <div className="flex items-center justify-between gap-1.5 sm:gap-2">
+              <p className="font-mono text-[9px] sm:text-[10px] uppercase tracking-[0.14em] sm:tracking-[0.16em] text-[var(--text-muted)] truncate">
+                {card.label}
+              </p>
+              <span className="h-1.5 w-1.5 bg-[var(--border)] shrink-0" />
+            </div>
+            <p className="mt-1.5 sm:mt-2 font-serif text-xl sm:text-2xl font-bold tracking-tight text-[var(--text-primary)] tabular-nums">
+              {card.value}
             </p>
-            <span className="h-1.5 w-1.5 bg-[var(--border)] shrink-0" />
-          </div>
-          <p className="mt-2 font-serif text-2xl font-bold tracking-tight text-[var(--text-primary)] tabular-nums">
-            {card.value}
-          </p>
-          {card.detail ? (
-            <p className="mt-1 font-mono text-[11px] text-[var(--text-secondary)] truncate" title={card.detail}>
-              {card.detail}
-            </p>
-          ) : null}
-        </article>
-      ))}
+            {card.detail ? (
+              <p className="mt-1 font-mono text-[10px] sm:text-[11px] text-[var(--text-secondary)] truncate" title={card.detail}>
+                {card.detail}
+              </p>
+            ) : null}
+          </article>
+        );
+      })}
     </section>
   );
 }
 
 export function Panel({ title, children, subtitle }: { title: string; children: ReactNode; subtitle?: string }) {
   return (
-    <article className="border border-[var(--border)] bg-[var(--bg-surface)] p-5 rounded-none">
-      <div className="flex items-center justify-between border-b border-[var(--border-subtle)] pb-3">
+    <article className="border border-[var(--border)] bg-[var(--bg-surface)] p-3.5 sm:p-5 rounded-none w-full max-w-full overflow-hidden">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-[var(--border-subtle)] pb-2.5 sm:pb-3 gap-1 sm:gap-2">
         <div>
-          <h2 className="font-mono text-[11px] uppercase tracking-[0.16em] font-semibold text-[var(--text-primary)]">
+          <h2 className="font-mono text-[10px] sm:text-[11px] uppercase tracking-[0.16em] font-semibold text-[var(--text-primary)]">
             {title}
           </h2>
           {subtitle ? (
-            <p className="mt-0.5 text-xs text-[var(--text-secondary)] font-sans">{subtitle}</p>
+            <p className="mt-0.5 text-[11px] sm:text-xs text-[var(--text-secondary)] font-sans">{subtitle}</p>
           ) : null}
         </div>
       </div>
-      <div className="mt-4">{children}</div>
+      <div className="mt-3.5 sm:mt-4">{children}</div>
     </article>
   );
 }
@@ -126,25 +133,25 @@ export function HorizontalBarChart({
   const fillCap = Math.min(100, Math.max(35, maxBarFillPercent));
 
   return (
-    <article className="border border-[var(--border)] bg-[var(--bg-surface)] p-5 rounded-none flex flex-col justify-between">
+    <article className="border border-[var(--border)] bg-[var(--bg-surface)] p-3.5 sm:p-5 rounded-none flex flex-col justify-between w-full max-w-full overflow-hidden">
       <div>
-        <div className="flex items-center justify-between border-b border-[var(--border-subtle)] pb-3">
-          <h2 className="font-mono text-[11px] uppercase tracking-[0.16em] font-semibold text-[var(--text-primary)]">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-[var(--border-subtle)] pb-2.5 sm:pb-3 gap-1 sm:gap-2">
+          <h2 className="font-mono text-[10px] sm:text-[11px] uppercase tracking-[0.16em] font-semibold text-[var(--text-primary)]">
             {title}
           </h2>
-          <span className="font-mono text-[10px] text-[var(--text-muted)] uppercase tracking-wider">
+          <span className="font-mono text-[9px] sm:text-[10px] text-[var(--text-muted)] uppercase tracking-wider">
             {data.length} Categories
           </span>
         </div>
 
         {xAxisLabel || yAxisLabel ? (
-          <div className="mt-3 flex items-center justify-between gap-3 font-mono text-[10px] uppercase tracking-wider text-[var(--text-muted)]">
+          <div className="mt-2.5 sm:mt-3 flex items-center justify-between gap-3 font-mono text-[9px] sm:text-[10px] uppercase tracking-wider text-[var(--text-muted)]">
             <span>{yAxisLabel ? `Axis Y: ${yAxisLabel}` : ""}</span>
             <span>{xAxisLabel ? `Axis X: ${xAxisLabel}` : ""}</span>
           </div>
         ) : null}
 
-        <div className="mt-4 space-y-2.5 overflow-y-auto" style={{ minHeight: `${height}px` }}>
+        <div className="mt-3.5 sm:mt-4 space-y-2 sm:space-y-2.5 overflow-y-auto" style={{ minHeight: `${height}px` }}>
           {data.map((item, index) => {
             const width = (Math.abs(item.value) / max) * fillCap;
             const isHovered = hoveredIdx === index;
@@ -154,18 +161,18 @@ export function HorizontalBarChart({
                 key={item.label}
                 onMouseEnter={() => setHoveredIdx(index)}
                 onMouseLeave={() => setHoveredIdx(null)}
-                className={`grid grid-cols-[minmax(130px,1.2fr)_minmax(180px,2fr)] items-center gap-3 px-2 py-1.5 transition-colors ${
+                className={`grid grid-cols-[minmax(95px,1.1fr)_minmax(110px,1.9fr)] sm:grid-cols-[minmax(130px,1.2fr)_minmax(180px,2fr)] items-center gap-2 sm:gap-3 px-1.5 sm:px-2 py-1 sm:py-1.5 transition-colors ${
                   isHovered ? "bg-[var(--bg-subtle)]" : "hover:bg-[var(--bg-subtle)]/50"
                 }`}
               >
                 <span
-                  className="truncate font-sans text-xs font-medium text-[var(--text-primary)]"
+                  className="truncate font-sans text-[11px] sm:text-xs font-medium text-[var(--text-primary)]"
                   title={item.label}
                 >
                   {item.label}
                 </span>
 
-                <div className="relative h-6 bg-[var(--bg-subtle)] border border-[var(--border-subtle)] rounded-none overflow-hidden">
+                <div className="relative h-5 sm:h-6 bg-[var(--bg-subtle)] border border-[var(--border-subtle)] rounded-none overflow-hidden">
                   <div
                     className="absolute inset-y-0 left-0 animate-bar-x transition-all duration-700 ease-out"
                     style={{
@@ -175,7 +182,7 @@ export function HorizontalBarChart({
                       opacity: isHovered ? 1 : 0.9,
                     }}
                   />
-                  <span className="absolute inset-y-0 right-2 flex items-center font-mono text-[11px] font-bold text-[var(--text-primary)] tabular-nums">
+                  <span className="absolute inset-y-0 right-2 flex items-center font-mono text-[10px] sm:text-[11px] font-bold text-[var(--text-primary)] tabular-nums">
                     {item.valueLabel ?? formatMetric(item.value, valueDecimals, valueUnit)}
                   </span>
                 </div>
@@ -212,27 +219,27 @@ export function VerticalBarChart({
   const barAreaHeight = Math.max(height - 110, 160);
 
   return (
-    <article className="border border-[var(--border)] bg-[var(--bg-surface)] p-5 rounded-none flex flex-col justify-between">
-      <div className="flex items-center justify-between border-b border-[var(--border-subtle)] pb-3">
-        <h2 className="font-mono text-[11px] uppercase tracking-[0.16em] font-semibold text-[var(--text-primary)]">
+    <article className="border border-[var(--border)] bg-[var(--bg-surface)] p-3.5 sm:p-5 rounded-none flex flex-col justify-between w-full max-w-full overflow-hidden">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-[var(--border-subtle)] pb-2.5 sm:pb-3 gap-1 sm:gap-2">
+        <h2 className="font-mono text-[10px] sm:text-[11px] uppercase tracking-[0.16em] font-semibold text-[var(--text-primary)]">
           {title}
         </h2>
-        <span className="font-mono text-[10px] text-[var(--text-muted)] uppercase tracking-wider">
+        <span className="font-mono text-[9px] sm:text-[10px] text-[var(--text-muted)] uppercase tracking-wider">
           {xAxisLabel}
         </span>
       </div>
 
       <div className="mt-4 overflow-x-auto no-scrollbar">
-        <div className="relative min-w-[340px]" style={{ height: `${height}px` }}>
+        <div className="relative w-full min-w-0" style={{ height: `${height}px` }}>
           <p
-            className="absolute left-0 top-1/2 -translate-y-1/2 -rotate-90 whitespace-nowrap font-mono text-[10px] uppercase tracking-wider text-[var(--text-muted)]"
+            className="absolute left-0 top-1/2 -translate-y-1/2 -rotate-90 whitespace-nowrap font-mono text-[9px] sm:text-[10px] uppercase tracking-wider text-[var(--text-muted)]"
             style={{ transformOrigin: "left top" }}
           >
             {yAxisLabel}
           </p>
 
-          <div className="absolute bottom-9 left-10 right-2 top-2 border-b border-l border-[var(--border)]">
-            <div className="flex h-full items-end justify-between gap-2 px-2 pb-0">
+          <div className="absolute bottom-8 sm:bottom-9 left-7 sm:left-10 right-1 sm:right-2 top-2 border-b border-l border-[var(--border)]">
+            <div className="flex h-full items-end justify-between gap-1 sm:gap-2 px-1 sm:px-2 pb-0">
               {data.map((item, index) => {
                 const barHeight = (item.value / max) * barAreaHeight;
                 const isHovered = hoveredIndex === index;
@@ -240,19 +247,20 @@ export function VerticalBarChart({
                 return (
                   <div
                     key={item.label}
+                    onClick={() => setHoveredIndex(hoveredIndex === index ? null : index)}
                     onMouseEnter={() => setHoveredIndex(index)}
                     onMouseLeave={() => setHoveredIndex(null)}
                     className="flex flex-1 flex-col items-center justify-end h-full group cursor-pointer"
                   >
                     <span
-                      className={`font-mono text-[10px] font-bold text-[var(--text-primary)] mb-1 transition-opacity tabular-nums ${
+                      className={`font-mono text-[9px] sm:text-[10px] font-bold text-[var(--text-primary)] mb-1 transition-opacity tabular-nums ${
                         isHovered ? "opacity-100" : "opacity-80"
                       }`}
                     >
                       {item.valueLabel ?? formatMetric(item.value, valueDecimals, valueUnit)}
                     </span>
                     <div
-                      className="w-full max-w-[40px] animate-bar-y transition-all duration-500 rounded-none"
+                      className="w-full max-w-[28px] sm:max-w-[40px] animate-bar-y transition-all duration-500 rounded-none"
                       style={{
                         height: `${Math.max(barHeight, 3)}px`,
                         backgroundColor: item.color ?? defaultColor,
@@ -261,7 +269,7 @@ export function VerticalBarChart({
                       }}
                     />
                     <span
-                      className="w-full mt-2 truncate text-center font-mono text-[10px] text-[var(--text-muted)] group-hover:text-[var(--text-primary)] transition-colors"
+                      className="w-full mt-1.5 sm:mt-2 truncate text-center font-mono text-[8px] sm:text-[10px] text-[var(--text-muted)] group-hover:text-[var(--text-primary)] transition-colors"
                       title={item.label}
                     >
                       {item.label}
@@ -272,7 +280,7 @@ export function VerticalBarChart({
             </div>
           </div>
 
-          <p className="absolute bottom-0 left-1/2 -translate-x-1/2 font-mono text-[10px] uppercase tracking-wider text-[var(--text-muted)]">
+          <p className="absolute bottom-0 left-1/2 -translate-x-1/2 font-mono text-[9px] sm:text-[10px] uppercase tracking-wider text-[var(--text-muted)]">
             {xAxisLabel}
           </p>
         </div>
@@ -301,27 +309,27 @@ export function HistogramChart({
   const barAreaHeight = Math.max(height - 110, 160);
 
   return (
-    <article className="border border-[var(--border)] bg-[var(--bg-surface)] p-5 rounded-none flex flex-col justify-between">
-      <div className="flex items-center justify-between border-b border-[var(--border-subtle)] pb-3">
-        <h2 className="font-mono text-[11px] uppercase tracking-[0.16em] font-semibold text-[var(--text-primary)]">
+    <article className="border border-[var(--border)] bg-[var(--bg-surface)] p-3.5 sm:p-5 rounded-none flex flex-col justify-between w-full max-w-full overflow-hidden">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-[var(--border-subtle)] pb-2.5 sm:pb-3 gap-1 sm:gap-2">
+        <h2 className="font-mono text-[10px] sm:text-[11px] uppercase tracking-[0.16em] font-semibold text-[var(--text-primary)]">
           {title}
         </h2>
-        <span className="font-mono text-[10px] text-[var(--text-muted)] uppercase tracking-wider">
+        <span className="font-mono text-[9px] sm:text-[10px] text-[var(--text-muted)] uppercase tracking-wider">
           Histogram ({data.length} Bins)
         </span>
       </div>
 
-      <div className="mt-4 overflow-x-auto no-scrollbar">
-        <div className="relative min-w-[340px]" style={{ height: `${height}px` }}>
+      <div className="mt-4 overflow-x-auto no-scrollbar touch-pan-x">
+        <div className="relative min-w-[300px] sm:min-w-[340px]" style={{ height: `${height}px` }}>
           <p
-            className="absolute left-0 top-1/2 -translate-y-1/2 -rotate-90 whitespace-nowrap font-mono text-[10px] uppercase tracking-wider text-[var(--text-muted)]"
+            className="absolute left-0 top-1/2 -translate-y-1/2 -rotate-90 whitespace-nowrap font-mono text-[9px] sm:text-[10px] uppercase tracking-wider text-[var(--text-muted)]"
             style={{ transformOrigin: "left top" }}
           >
             {yAxisLabel}
           </p>
 
-          <div className="absolute bottom-9 left-10 right-2 top-2 border-b border-l border-[var(--border)]">
-            <div className="flex h-full items-end gap-1.5 px-1 pb-0">
+          <div className="absolute bottom-8 sm:bottom-9 left-7 sm:left-10 right-1 sm:right-2 top-2 border-b border-l border-[var(--border)]">
+            <div className="flex h-full items-end gap-1 sm:gap-1.5 px-0.5 sm:px-1 pb-0">
               {data.map((item, index) => {
                 const barHeight = (item.count / max) * barAreaHeight;
                 const isHovered = hoveredIndex === index;
@@ -329,12 +337,13 @@ export function HistogramChart({
                 return (
                   <div
                     key={item.label}
+                    onClick={() => setHoveredIndex(hoveredIndex === index ? null : index)}
                     onMouseEnter={() => setHoveredIndex(index)}
                     onMouseLeave={() => setHoveredIndex(null)}
                     className="flex flex-1 flex-col items-center justify-end h-full group cursor-pointer"
                   >
                     <span
-                      className={`font-mono text-[10px] font-bold text-[var(--text-primary)] mb-1 tabular-nums transition-opacity ${
+                      className={`font-mono text-[9px] sm:text-[10px] font-bold text-[var(--text-primary)] mb-1 tabular-nums transition-opacity ${
                         isHovered ? "opacity-100" : "opacity-75"
                       }`}
                     >
@@ -350,7 +359,7 @@ export function HistogramChart({
                       }}
                     />
                     <span
-                      className="w-full mt-2 truncate text-center font-mono text-[9px] text-[var(--text-muted)] group-hover:text-[var(--text-primary)] transition-colors"
+                      className="w-full mt-1.5 sm:mt-2 truncate text-center font-mono text-[8px] sm:text-[9px] text-[var(--text-muted)] group-hover:text-[var(--text-primary)] transition-colors"
                       title={item.label}
                     >
                       {item.label}
@@ -361,7 +370,7 @@ export function HistogramChart({
             </div>
           </div>
 
-          <p className="absolute bottom-0 left-1/2 -translate-x-1/2 font-mono text-[10px] uppercase tracking-wider text-[var(--text-muted)]">
+          <p className="absolute bottom-0 left-1/2 -translate-x-1/2 font-mono text-[9px] sm:text-[10px] uppercase tracking-wider text-[var(--text-muted)]">
             {xAxisLabel}
           </p>
         </div>
@@ -416,45 +425,45 @@ export function CorrelationHeatmap({
   }
 
   return (
-    <article className="border border-[var(--border)] bg-[var(--bg-surface)] p-5 rounded-none" style={{ minHeight: height }}>
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-[var(--border-subtle)] pb-3 gap-2">
+    <article className="border border-[var(--border)] bg-[var(--bg-surface)] p-3.5 sm:p-5 rounded-none w-full max-w-full overflow-hidden" style={{ minHeight: height }}>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-[var(--border-subtle)] pb-2.5 sm:pb-3 gap-2">
         <div>
-          <h2 className="font-mono text-[11px] uppercase tracking-[0.16em] font-semibold text-[var(--text-primary)]">
+          <h2 className="font-mono text-[10px] sm:text-[11px] uppercase tracking-[0.16em] font-semibold text-[var(--text-primary)]">
             {title}
           </h2>
-          <p className="mt-0.5 text-xs text-[var(--text-secondary)] font-sans">
+          <p className="mt-0.5 text-[11px] sm:text-xs text-[var(--text-secondary)] font-sans">
             Pairwise Pearson coefficient (r) measuring linear association between electoral and demographic attributes.
           </p>
         </div>
 
         {/* Legend */}
-        <div className="flex items-center gap-4 font-mono text-[10px] uppercase text-[var(--text-muted)]">
+        <div className="flex flex-wrap items-center gap-3 sm:gap-4 font-mono text-[9px] sm:text-[10px] uppercase text-[var(--text-muted)]">
           <div className="flex items-center gap-1.5">
-            <span className="h-3 w-3 bg-[#dc2626]/85 inline-block" />
+            <span className="h-2.5 w-2.5 sm:h-3 sm:w-3 bg-[#dc2626]/85 inline-block" />
             <span>r = -1.0</span>
           </div>
           <div className="flex items-center gap-1.5">
-            <span className="h-3 w-3 bg-[var(--bg-subtle)] border border-[var(--border)] inline-block" />
+            <span className="h-2.5 w-2.5 sm:h-3 sm:w-3 bg-[var(--bg-subtle)] border border-[var(--border)] inline-block" />
             <span>0.0</span>
           </div>
           <div className="flex items-center gap-1.5">
-            <span className="h-3 w-3 bg-[#059669]/85 inline-block" />
+            <span className="h-2.5 w-2.5 sm:h-3 sm:w-3 bg-[#059669]/85 inline-block" />
             <span>r = +1.0</span>
           </div>
         </div>
       </div>
 
       {/* Active Inspector Callout Banner */}
-      <div className="mt-3 min-h-[38px] px-3 py-2 bg-[var(--bg-subtle)] border border-[var(--border)] flex items-center justify-between text-xs">
+      <div className="mt-3 min-h-[38px] px-2.5 sm:px-3 py-1.5 sm:py-2 bg-[var(--bg-subtle)] border border-[var(--border)] flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 sm:gap-2 text-xs">
         {activeCell ? (
-          <div className="flex items-center justify-between w-full">
-            <div className="flex items-center gap-2 font-mono">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between w-full gap-1.5 sm:gap-2">
+            <div className="flex items-center gap-1.5 sm:gap-2 font-mono text-[11px] sm:text-xs">
               <span className="font-semibold text-[var(--text-primary)]">{getAnalysisLabel(activeCell.left)}</span>
               <span className="text-[var(--text-muted)]">×</span>
               <span className="font-semibold text-[var(--text-primary)]">{getAnalysisLabel(activeCell.right)}</span>
             </div>
-            <div className="flex items-center gap-3 font-mono">
-              <span className="text-[10px] uppercase tracking-wider text-[var(--text-muted)]">
+            <div className="flex items-center gap-2 sm:gap-3 font-mono">
+              <span className="text-[9px] sm:text-[10px] uppercase tracking-wider text-[var(--text-muted)]">
                 {getCorrelationVerdict(activeCell.value)}
               </span>
               <span
@@ -471,23 +480,23 @@ export function CorrelationHeatmap({
             </div>
           </div>
         ) : (
-          <p className="font-mono text-[11px] text-[var(--text-muted)]">
-            Hover over any cell in the matrix to inspect exact coefficients and qualitative strength.
+          <p className="font-mono text-[10px] sm:text-[11px] text-[var(--text-muted)]">
+            Tap or hover over any cell in the matrix to inspect exact coefficients and qualitative strength.
           </p>
         )}
       </div>
 
-      {/* Matrix Table */}
-      <div className="mt-3 overflow-x-auto no-scrollbar" style={{ minHeight: height }}>
-        <div className="min-w-[680px]">
+      {/* Matrix Table with Sticky Row Label Column */}
+      <div className="mt-3 overflow-x-auto no-scrollbar touch-pan-x" style={{ minHeight: height }}>
+        <div className="min-w-[580px] sm:min-w-[680px]">
           <div
+            className="grid"
             style={{
-              display: "grid",
-              gridTemplateColumns: `140px repeat(${columns.length}, minmax(44px, 1fr))`,
+              gridTemplateColumns: `minmax(115px, 140px) repeat(${columns.length}, minmax(40px, 1fr))`,
             }}
           >
-            {/* Header row */}
-            <div className="p-2 font-mono text-[10px] text-[var(--text-muted)] uppercase tracking-wider border-b border-r border-[var(--border)]">
+            {/* Header row - Top Left Cell is sticky */}
+            <div className="sticky left-0 z-20 bg-[var(--bg-surface)] p-2 font-mono text-[9px] sm:text-[10px] text-[var(--text-muted)] uppercase tracking-wider border-b border-r border-[var(--border)] shadow-[1px_0_0_0_var(--border)]">
               Feature Matrix
             </div>
             {columns.map((col) => {
@@ -495,7 +504,7 @@ export function CorrelationHeatmap({
               return (
                 <div
                   key={`col-${col}`}
-                  className={`p-1.5 text-center font-mono text-[9px] uppercase tracking-wider border-b border-r border-[var(--border)] truncate ${
+                  className={`p-1.5 text-center font-mono text-[8px] sm:text-[9px] uppercase tracking-wider border-b border-r border-[var(--border)] truncate ${
                     isTargetCol
                       ? "bg-[var(--bg-subtle)] text-[var(--text-primary)] font-bold"
                       : "text-[var(--text-secondary)]"
@@ -512,8 +521,9 @@ export function CorrelationHeatmap({
               const isTargetRow = rowFeature === highlightKey;
               return (
                 <Fragment key={`row-${rowFeature}`}>
+                  {/* Sticky Row Label Cell */}
                   <div
-                    className={`p-2 font-mono text-[10px] border-b border-r border-[var(--border)] truncate ${
+                    className={`sticky left-0 z-20 bg-[var(--bg-surface)] p-2 font-mono text-[9px] sm:text-[10px] border-b border-r border-[var(--border)] shadow-[1px_0_0_0_var(--border)] truncate ${
                       isTargetRow
                         ? "bg-[var(--bg-subtle)] text-[var(--text-primary)] font-bold"
                         : "text-[var(--text-secondary)]"
@@ -530,6 +540,19 @@ export function CorrelationHeatmap({
                     return (
                       <div
                         key={`cell-${rowIndex}-${colIndex}`}
+                        onClick={() =>
+                          setActiveCell(
+                            activeCell?.row === rowIndex && activeCell?.col === colIndex
+                              ? null
+                              : {
+                                  row: rowIndex,
+                                  col: colIndex,
+                                  value: val,
+                                  left: rowFeature,
+                                  right: columns[colIndex],
+                                }
+                          )
+                        }
                         onMouseEnter={() =>
                           setActiveCell({
                             row: rowIndex,
@@ -540,7 +563,7 @@ export function CorrelationHeatmap({
                           })
                         }
                         onMouseLeave={() => setActiveCell(null)}
-                        className={`h-9 flex items-center justify-center font-mono text-[10px] font-bold border-b border-r border-[var(--border-subtle)] transition-transform cursor-pointer select-none ${
+                        className={`h-9 flex items-center justify-center font-mono text-[9px] sm:text-[10px] font-bold border-b border-r border-[var(--border-subtle)] transition-transform cursor-pointer select-none ${
                           isHovered ? "scale-105 z-10 shadow-sm border-[var(--border-active)]" : ""
                         }`}
                         style={{
@@ -587,13 +610,13 @@ export function DivergingBarChart({
   const max = Math.max(...data.map((item) => Math.abs(item.value)), 0.001);
 
   return (
-    <article className="border border-[var(--border)] bg-[var(--bg-surface)] p-5 rounded-none flex flex-col justify-between">
+    <article className="border border-[var(--border)] bg-[var(--bg-surface)] p-3.5 sm:p-5 rounded-none flex flex-col justify-between w-full max-w-full overflow-hidden">
       <div>
-        <div className="flex items-center justify-between border-b border-[var(--border-subtle)] pb-3">
-          <h2 className="font-mono text-[11px] uppercase tracking-[0.16em] font-semibold text-[var(--text-primary)]">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-[var(--border-subtle)] pb-2.5 sm:pb-3 gap-1 sm:gap-2">
+          <h2 className="font-mono text-[10px] sm:text-[11px] uppercase tracking-[0.16em] font-semibold text-[var(--text-primary)]">
             {title}
           </h2>
-          <div className="flex items-center gap-3 font-mono text-[10px] uppercase text-[var(--text-muted)]">
+          <div className="flex flex-wrap items-center gap-2.5 sm:gap-3 font-mono text-[9px] sm:text-[10px] uppercase text-[var(--text-muted)]">
             <span className="flex items-center gap-1">
               <span className="h-2 w-2 inline-block bg-emerald-500" /> Positive Impact
             </span>
@@ -604,13 +627,13 @@ export function DivergingBarChart({
         </div>
 
         {xAxisLabel || yAxisLabel ? (
-          <div className="mt-3 flex items-center justify-between gap-3 font-mono text-[10px] uppercase tracking-wider text-[var(--text-muted)]">
+          <div className="mt-2.5 sm:mt-3 flex items-center justify-between gap-3 font-mono text-[9px] sm:text-[10px] uppercase tracking-wider text-[var(--text-muted)]">
             <span>{yAxisLabel ? `Feature: ${yAxisLabel}` : ""}</span>
             <span>{xAxisLabel ? `Impact: ${xAxisLabel}` : ""}</span>
           </div>
         ) : null}
 
-        <div className="mt-4 space-y-2.5 overflow-y-auto" style={{ minHeight: `${height}px` }}>
+        <div className="mt-3.5 sm:mt-4 space-y-2 sm:space-y-2.5 overflow-y-auto" style={{ minHeight: `${height}px` }}>
           {data.map((item, index) => {
             const isPositive = item.value >= 0;
             const widthPct = (Math.abs(item.value) / max) * 48; // max 48% on each side of zero
@@ -621,19 +644,19 @@ export function DivergingBarChart({
                 key={item.label}
                 onMouseEnter={() => setHoveredIdx(index)}
                 onMouseLeave={() => setHoveredIdx(null)}
-                className={`grid grid-cols-[140px_1fr_70px] items-center gap-2 px-2 py-1.5 transition-colors ${
+                className={`grid grid-cols-[100px_1fr_55px] sm:grid-cols-[140px_1fr_70px] items-center gap-2 px-1.5 sm:px-2 py-1 sm:py-1.5 transition-colors ${
                   isHovered ? "bg-[var(--bg-subtle)]" : "hover:bg-[var(--bg-subtle)]/50"
                 }`}
               >
                 <span
-                  className="truncate font-sans text-xs font-medium text-[var(--text-primary)]"
+                  className="truncate font-sans text-[11px] sm:text-xs font-medium text-[var(--text-primary)]"
                   title={item.label}
                 >
                   {item.label}
                 </span>
 
                 {/* Split canvas with center zero axis */}
-                <div className="relative h-6 bg-[var(--bg-subtle)] border border-[var(--border-subtle)] flex items-center">
+                <div className="relative h-5 sm:h-6 bg-[var(--bg-subtle)] border border-[var(--border-subtle)] flex items-center">
                   {/* Center vertical dashed line */}
                   <div className="absolute left-1/2 top-0 bottom-0 w-px border-r border-dashed border-[var(--border-active)] z-10" />
 
@@ -661,7 +684,7 @@ export function DivergingBarChart({
                 </div>
 
                 <span
-                  className={`text-right font-mono text-[11px] font-bold tabular-nums ${
+                  className={`text-right font-mono text-[10px] sm:text-[11px] font-bold tabular-nums ${
                     isPositive ? "text-emerald-600 dark:text-emerald-400" : "text-red-600 dark:text-red-400"
                   }`}
                 >
@@ -727,22 +750,22 @@ export function ScatterPlot({
   const effectiveColors = groupColors ?? DEFAULT_DIVISION_COLORS;
 
   return (
-    <article className="border border-[var(--border)] bg-[var(--bg-surface)] p-5 rounded-none flex flex-col justify-between">
+    <article className="border border-[var(--border)] bg-[var(--bg-surface)] p-3.5 sm:p-5 rounded-none flex flex-col justify-between w-full max-w-full overflow-hidden">
       <div>
-        <div className="flex items-center justify-between border-b border-[var(--border-subtle)] pb-3">
-          <h2 className="font-mono text-[11px] uppercase tracking-[0.16em] font-semibold text-[var(--text-primary)]">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-[var(--border-subtle)] pb-2.5 sm:pb-3 gap-1 sm:gap-2">
+          <h2 className="font-mono text-[10px] sm:text-[11px] uppercase tracking-[0.16em] font-semibold text-[var(--text-primary)]">
             {title}
           </h2>
-          <span className="font-mono text-[10px] text-[var(--text-muted)] uppercase tracking-wider">
+          <span className="font-mono text-[9px] sm:text-[10px] text-[var(--text-muted)] uppercase tracking-wider">
             {cleanData.length} Constituencies
           </span>
         </div>
 
-        {/* Hover Inspector Card */}
-        <div className="mt-3 min-h-[34px] px-3 py-1.5 bg-[var(--bg-subtle)] border border-[var(--border)] flex items-center justify-between text-xs">
+        {/* Hover / Tap Inspector Card */}
+        <div className="mt-3 min-h-[34px] px-2.5 sm:px-3 py-1.5 bg-[var(--bg-subtle)] border border-[var(--border)] flex flex-col sm:flex-row sm:items-center justify-between gap-1 sm:gap-2 text-xs">
           {hoveredPoint ? (
-            <div className="flex items-center justify-between w-full font-mono text-[11px]">
-              <div className="flex items-center gap-2">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between w-full font-mono text-[10px] sm:text-[11px] gap-1 sm:gap-2">
+              <div className="flex items-center gap-1.5 sm:gap-2">
                 <span
                   className="h-2 w-2 shrink-0"
                   style={{ backgroundColor: effectiveColors[hoveredPoint.group] ?? "#9ca3af" }}
@@ -753,7 +776,7 @@ export function ScatterPlot({
                   <span className="text-[var(--text-secondary)]">· {hoveredPoint.detail}</span>
                 ) : null}
               </div>
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2 sm:gap-3">
                 <span>
                   Actual: <b className="text-[var(--text-primary)]">{hoveredPoint.x.toFixed(1)}%</b>
                 </span>
@@ -772,8 +795,8 @@ export function ScatterPlot({
               </div>
             </div>
           ) : (
-            <p className="font-mono text-[10px] text-[var(--text-muted)]">
-              Hover over any constituency point to inspect actual vs. predicted values and residual error.
+            <p className="font-mono text-[9px] sm:text-[10px] text-[var(--text-muted)]">
+              Tap or hover over any constituency point to inspect actual vs. predicted values and residual error.
             </p>
           )}
         </div>
@@ -837,6 +860,7 @@ export function ScatterPlot({
                     animationDelay: `${(idx % 25) * 20}ms`,
                     opacity: hoveredPoint && !isHovered ? 0.35 : 0.9,
                   }}
+                  onClick={() => setHoveredPoint(hoveredPoint?.label === pt.label ? null : pt)}
                   onMouseEnter={() => setHoveredPoint(pt)}
                   onMouseLeave={() => setHoveredPoint(null)}
                 />
@@ -914,16 +938,16 @@ export function ScatterPlot({
         </div>
 
         {/* Axis Titles & Division / Group Color Legend */}
-        <div className="mt-3 flex flex-wrap items-center justify-between gap-2 border-t border-[var(--border-subtle)] pt-2.5">
-          <div className="flex flex-wrap items-center gap-3">
+        <div className="mt-3 flex flex-wrap items-center justify-between gap-2 border-t border-[var(--border-subtle)] pt-2 sm:pt-2.5">
+          <div className="flex flex-wrap items-center gap-2 sm:gap-3">
             {Object.entries(effectiveColors).map(([div, col]) => (
-              <span key={div} className="flex items-center gap-1 font-mono text-[9px] uppercase text-[var(--text-muted)]">
+              <span key={div} className="flex items-center gap-1 font-mono text-[8px] sm:text-[9px] uppercase text-[var(--text-muted)]">
                 <span className="h-2 w-2 shrink-0 inline-block" style={{ backgroundColor: col }} />
                 {div}
               </span>
             ))}
           </div>
-          <span className="font-mono text-[9px] uppercase tracking-wider text-[var(--text-muted)]">
+          <span className="font-mono text-[8px] sm:text-[9px] uppercase tracking-wider text-[var(--text-muted)] shrink-0">
             Dashed: 45° Ideal Fit
           </span>
         </div>
@@ -968,12 +992,12 @@ export function RadarComparison({
   const rings = [0.25, 0.5, 0.75, 1.0];
 
   return (
-    <article className="border border-[var(--border)] bg-[var(--bg-surface)] p-5 rounded-none" style={{ minHeight: height }}>
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-[var(--border-subtle)] pb-3 gap-2">
-        <h2 className="font-mono text-[11px] uppercase tracking-[0.16em] font-semibold text-[var(--text-primary)]">
+    <article className="border border-[var(--border)] bg-[var(--bg-surface)] p-3.5 sm:p-5 rounded-none w-full max-w-full overflow-hidden" style={{ minHeight: height }}>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-[var(--border-subtle)] pb-2.5 sm:pb-3 gap-2">
+        <h2 className="font-mono text-[10px] sm:text-[11px] uppercase tracking-[0.16em] font-semibold text-[var(--text-primary)]">
           {title}
         </h2>
-        <div className="flex flex-wrap items-center gap-3 font-mono text-[10px]">
+        <div className="flex flex-wrap items-center gap-1.5 sm:gap-3 font-mono text-[9px] sm:text-[10px]">
           {series.map((s) => {
             const isSelected = selectedSeries === s.name;
             return (
@@ -981,7 +1005,7 @@ export function RadarComparison({
                 type="button"
                 key={s.name}
                 onClick={() => setSelectedSeries(isSelected ? null : s.name)}
-                className={`flex items-center gap-1.5 px-2 py-0.5 border cursor-pointer transition-all ${
+                className={`flex items-center gap-1 px-1.5 sm:px-2 py-0.5 border cursor-pointer transition-all ${
                   isSelected
                     ? "border-[var(--text-primary)] bg-[var(--bg-subtle)] font-bold text-[var(--text-primary)]"
                     : "border-[var(--border)] text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
@@ -996,7 +1020,7 @@ export function RadarComparison({
       </div>
 
       <div className="mt-4 flex flex-col items-center justify-center">
-        <svg viewBox="0 0 400 380" className="w-full max-w-[440px] h-auto overflow-visible select-none">
+        <svg viewBox="0 0 400 380" className="w-full max-w-[340px] sm:max-w-[440px] h-auto overflow-visible select-none">
           {/* Concentric rings */}
           {rings.map((ring) => (
             <polygon
@@ -1100,19 +1124,19 @@ export function GroupedBarChart({
   const max = Math.max(...allValues, 1);
 
   return (
-    <article className="border border-[var(--border)] bg-[var(--bg-surface)] p-5 rounded-none flex flex-col justify-between" style={{ minHeight: height }}>
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-[var(--border-subtle)] pb-3 gap-2">
-        <h2 className="font-mono text-[11px] uppercase tracking-[0.16em] font-semibold text-[var(--text-primary)]">
+    <article className="border border-[var(--border)] bg-[var(--bg-surface)] p-3.5 sm:p-5 rounded-none flex flex-col justify-between w-full max-w-full overflow-hidden" style={{ minHeight: height }}>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-[var(--border-subtle)] pb-2.5 sm:pb-3 gap-1.5 sm:gap-2">
+        <h2 className="font-mono text-[10px] sm:text-[11px] uppercase tracking-[0.16em] font-semibold text-[var(--text-primary)]">
           {title}
         </h2>
-        <div className="flex items-center gap-3 font-mono text-[10px]">
+        <div className="flex flex-wrap items-center gap-2 sm:gap-3 font-mono text-[9px] sm:text-[10px]">
           {yAxisLabel ? (
             <span className="text-[var(--text-muted)] uppercase tracking-wider mr-1">
               {yAxisLabel}
             </span>
           ) : null}
           {series.map((s) => (
-            <span key={s.key} className="flex items-center gap-1.5 text-[var(--text-secondary)]">
+            <span key={s.key} className="flex items-center gap-1 text-[var(--text-secondary)]">
               <span className="h-2 w-2 shrink-0 inline-block" style={{ backgroundColor: s.color }} />
               <span>{s.label}</span>
             </span>
@@ -1120,21 +1144,21 @@ export function GroupedBarChart({
         </div>
       </div>
 
-      <div className="mt-4 overflow-x-auto no-scrollbar">
-        <div className="min-w-[420px] space-y-4">
+      <div className="mt-3.5 sm:mt-4 overflow-x-auto no-scrollbar">
+        <div className="w-full min-w-0 space-y-3 sm:space-y-4">
           {data.map((row) => (
-            <div key={row.label} className="border-b border-[var(--border-subtle)] pb-3 last:border-0">
-              <div className="font-sans text-xs font-semibold text-[var(--text-primary)] mb-2">
+            <div key={row.label} className="border-b border-[var(--border-subtle)] pb-2.5 sm:pb-3 last:border-0">
+              <div className="font-sans text-[11px] sm:text-xs font-semibold text-[var(--text-primary)] mb-1.5 sm:mb-2">
                 {row.label}
               </div>
-              <div className="space-y-1.5">
+              <div className="space-y-1 sm:space-y-1.5">
                 {series.map((s) => {
                   const val = row.values[s.key] ?? 0;
                   const width = (val / max) * 100;
                   return (
-                    <div key={s.key} className="grid grid-cols-[80px_1fr_45px] items-center gap-2">
-                      <span className="font-mono text-[10px] text-[var(--text-muted)] truncate">{s.label}</span>
-                      <div className="relative h-4 bg-[var(--bg-subtle)] overflow-hidden">
+                    <div key={s.key} className="grid grid-cols-[65px_1fr_35px] sm:grid-cols-[80px_1fr_45px] items-center gap-1.5 sm:gap-2">
+                      <span className="font-mono text-[9px] sm:text-[10px] text-[var(--text-muted)] truncate">{s.label}</span>
+                      <div className="relative h-3.5 sm:h-4 bg-[var(--bg-subtle)] overflow-hidden">
                         <div
                           className="h-full animate-bar-x transition-all duration-500"
                           style={{
@@ -1143,7 +1167,7 @@ export function GroupedBarChart({
                           }}
                         />
                       </div>
-                      <span className="font-mono text-[10px] font-bold text-[var(--text-primary)] tabular-nums text-right">
+                      <span className="font-mono text-[9px] sm:text-[10px] font-bold text-[var(--text-primary)] tabular-nums text-right">
                         {val}
                       </span>
                     </div>
@@ -1154,7 +1178,7 @@ export function GroupedBarChart({
           ))}
         </div>
         {xAxisLabel ? (
-          <div className="mt-2 text-right font-mono text-[9px] text-[var(--text-muted)] uppercase tracking-wider">
+          <div className="mt-2 text-right font-mono text-[8px] sm:text-[9px] text-[var(--text-muted)] uppercase tracking-wider">
             {xAxisLabel}
           </div>
         ) : null}

@@ -111,13 +111,56 @@ function getPartySwatchColor(partyName: string): string {
   return ALLIANCE_COLORS.others;
 }
 
+const BANGLADESH_DIVISIONS = [
+  "Barishal",
+  "Chattogram",
+  "Dhaka",
+  "Khulna",
+  "Mymensingh",
+  "Rajshahi",
+  "Rangpur",
+  "Sylhet",
+] as const;
+
+const DIVISION_ALIASES: Record<string, string> = {
+  chittagong: "Chattogram",
+  ctg: "Chattogram",
+  barisal: "Barishal",
+};
+
+function getMatchedDivision(query: string): string | null {
+  const q = query.trim().toLowerCase();
+  if (!q || q.length < 3) return null;
+
+  for (const [alias, target] of Object.entries(DIVISION_ALIASES)) {
+    if (alias === q || alias.startsWith(q)) {
+      return target;
+    }
+  }
+
+  const exact = BANGLADESH_DIVISIONS.find((d) => d.toLowerCase() === q);
+  if (exact) return exact;
+
+  if (!/[\d-]/.test(q)) {
+    const prefix = BANGLADESH_DIVISIONS.find((d) => d.toLowerCase().startsWith(q));
+    if (prefix) return prefix;
+  }
+
+  return null;
+}
+
 function matchesSeatQuery(seat: ConstituencyRow, query: string): boolean {
   if (!query) {
     return true;
   }
 
+  const q = query.trim().toLowerCase();
+  const qClean = q.replace(/[-_]/g, " ");
+
   const haystack = [
     seat.constituency,
+    seat.geo_name ?? "",
+    seat.seat_key,
     seat.district,
     seat.division,
     seat.winner_party,
@@ -126,7 +169,36 @@ function matchesSeatQuery(seat: ConstituencyRow, query: string): boolean {
     .join(" ")
     .toLowerCase();
 
-  return haystack.includes(query);
+  const haystackClean = haystack.replace(/[-_]/g, " ");
+
+  return haystack.includes(q) || haystackClean.includes(qClean);
+}
+
+function rankSeatMatches(seats: ConstituencyRow[], query: string): ConstituencyRow[] {
+  const q = query.trim().toLowerCase();
+  if (!q) return [];
+  const qClean = q.replace(/[-_]/g, " ");
+
+  return seats
+    .filter((seat) => matchesSeatQuery(seat, q))
+    .sort((a, b) => {
+      const aConst = a.constituency.toLowerCase();
+      const bConst = b.constituency.toLowerCase();
+      const aGeo = (a.geo_name ?? "").toLowerCase();
+      const bGeo = (b.geo_name ?? "").toLowerCase();
+
+      const aExact = aConst === q || aConst === qClean || aGeo === q;
+      const bExact = bConst === q || bConst === qClean || bGeo === q;
+      if (aExact && !bExact) return -1;
+      if (!aExact && bExact) return 1;
+
+      const aStarts = aConst.startsWith(q) || aConst.startsWith(qClean) || aGeo.startsWith(q);
+      const bStarts = bConst.startsWith(q) || bConst.startsWith(qClean) || bGeo.startsWith(q);
+      if (aStarts && !bStarts) return -1;
+      if (!aStarts && bStarts) return 1;
+
+      return a.constituency.localeCompare(b.constituency, undefined, { numeric: true });
+    });
 }
 
 function matchesSeatFilters(seat: ConstituencyRow, division: string, query: string): boolean {
@@ -139,6 +211,11 @@ export function LandingShell({ summaryDataset, constituencyDataset }: LandingShe
   const seats = constituencyDataset.rows;
   const [mapMode, setMapMode] = useState<MapMode>("election");
   const [searchValue, setSearchValue] = useState("");
+  const [isMobileSearchOpen, setIsMobileSearchOpen] = useState(false);
+  const [isMobileSuggestionsOpen, setIsMobileSuggestionsOpen] = useState(false);
+  const [openDropdown, setOpenDropdown] = useState<"division" | "constituency" | null>(null);
+  const dropdownContainerRef = useRef<HTMLDivElement | null>(null);
+  const mobileSearchContainerRef = useRef<HTMLDivElement | null>(null);
   const deferredSearchValue = useDeferredValue(searchValue);
   const [activeDivision, setActiveDivision] = useState<string>(ALL_DIVISIONS);
   const [selectedSeatKey, setSelectedSeatKey] = useState<string | null>(() => {
@@ -154,9 +231,34 @@ export function LandingShell({ summaryDataset, constituencyDataset }: LandingShe
     return seats.some((seat) => seat.seat_key === seatFromQuery) ? seatFromQuery : null;
   });
   const seatRefs = useRef<Record<string, HTMLButtonElement | null>>({});
+  const detailRef = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
     fetchBangladeshGeoJson().catch(() => {});
+  }, []);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownContainerRef.current && !dropdownContainerRef.current.contains(event.target as Node)) {
+        setOpenDropdown(null);
+      }
+      if (mobileSearchContainerRef.current && !mobileSearchContainerRef.current.contains(event.target as Node)) {
+        setIsMobileSuggestionsOpen(false);
+      }
+    };
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setOpenDropdown(null);
+        setIsMobileSuggestionsOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("keydown", handleKeyDown);
+    };
   }, []);
 
   const normalizedSearch = deferredSearchValue.trim().toLowerCase();
@@ -164,6 +266,20 @@ export function LandingShell({ summaryDataset, constituencyDataset }: LandingShe
   const sortedSeats = useMemo(() => {
     return [...seats].sort((left, right) => left.constituency.localeCompare(right.constituency));
   }, [seats]);
+
+  const matchedDivision = useMemo(() => {
+    return getMatchedDivision(deferredSearchValue);
+  }, [deferredSearchValue]);
+
+  const suggestedSeats = useMemo(() => {
+    if (!deferredSearchValue.trim()) return [];
+    return rankSeatMatches(sortedSeats, deferredSearchValue);
+  }, [deferredSearchValue, sortedSeats]);
+
+  const matchingSeatKeys = useMemo(() => {
+    if (!deferredSearchValue.trim() || matchedDivision) return null;
+    return suggestedSeats.map((s) => s.seat_key);
+  }, [deferredSearchValue, matchedDivision, suggestedSeats]);
 
   const divisions = useMemo(() => {
     const counts = new Map<string, number>();
@@ -232,6 +348,7 @@ export function LandingShell({ summaryDataset, constituencyDataset }: LandingShe
 
   const handleSearchChange = (value: string) => {
     setSearchValue(value);
+    setIsMobileSuggestionsOpen(Boolean(value.trim()));
 
     if (selectedSeat && !matchesSeatFilters(selectedSeat, activeDivision, value.trim().toLowerCase())) {
       setSelectedSeatKey(null);
@@ -246,19 +363,435 @@ export function LandingShell({ summaryDataset, constituencyDataset }: LandingShe
     }
   };
 
+  const handleSeatSelect = (seatKey: string) => {
+    setSelectedSeatKey(seatKey);
+    const seat = sortedSeats.find((s) => s.seat_key === seatKey);
+    if (seat && activeDivision !== ALL_DIVISIONS && seat.division !== activeDivision) {
+      setActiveDivision(seat.division);
+    }
+  };
+
   return (
-    <main className="h-screen max-h-screen overflow-hidden flex flex-col bg-[var(--bg-canvas)] text-[var(--text-primary)] font-sans antialiased">
+    <main className="min-h-screen flex flex-col bg-[var(--bg-canvas)] text-[var(--text-primary)] font-sans antialiased lg:h-screen lg:max-h-screen lg:overflow-hidden">
       {/* ── Fixed 42px Header Navigation ───────────────────────────────── */}
       <PrimaryNav />
 
       {/* ── 3-Column Layout (Map | Constituencies | Inspector) ──────────── */}
-      <section className="flex-1 min-h-0 flex overflow-hidden border-t border-[var(--border)]">
+      <section className="flex-1 flex flex-col lg:min-h-0 lg:flex-row lg:overflow-hidden border-t border-[var(--border)]">
 
-        {/* ── Left Container: Division Tabs + Map Canvas + Seat List ────── */}
-        <div className="flex min-w-0 flex-1 flex-col border-r border-[var(--border)]">
+        {/* ── Left Container: Division Tabs/Dropdowns + Map Canvas + Seat List ────── */}
+        <div className="flex min-w-0 flex-1 flex-col lg:border-r border-[var(--border)]">
 
-          {/* Division Filter Tabs across top (Clean names, no seat count badges) */}
-          <div className="flex h-9 shrink-0 items-center overflow-x-auto border-b border-[var(--border)] bg-[var(--bg-surface)] px-2 sm:px-4">
+          {/* Mobile Control Bar: Mode Switcher + Dual Dropdowns + Collapsible Search (Option 1) */}
+          <div className="lg:hidden shrink-0 border-b border-[var(--border)] bg-[var(--bg-surface)] p-2.5 sm:p-3 space-y-2 relative z-[2000]">
+            {/* Row 1: Mode Switcher + Clear Selection */}
+            <div className="flex items-center justify-between gap-2">
+              <div className="inline-flex border border-[var(--border)] bg-[var(--bg-canvas)]">
+                <button
+                  type="button"
+                  onClick={() => setMapMode("election")}
+                  className={`px-2.5 py-1 font-mono text-[10px] uppercase tracking-wider transition-colors rounded-none cursor-pointer ${
+                    mapMode === "election"
+                      ? "bg-[var(--text-primary)] text-[var(--bg-canvas)] font-bold"
+                      : "bg-transparent text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+                  }`}
+                >
+                  Election
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setMapMode("referendum")}
+                  className={`px-2.5 py-1 font-mono text-[10px] uppercase tracking-wider transition-colors rounded-none border-l border-[var(--border)] cursor-pointer ${
+                    mapMode === "referendum"
+                      ? "bg-[var(--text-primary)] text-[var(--bg-canvas)] font-bold"
+                      : "bg-transparent text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+                  }`}
+                >
+                  Referendum
+                </button>
+              </div>
+
+              {selectedSeat && (
+                <button
+                  type="button"
+                  onClick={() => setSelectedSeatKey(null)}
+                  className="font-mono text-[10px] uppercase tracking-wider text-[var(--text-muted)] hover:text-[var(--text-primary)] underline decoration-[var(--border)] cursor-pointer flex items-center gap-1"
+                >
+                  <span>✕</span> Clear Selection
+                </button>
+              )}
+            </div>
+
+            {/* Row 2: Custom Dual Dropdowns + Search Toggle Button */}
+            <div ref={dropdownContainerRef} className="flex items-center gap-1.5 relative">
+              {/* Custom Division Dropdown */}
+              <div className="relative flex-1 min-w-0">
+                <button
+                  type="button"
+                  onClick={() => setOpenDropdown((prev) => (prev === "division" ? null : "division"))}
+                  aria-haspopup="listbox"
+                  aria-expanded={openDropdown === "division"}
+                  className={`w-full h-8 px-2.5 flex items-center justify-between font-mono text-[11px] bg-[var(--bg-canvas)] text-[var(--text-primary)] border transition-colors cursor-pointer rounded-none outline-none ${
+                    openDropdown === "division"
+                      ? "border-[var(--text-primary)] bg-[var(--bg-subtle)]"
+                      : "border-[var(--border)] hover:bg-[var(--bg-subtle)]"
+                  }`}
+                >
+                  <span className="truncate">{activeDivision === ALL_DIVISIONS ? "All Divisions" : activeDivision}</span>
+                  <svg
+                    className={`h-3 w-3 shrink-0 text-[var(--text-muted)] transition-transform duration-150 ${
+                      openDropdown === "division" ? "rotate-180 text-[var(--text-primary)]" : ""
+                    }`}
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                </button>
+
+                {openDropdown === "division" && (
+                  <div
+                    role="listbox"
+                    className="absolute top-full left-0 w-[240px] max-w-[85vw] mt-1 max-h-64 overflow-y-auto z-[1100] bg-[var(--bg-surface)] border border-[var(--border)] shadow-2xl rounded-none divide-y divide-[var(--border-subtle)] animate-chart-fade"
+                  >
+                    {divisions.map((division) => {
+                      const isSelected = division.name === activeDivision;
+                      return (
+                        <button
+                          key={division.name}
+                          type="button"
+                          role="option"
+                          aria-selected={isSelected}
+                          onClick={() => {
+                            handleDivisionChange(division.name);
+                            setOpenDropdown(null);
+                          }}
+                          className={`w-full px-3 py-2 flex items-center justify-between text-left font-mono text-[11px] transition-colors rounded-none cursor-pointer ${
+                            isSelected
+                              ? "bg-[var(--bg-subtle)] text-[var(--text-primary)] font-bold border-l-2 border-[var(--text-primary)]"
+                              : "text-[var(--text-secondary)] hover:bg-[var(--bg-subtle)] hover:text-[var(--text-primary)]"
+                          }`}
+                        >
+                          <span className="truncate">{division.name}</span>
+                          <span className="font-mono text-[10px] text-[var(--text-muted)] shrink-0 ml-2">
+                            {division.count}
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+
+              {/* Custom Constituency Dropdown */}
+              <div className="relative flex-1 min-w-0">
+                <button
+                  type="button"
+                  onClick={() => setOpenDropdown((prev) => (prev === "constituency" ? null : "constituency"))}
+                  aria-haspopup="listbox"
+                  aria-expanded={openDropdown === "constituency"}
+                  className={`w-full h-8 px-2.5 flex items-center justify-between font-mono text-[11px] bg-[var(--bg-canvas)] text-[var(--text-primary)] border transition-colors cursor-pointer rounded-none outline-none ${
+                    openDropdown === "constituency"
+                      ? "border-[var(--text-primary)] bg-[var(--bg-subtle)]"
+                      : "border-[var(--border)] hover:bg-[var(--bg-subtle)]"
+                  }`}
+                >
+                  <div className="flex items-center gap-1.5 min-w-0 truncate">
+                    {selectedSeat && (
+                      <span
+                        className="h-1.5 w-1.5 shrink-0 rounded-full"
+                        style={{ backgroundColor: getSeatDisplayColor(selectedSeat) }}
+                      />
+                    )}
+                    <span className="truncate">{selectedSeat ? selectedSeat.constituency : "All Constituencies"}</span>
+                  </div>
+                  <svg
+                    className={`h-3 w-3 shrink-0 text-[var(--text-muted)] transition-transform duration-150 ${
+                      openDropdown === "constituency" ? "rotate-180 text-[var(--text-primary)]" : ""
+                    }`}
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                </button>
+
+                {openDropdown === "constituency" && (
+                  <div
+                    role="listbox"
+                    className="absolute top-full right-0 w-[260px] max-w-[85vw] mt-1 max-h-64 overflow-y-auto z-[1100] bg-[var(--bg-surface)] border border-[var(--border)] shadow-2xl rounded-none divide-y divide-[var(--border-subtle)] animate-chart-fade"
+                  >
+                    {/* Clear selection option */}
+                    <button
+                      type="button"
+                      role="option"
+                      aria-selected={!selectedSeatKey}
+                      onClick={() => {
+                        setSelectedSeatKey(null);
+                        setOpenDropdown(null);
+                      }}
+                      className={`w-full px-3 py-2 flex items-center justify-between text-left font-mono text-[11px] transition-colors rounded-none cursor-pointer ${
+                        !selectedSeatKey
+                          ? "bg-[var(--bg-subtle)] text-[var(--text-primary)] font-bold border-l-2 border-[var(--text-primary)]"
+                          : "text-[var(--text-muted)] hover:bg-[var(--bg-subtle)] hover:text-[var(--text-primary)]"
+                      }`}
+                    >
+                      <span>All Constituencies</span>
+                      <span className="text-[10px] text-[var(--text-muted)] font-mono">{filteredSeats.length}</span>
+                    </button>
+
+                    {filteredSeats.map((seat) => {
+                      const isSelected = seat.seat_key === selectedSeatKey;
+                      const seatColor = getSeatDisplayColor(seat);
+                      return (
+                        <button
+                          key={seat.seat_key}
+                          type="button"
+                          role="option"
+                          aria-selected={isSelected}
+                          onClick={() => {
+                            handleSeatSelect(seat.seat_key);
+                            setOpenDropdown(null);
+                          }}
+                          className={`w-full px-3 py-2 flex items-center justify-between text-left font-mono text-[11px] transition-colors rounded-none cursor-pointer ${
+                            isSelected
+                              ? "bg-[var(--bg-subtle)] text-[var(--text-primary)] font-bold border-l-2 border-[var(--text-primary)]"
+                              : "text-[var(--text-primary)] hover:bg-[var(--bg-subtle)]"
+                          }`}
+                        >
+                          <div className="flex items-center gap-2 min-w-0">
+                            <span
+                              className="h-2 w-2 shrink-0 rounded-full"
+                              style={{ backgroundColor: seatColor }}
+                            />
+                            <span className="truncate text-xs font-medium">{seat.constituency}</span>
+                          </div>
+                          <span className="font-mono text-[10px] text-[var(--text-muted)] shrink-0 ml-2">
+                            {seat.division}
+                          </span>
+                        </button>
+                      );
+                    })}
+
+                    {filteredSeats.length === 0 && (
+                      <div className="px-3 py-4 text-center font-mono text-[11px] text-[var(--text-muted)]">
+                        No matching constituencies
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+
+              {/* Search Toggle Button */}
+              <button
+                id="mobileSearchToggle"
+                type="button"
+                onClick={() =>
+                  setIsMobileSearchOpen((prev) => {
+                    const next = !prev;
+                    if (!next) {
+                      setIsMobileSuggestionsOpen(false);
+                    }
+                    return next;
+                  })
+                }
+                title={isMobileSearchOpen ? "Close Search" : "Search"}
+                aria-label="Toggle search input"
+                className={`flex h-8 w-8 shrink-0 items-center justify-center border border-[var(--border)] transition-colors cursor-pointer ${
+                  isMobileSearchOpen || searchValue
+                    ? "bg-[var(--text-primary)] text-[var(--bg-canvas)] font-bold"
+                    : "bg-[var(--bg-canvas)] text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+                }`}
+              >
+                <svg className="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor">
+                  <path
+                    fillRule="evenodd"
+                    d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z"
+                    clipRule="evenodd"
+                  />
+                </svg>
+              </button>
+            </div>
+
+            {/* Collapsible Search Row with Autocomplete Suggestions */}
+            {(isMobileSearchOpen || searchValue) && (
+              <div ref={mobileSearchContainerRef} className="relative pt-1 animate-chart-fade">
+                <div className="relative flex items-center">
+                  <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-2.5 text-[var(--text-muted)]">
+                    <svg className="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor">
+                      <path
+                        fillRule="evenodd"
+                        d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z"
+                        clipRule="evenodd"
+                      />
+                    </svg>
+                  </div>
+                  <input
+                    id="mobileSeatSearch"
+                    type="search"
+                    autoFocus
+                    value={searchValue}
+                    onChange={(e) => {
+                      handleSearchChange(e.target.value);
+                      setIsMobileSuggestionsOpen(true);
+                    }}
+                    onFocus={() => {
+                      if (searchValue.trim()) {
+                        setIsMobileSuggestionsOpen(true);
+                      }
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        e.preventDefault();
+                        if (suggestedSeats.length > 0) {
+                          handleSeatSelect(suggestedSeats[0].seat_key);
+                          setSearchValue(suggestedSeats[0].constituency);
+                          setIsMobileSuggestionsOpen(false);
+                        } else if (matchedDivision) {
+                          handleDivisionChange(matchedDivision);
+                          setIsMobileSuggestionsOpen(false);
+                        }
+                      }
+                    }}
+                    placeholder="Search constituency, candidate, district..."
+                    className="w-full h-7 pl-8 pr-12 font-mono text-[11px] bg-[var(--bg-canvas)] text-[var(--text-primary)] border border-[var(--border)] rounded-none outline-none placeholder:text-[var(--text-muted)] focus:border-[var(--text-primary)]"
+                  />
+                  {searchValue && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        handleSearchChange("");
+                        setIsMobileSuggestionsOpen(false);
+                      }}
+                      className="absolute inset-y-0 right-0 flex items-center pr-2.5 font-mono text-[10px] uppercase tracking-wider text-[var(--text-muted)] hover:text-[var(--text-primary)] underline decoration-[var(--border)] cursor-pointer"
+                    >
+                      Clear
+                    </button>
+                  )}
+                </div>
+
+                {/* Floating Autocomplete Suggestions Dropdown */}
+                {searchValue.trim().length > 0 && isMobileSuggestionsOpen && (
+                  <div
+                    role="listbox"
+                    aria-label="Suggested Constituencies"
+                    className="absolute top-full left-0 right-0 mt-1 z-[1300] bg-[var(--bg-surface)] border border-[var(--border)] shadow-2xl rounded-none divide-y divide-[var(--border-subtle)] max-h-72 overflow-y-auto animate-chart-fade"
+                  >
+                    {/* Quick Division Jump Option if query matches a division */}
+                    {matchedDivision && (
+                      <button
+                        type="button"
+                        role="option"
+                        aria-selected={false}
+                        onClick={() => {
+                          handleDivisionChange(matchedDivision);
+                          setIsMobileSuggestionsOpen(false);
+                        }}
+                        className="w-full px-3 py-2 flex items-center justify-between text-left font-mono text-[11px] bg-[var(--bg-subtle)] hover:bg-[var(--border-subtle)] text-[var(--text-primary)] transition-colors cursor-pointer border-b border-[var(--border)]"
+                      >
+                        <div className="flex items-center gap-2">
+                          <span className="px-1.5 py-0.5 text-[9px] uppercase font-bold tracking-wider bg-[var(--text-primary)] text-[var(--bg-canvas)]">
+                            Division
+                          </span>
+                          <span className="font-semibold text-xs">{matchedDivision}</span>
+                        </div>
+                        <span className="text-[10px] text-[var(--text-muted)] flex items-center gap-1 font-mono">
+                          Highlight Division Map &rarr;
+                        </span>
+                      </button>
+                    )}
+
+                    {/* Top Matching Seats */}
+                    {suggestedSeats.slice(0, 8).map((seat) => {
+                      const isSelected = seat.seat_key === selectedSeatKey;
+                      const seatColor = getSeatDisplayColor(seat);
+                      const status = getSeatElectionStatus(seat);
+
+                      return (
+                        <button
+                          key={seat.seat_key}
+                          type="button"
+                          role="option"
+                          aria-selected={isSelected}
+                          onClick={() => {
+                            handleSeatSelect(seat.seat_key);
+                            setSearchValue(seat.constituency);
+                            setIsMobileSuggestionsOpen(false);
+                          }}
+                          className={`w-full px-3 py-2 flex items-center justify-between text-left font-mono text-[11px] transition-colors rounded-none cursor-pointer ${
+                            isSelected
+                              ? "bg-[var(--bg-subtle)] text-[var(--text-primary)] font-bold border-l-2 border-[var(--text-primary)]"
+                              : "text-[var(--text-primary)] hover:bg-[var(--bg-subtle)] active:bg-[var(--bg-subtle)]"
+                          }`}
+                        >
+                          <div className="flex items-center gap-2.5 min-w-0">
+                            <span
+                              className="h-2 w-2 shrink-0 rounded-full"
+                              style={{ backgroundColor: seatColor }}
+                            />
+                            <div className="min-w-0">
+                              <div className="text-xs font-medium text-[var(--text-primary)] truncate">
+                                {seat.constituency}
+                              </div>
+                              <div className="text-[10px] text-[var(--text-muted)] font-mono truncate">
+                                {seat.district} · {seat.division}
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="shrink-0 text-right font-mono text-[10px] ml-2">
+                            {mapMode === "election" ? (
+                              status.isPostponed ? (
+                                <span className="text-amber-600 dark:text-amber-400">Postponed</span>
+                              ) : (
+                                <>
+                                  <span className="font-semibold text-[var(--text-primary)]">{seat.winner_party}</span>
+                                  {seat.winner_vote_share_pct !== null && (
+                                    <span className="text-[var(--text-muted)] ml-1">
+                                      {seat.winner_vote_share_pct.toFixed(1)}%
+                                    </span>
+                                  )}
+                                </>
+                              )
+                            ) : (
+                              <span className="capitalize text-[var(--text-secondary)]">
+                                {getReferendumSeatResult(seat)}
+                              </span>
+                            )}
+                          </div>
+                        </button>
+                      );
+                    })}
+
+                    {/* Empty state */}
+                    {!matchedDivision && suggestedSeats.length === 0 && (
+                      <div className="px-3 py-4 text-center font-mono text-[11px] text-[var(--text-muted)]">
+                        No matching seats found
+                      </div>
+                    )}
+
+                    {/* Counter footer if more results exist */}
+                    {suggestedSeats.length > 8 && (
+                      <div className="px-3 py-1.5 text-center font-mono text-[9px] uppercase tracking-wider text-[var(--text-muted)] bg-[var(--bg-subtle)]">
+                        Showing 8 of {suggestedSeats.length} matching seats
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+
+          {/* Division Filter Tabs across top (Desktop only) */}
+          <div className="hidden lg:flex h-9 shrink-0 items-center overflow-x-auto border-b border-[var(--border)] bg-[var(--bg-surface)] px-2 sm:px-4">
             {divisions.map((division) => {
               const active = division.name === activeDivision;
               return (
@@ -279,12 +812,12 @@ export function LandingShell({ summaryDataset, constituencyDataset }: LandingShe
           </div>
 
           {/* Sub-container: Map Canvas (Column 1) + Constituencies List (Column 2) */}
-          <div className="flex min-h-0 flex-1">
+          <div className="flex flex-col lg:flex-row min-h-0 flex-1">
 
             {/* Column 1: Map Canvas */}
             <div className="flex min-w-0 flex-1 flex-col bg-[var(--bg-canvas)]">
-              {/* Map Controls: Mode Toggle & Search */}
-              <div className="shrink-0 border-b border-[var(--border)] bg-[var(--bg-surface)] px-3 py-2 space-y-2">
+              {/* Map Controls: Mode Toggle & Search (Desktop only) */}
+              <div className="hidden lg:block shrink-0 border-b border-[var(--border)] bg-[var(--bg-surface)] px-3 py-2 space-y-2">
                 <div className="flex items-center justify-between gap-3">
                   <div className="inline-flex border border-[var(--border)] bg-[var(--bg-canvas)]">
                     <button
@@ -342,29 +875,49 @@ export function LandingShell({ summaryDataset, constituencyDataset }: LandingShe
                     type="search"
                     value={searchValue}
                     onChange={(e) => handleSearchChange(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        e.preventDefault();
+                        if (suggestedSeats.length > 0) {
+                          handleSeatSelect(suggestedSeats[0].seat_key);
+                        } else if (matchedDivision) {
+                          handleDivisionChange(matchedDivision);
+                        }
+                      }
+                    }}
                     placeholder="Search constituency, district, division..."
-                    className="w-full h-7 pl-8 pr-3 font-mono text-[11px] bg-[var(--bg-canvas)] text-[var(--text-primary)] border border-[var(--border)] rounded-none outline-none placeholder:text-[var(--text-muted)] focus:border-[var(--text-primary)]"
+                    className="w-full h-7 pl-8 pr-12 font-mono text-[11px] bg-[var(--bg-canvas)] text-[var(--text-primary)] border border-[var(--border)] rounded-none outline-none placeholder:text-[var(--text-muted)] focus:border-[var(--text-primary)]"
                   />
+                  {searchValue && (
+                    <button
+                      type="button"
+                      onClick={() => handleSearchChange("")}
+                      className="absolute inset-y-0 right-0 flex items-center pr-2.5 font-mono text-[10px] uppercase tracking-wider text-[var(--text-muted)] hover:text-[var(--text-primary)] underline decoration-[var(--border)] cursor-pointer"
+                    >
+                      Clear
+                    </button>
+                  )}
                 </div>
               </div>
 
               {/* Map Viewport Canvas */}
-              <div className="min-h-0 flex-1 relative">
+              <div className="h-[360px] sm:h-[420px] lg:h-auto lg:min-h-0 lg:flex-1 relative z-0 w-full border-b lg:border-b-0 border-[var(--border)]">
                 <BangladeshMap
                   seats={sortedSeats}
                   mode={mapMode}
                   selectedSeatKey={selectedSeatKey}
                   activeDivision={activeDivision}
-                  onSelectSeat={(seatKey) => {
-                    setSelectedSeatKey(seatKey);
-                  }}
+                  searchQuery={searchValue}
+                  matchingDivision={matchedDivision}
+                  matchingSeatKeys={matchingSeatKeys}
+                  onSelectSeat={handleSeatSelect}
                   onClearSelection={() => setSelectedSeatKey(null)}
                 />
               </div>
             </div>
 
-            {/* Column 2: Constituencies List (No odd divider lines, clean rows) */}
-            <div className="flex w-56 md:w-60 lg:w-64 shrink-0 flex-col border-l border-[var(--border)] bg-[var(--bg-surface)]">
+            {/* Column 2: Constituencies List (Desktop only) */}
+            <div className="hidden lg:flex w-56 md:w-60 lg:w-64 shrink-0 flex-col border-l border-[var(--border)] bg-[var(--bg-surface)]">
               <div className="flex h-8 shrink-0 items-center justify-between border-b border-[var(--border)] px-3">
                 <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--text-muted)]">
                   Constituencies
@@ -421,7 +974,10 @@ export function LandingShell({ summaryDataset, constituencyDataset }: LandingShe
         </div>
 
         {/* ── Column 3: Constituency Detail Panel (Inspector) ───────────── */}
-        <aside className="flex w-[440px] lg:w-[480px] xl:w-[520px] 2xl:w-[560px] shrink-0 flex-col overflow-y-auto bg-[var(--bg-canvas)] p-4 space-y-4 border-l border-[var(--border)]">
+        <aside
+          ref={detailRef}
+          className="flex w-full lg:w-[440px] xl:w-[520px] 2xl:w-[560px] shrink-0 flex-col bg-[var(--bg-canvas)] p-4 sm:p-5 space-y-4 lg:overflow-y-auto lg:border-l border-[var(--border)]"
+        >
           {selectedSeat ? (
             <div className="space-y-4">
               {/* Breadcrumb & Title */}
@@ -463,8 +1019,10 @@ export function LandingShell({ summaryDataset, constituencyDataset }: LandingShe
                 )}
               </div>
 
-              {/* Boundary Mini-Map */}
-              <ConstituencyMiniMap seat={selectedSeat} mode={mapMode} />
+              {/* Boundary Mini-Map (Desktop only) */}
+              <div className="hidden lg:block">
+                <ConstituencyMiniMap seat={selectedSeat} mode={mapMode} />
+              </div>
 
               {/* Election Result Card */}
               <div className="border border-[var(--border)] bg-[var(--bg-surface)]">
