@@ -51,7 +51,7 @@ function formatMetric(value: number, decimals: number, unit: string): string {
 }
 
 function resolvePaletteColor(group: string): string {
-  const palette = ["#4a9e7a", "#2a6aaa", "#c0572a", "#b7791f", "#8b5cf6", "#ef4444", "#14b8a6", "#eab308"];
+  const palette = ["#2ec486", "#3b82f6", "#e25822", "#d4af37", "#a855f7", "#06b6d4", "#ec4899", "#f59e0b"];
   let hash = 0;
   for (let index = 0; index < group.length; index += 1) {
     hash = (hash << 5) - hash + group.charCodeAt(index);
@@ -93,10 +93,10 @@ export function MetricCards({ cards }: { cards: MetricCard[] }) {
   return (
     <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
       {cards.map((card) => (
-        <article key={card.label} className="border border-white/10 bg-[#141412] px-4 py-3">
-          <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-[#5a5848]">{card.label}</p>
-          <p className="mt-2 text-lg text-[#f0ece2]">{card.value}</p>
-          {card.detail ? <p className="mt-1 text-xs text-[#9c9888]">{card.detail}</p> : null}
+        <article key={card.label} className="rounded-lg border border-white/[0.07] bg-[#121317] px-4 py-3">
+          <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-[#71717a]">{card.label}</p>
+          <p className="details-number mt-2 text-xl font-bold text-[#f4f1ea]">{card.value}</p>
+          {card.detail ? <p className="mt-1 text-xs text-[#a1a1aa]">{card.detail}</p> : null}
         </article>
       ))}
     </section>
@@ -105,8 +105,8 @@ export function MetricCards({ cards }: { cards: MetricCard[] }) {
 
 export function Panel({ title, children }: { title: string; children: ReactNode }) {
   return (
-    <article className="border border-white/10 bg-[#141412] p-4">
-      <h2 className="font-mono text-[11px] uppercase tracking-[0.16em] text-[#c9a84c]">{title}</h2>
+    <article className="rounded-lg border border-white/[0.07] bg-[#121317] p-4">
+      <h2 className="font-mono text-[11px] uppercase tracking-[0.16em] text-[#d4af37]">{title}</h2>
       <div className="mt-3">{children}</div>
     </article>
   );
@@ -137,8 +137,8 @@ export function HorizontalBarChart({
   const fillCap = Math.min(100, Math.max(35, maxBarFillPercent));
 
   return (
-    <article className="border border-white/10 bg-[#141412] p-4">
-      <h2 className="font-mono text-[11px] uppercase tracking-[0.16em] text-[#c9a84c]">{title}</h2>
+    <article className="rounded-lg border border-white/[0.07] bg-[#121317] p-4">
+      <h2 className="font-mono text-[11px] uppercase tracking-[0.16em] text-[#d4af37]">{title}</h2>
       {xAxisLabel || yAxisLabel ? (
         <div className="mt-3 flex items-center justify-between gap-3 text-[10px] uppercase tracking-[0.14em] text-[#7d7969]">
           <span>{yAxisLabel ? `Y-axis: ${yAxisLabel}` : ""}</span>
@@ -202,8 +202,8 @@ export function VerticalBarChart({
   const barAreaHeight = Math.max(height - 120, 180);
 
   return (
-    <article className="border border-white/10 bg-[#141412] p-4">
-      <h2 className="font-mono text-[11px] uppercase tracking-[0.16em] text-[#c9a84c]">{title}</h2>
+    <article className="rounded-lg border border-white/[0.07] bg-[#121317] p-4">
+      <h2 className="font-mono text-[11px] uppercase tracking-[0.16em] text-[#d4af37]">{title}</h2>
       <div className="mt-4 overflow-x-auto">
         <div className="relative min-w-170" style={{ height: `${height}px` }}>
           <p
@@ -264,8 +264,8 @@ export function HistogramChart({
   const barAreaHeight = Math.max(height - 120, 180);
 
   return (
-    <article className="border border-white/10 bg-[#141412] p-4">
-      <h2 className="font-mono text-[11px] uppercase tracking-[0.16em] text-[#c9a84c]">{title}</h2>
+    <article className="rounded-lg border border-white/[0.07] bg-[#121317] p-4">
+      <h2 className="font-mono text-[11px] uppercase tracking-[0.16em] text-[#d4af37]">{title}</h2>
       <div className="mt-4 overflow-x-auto">
         <div className="relative min-w-170" style={{ height: `${height}px` }}>
           <p
@@ -324,8 +324,8 @@ export function CorrelationHeatmap({
   const rowHeaderWidth = 220;
 
   return (
-    <article className="border border-white/10 bg-[#141412] p-4">
-      <h2 className="font-mono text-[11px] uppercase tracking-[0.16em] text-[#c9a84c]">{title}</h2>
+    <article className="rounded-lg border border-white/[0.07] bg-[#121317] p-4">
+      <h2 className="font-mono text-[11px] uppercase tracking-[0.16em] text-[#d4af37]">{title}</h2>
       <div className="mt-4 grid gap-4 lg:grid-cols-[1fr_74px]">
         <div className="overflow-auto" style={{ minHeight: `${height}px` }}>
           <div
@@ -436,8 +436,8 @@ export function DivergingBarChart({
   const max = Math.max(...data.map((item) => Math.abs(item.value)), 1);
 
   return (
-    <article className="border border-white/10 bg-[#141412] p-4">
-      <h2 className="font-mono text-[11px] uppercase tracking-[0.16em] text-[#c9a84c]">{title}</h2>
+    <article className="rounded-lg border border-white/[0.07] bg-[#121317] p-4">
+      <h2 className="font-mono text-[11px] uppercase tracking-[0.16em] text-[#d4af37]">{title}</h2>
       <div className="mt-3 flex items-center justify-between gap-3 text-[10px] uppercase tracking-[0.14em] text-[#7d7969]">
         <span>{`Y-axis: ${yAxisLabel}`}</span>
         <span>{`X-axis: ${xAxisLabel}`}</span>
@@ -525,8 +525,8 @@ export function ScatterPlot({
 }) {
   if (points.length === 0) {
     return (
-      <article className="border border-white/10 bg-[#141412] p-4">
-        <h2 className="font-mono text-[11px] uppercase tracking-[0.16em] text-[#c9a84c]">{title}</h2>
+      <article className="rounded-lg border border-white/[0.07] bg-[#121317] p-4">
+        <h2 className="font-mono text-[11px] uppercase tracking-[0.16em] text-[#d4af37]">{title}</h2>
         <p className="mt-3 text-sm text-[#9c9888]">No complete rows available for scatter plotting.</p>
       </article>
     );
@@ -565,8 +565,8 @@ export function ScatterPlot({
   const referenceMax = Math.min(xDomainMax, yDomainMax);
 
   return (
-    <article className="border border-white/10 bg-[#141412] p-4">
-      <h2 className="font-mono text-[11px] uppercase tracking-[0.16em] text-[#c9a84c]">{title}</h2>
+    <article className="rounded-lg border border-white/[0.07] bg-[#121317] p-4">
+      <h2 className="font-mono text-[11px] uppercase tracking-[0.16em] text-[#d4af37]">{title}</h2>
       <svg
         viewBox={`0 0 ${chartWidth} ${chartHeight}`}
         className="mt-3 w-full rounded border border-white/10 bg-[#11110f]"
@@ -683,8 +683,8 @@ export function RadarComparison({
   const labelSize = compact ? 10 : 11;
 
   return (
-    <article className={`border border-white/10 bg-[#141412] p-4 ${className ?? ""}`}>
-      <h2 className="font-mono text-[11px] uppercase tracking-[0.16em] text-[#c9a84c]">{title}</h2>
+    <article className={`rounded-lg border border-white/[0.07] bg-[#121317] p-4 ${className ?? ""}`}>
+      <h2 className="font-mono text-[11px] uppercase tracking-[0.16em] text-[#d4af37]">{title}</h2>
       {subtitle ? <p className="mt-2 text-sm text-[#9c9888]">{subtitle}</p> : null}
 
       <div className={`mt-3 grid gap-4 ${compact ? "" : "lg:grid-cols-[1fr_240px]"}`} style={{ minHeight: `${height}px` }}>
@@ -758,8 +758,8 @@ export function GroupedBarChart({
   const barAreaHeight = Math.max(height - 120, 180);
 
   return (
-    <article className="border border-white/10 bg-[#141412] p-4">
-      <h2 className="font-mono text-[11px] uppercase tracking-[0.16em] text-[#c9a84c]">{title}</h2>
+    <article className="rounded-lg border border-white/[0.07] bg-[#121317] p-4">
+      <h2 className="font-mono text-[11px] uppercase tracking-[0.16em] text-[#d4af37]">{title}</h2>
 
       <div className="mt-3 flex flex-wrap gap-3 text-xs text-[#d8d3c6]">
         {series.map((entry) => (

@@ -1,35 +1,35 @@
 const ALLIANCE_COLORS = {
-  bnp: "#4a9e7a",
-  jamaat: "#2a6aaa",
-  others: "#c9a84c",
-  neutral: "#475569",
+  bnp: "#2ec486",
+  jamaat: "#3b82f6",
+  others: "#d4af37",
+  neutral: "#64748b",
 } as const;
 
 const ALLIANCE_SOFT_COLORS = {
-  bnp: "rgba(74, 158, 122, 0.14)",
-  jamaat: "rgba(42, 106, 170, 0.14)",
-  others: "rgba(201, 168, 76, 0.14)",
-  neutral: "rgba(71, 85, 105, 0.14)",
+  bnp: "rgba(46, 196, 134, 0.14)",
+  jamaat: "rgba(59, 130, 246, 0.14)",
+  others: "rgba(212, 175, 55, 0.14)",
+  neutral: "rgba(100, 116, 139, 0.14)",
 } as const;
 
 const PARTY_COLORS = {
-  ncp: "#c0572a",
+  ncp: "#e25822",
 } as const;
 
 const PARTY_SOFT_COLORS = {
-  ncp: "rgba(192, 87, 42, 0.14)",
+  ncp: "rgba(226, 88, 34, 0.14)",
 } as const;
 
 const REFERENDUM_COLORS = {
-  yes: "#2f9e44",
-  no: "#d94841",
-  null: "#6b7280",
+  yes: "#10b981",
+  no: "#f43f5e",
+  null: "#64748b",
 } as const;
 
 const REFERENDUM_SOFT_COLORS = {
-  yes: "rgba(47, 158, 68, 0.14)",
-  no: "rgba(217, 72, 65, 0.14)",
-  null: "rgba(107, 114, 128, 0.18)",
+  yes: "rgba(16, 185, 129, 0.14)",
+  no: "rgba(244, 63, 94, 0.14)",
+  null: "rgba(100, 116, 139, 0.16)",
 } as const;
 
 export type AllianceKey = keyof typeof ALLIANCE_COLORS;

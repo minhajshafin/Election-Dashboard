@@ -15,7 +15,7 @@ export function AnalysisSubNav() {
   const pathname = usePathname();
 
   return (
-    <nav className="flex flex-wrap gap-2 px-4 pb-4 sm:px-10">
+    <nav className="flex flex-wrap gap-2 px-4 pb-4 sm:px-10 bg-[#0b0c0e]">
       {ANALYSIS_LINKS.map((link) => {
         const isActive = pathname === link.href;
 
@@ -23,10 +23,10 @@ export function AnalysisSubNav() {
           <Link
             key={link.href}
             href={link.href}
-            className={`rounded border px-3 py-1.5 font-mono text-[10px] uppercase tracking-[0.14em] transition ${
+            className={`rounded-md border px-3 py-1.5 font-mono text-[10px] uppercase tracking-[0.14em] transition ${
               isActive
-                ? "border-[#c9a84c]/70 bg-[#c9a84c]/10 text-[#c9a84c]"
-                : "border-white/15 text-[#9c9888] hover:border-white/35 hover:text-[#f0ece2]"
+                ? "border-[#d4af37]/60 bg-[#d4af37]/10 text-[#d4af37] font-semibold shadow-sm"
+                : "border-white/10 text-[#a1a1aa] hover:border-white/25 hover:text-[#f4f1ea] hover:bg-white/[0.02]"
             }`}
           >
             {link.label}

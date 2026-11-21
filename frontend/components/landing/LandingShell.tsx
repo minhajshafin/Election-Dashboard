@@ -282,47 +282,56 @@ export function LandingShell({ summaryDataset, constituencyDataset }: LandingShe
   ];
 
   return (
-    <main className="min-h-screen bg-[#0d0d0b] text-[#f0ece2]">
+    <main className="min-h-screen bg-[#0b0c0e] text-[#f4f1ea]">
       <PrimaryNav />
 
       {/* ── Hero banner ──────────────────────────────────────── */}
-      <section className="relative shrink-0 overflow-hidden border-b border-white/8 px-4 py-6 sm:px-10 sm:py-8">
-        <div className="pointer-events-none absolute right-0 top-0 h-full w-1/3 bg-[radial-gradient(ellipse_at_top_right,rgba(201,168,76,0.07),transparent_70%)]" />
-        <p className="relative z-10 font-mono text-[11px] uppercase tracking-[0.24em] text-[#c9a84c]">
-          Bangladesh General Election · National Results
-        </p>
-        <h1
-          className="relative z-10 mt-2 text-2xl font-semibold leading-tight text-[#f0ece2] sm:text-4xl"
-          style={{ fontFamily: "var(--font-playfair), serif" }}
-        >
-          National Election <em className="text-[#c9a84c]">Dashboard</em>
-        </h1>
+      <section className="relative shrink-0 overflow-hidden border-b border-white/[0.07] px-4 py-5 sm:px-10 sm:py-6">
+        <div className="pointer-events-none absolute right-0 top-0 h-full w-1/3 bg-[radial-gradient(ellipse_at_top_right,rgba(212,175,55,0.08),transparent_70%)]" />
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <div>
+            <p className="relative z-10 font-mono text-[10px] uppercase tracking-[0.24em] text-[#d4af37]">
+              Bangladesh General Election · 2026 National Results
+            </p>
+            <h1
+              className="relative z-10 mt-1 text-2xl font-semibold leading-tight text-[#f4f1ea] sm:text-3xl lg:text-4xl"
+              style={{ fontFamily: "var(--font-playfair), serif" }}
+            >
+              National Election <em className="text-[#d4af37]">Intelligence</em>
+            </h1>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/20 bg-emerald-500/10 px-3 py-1 font-mono text-[10px] uppercase tracking-wider text-emerald-400">
+              <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
+              Verified Pre-rendered
+            </span>
+          </div>
+        </div>
       </section>
 
       {/* ── Stats strip ──────────────────────────────────────── */}
-      <section className="shrink-0 grid border-b border-white/8 sm:grid-cols-2 lg:grid-cols-5">
+      <section className="shrink-0 grid border-b border-white/[0.07] bg-[#0e0f12]/50 sm:grid-cols-2 lg:grid-cols-5">
         {summaryCards.map((card) => (
-          <article key={card.label} className="border-r border-white/8 px-4 py-3 last:border-r-0 sm:px-6">
-            <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-[#5a5848]">{card.label}</p>
+          <article key={card.label} className="border-r border-white/[0.07] px-4 py-3 last:border-r-0 sm:px-6">
+            <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-[#71717a]">{card.label}</p>
             <p
-              className={`mt-1 text-[1.6rem] font-bold leading-none ${card.label === "Top Party" ? "text-[#c9a84c]" : "text-[#f0ece2]"}`}
-              style={{ fontFamily: "var(--font-playfair), serif" }}
+              className={`details-number mt-1 text-[1.65rem] font-bold leading-none ${card.label === "Top Party" ? "text-[#d4af37]" : "text-[#f4f1ea]"}`}
             >
               {card.value}
             </p>
-            <p className="mt-1 text-xs text-[#9c9888]">{card.detail}</p>
+            <p className="mt-1 text-xs text-[#a1a1aa]">{card.detail}</p>
           </article>
         ))}
       </section>
 
       {/* ── Main content (fills remaining viewport) ──────────── */}
-      <section className="flex h-screen overflow-hidden border-t border-white/8">
+      <section className="flex h-screen overflow-hidden border-t border-white/[0.07]">
 
         {/* Left column: division tabs + map + seat list */}
-        <div className="flex min-w-0 flex-1 flex-col border-r border-white/8">
+        <div className="flex min-w-0 flex-1 flex-col border-r border-white/[0.07]">
 
           {/* Division filter tabs */}
-          <div className="flex h-11 shrink-0 items-center overflow-x-auto border-b border-white/8 px-2 sm:px-6">
+          <div className="flex h-11 shrink-0 items-center overflow-x-auto border-b border-white/[0.07] bg-[#0b0c0e] px-2 sm:px-6">
             {divisions.map((division) => {
               const active = division.name === activeDivision;
               return (
@@ -330,13 +339,20 @@ export function LandingShell({ summaryDataset, constituencyDataset }: LandingShe
                   key={division.name}
                   type="button"
                   onClick={() => handleDivisionChange(division.name)}
-                  className={`group flex h-11 items-center whitespace-nowrap border-b-2 px-3 font-mono text-[11px] tracking-[0.08em] transition ${
+                  className={`group flex h-11 items-center gap-1.5 whitespace-nowrap border-b-2 px-3 font-mono text-[11px] tracking-wide transition ${
                     active
-                      ? "border-[#c9a84c] text-[#f0ece2]"
-                      : "border-transparent text-[#5a5848] hover:text-[#9c9888]"
+                      ? "border-[#d4af37] text-[#f4f1ea] font-medium"
+                      : "border-transparent text-[#71717a] hover:text-[#d4d4d8]"
                   }`}
                 >
                   <span>{division.name}</span>
+                  <span
+                    className={`rounded px-1.5 py-0.2 text-[9px] ${
+                      active ? "bg-[#d4af37]/20 text-[#d4af37]" : "bg-white/5 text-[#52525b]"
+                    }`}
+                  >
+                    {division.count}
+                  </span>
                 </button>
               );
             })}
@@ -346,17 +362,17 @@ export function LandingShell({ summaryDataset, constituencyDataset }: LandingShe
           <div className="flex min-h-0 flex-1">
 
             {/* Map panel */}
-            <div className="flex min-w-0 flex-1 flex-col">
-              <div className="shrink-0 border-b border-white/8 px-4 py-2.5 sm:px-5">
-                <div className="flex flex-wrap items-center justify-between gap-2">
-                  <div className="inline-flex overflow-hidden rounded border border-white/15 bg-[#121210]">
+            <div className="flex min-w-0 flex-1 flex-col bg-[#0b0c0e]">
+              <div className="shrink-0 border-b border-white/[0.07] bg-[#0e0f12]/60 px-4 py-2.5 sm:px-5">
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <div className="inline-flex rounded-md border border-white/10 bg-[#0b0c0e] p-0.5">
                     <button
                       type="button"
                       onClick={() => setMapMode("election")}
-                      className={`px-3 py-1.5 font-mono text-[11px] uppercase tracking-widest transition ${
+                      className={`rounded px-3 py-1 font-mono text-[11px] uppercase tracking-wider transition ${
                         mapMode === "election"
-                          ? "bg-[#c9a84c] text-[#0d0d0b]"
-                          : "text-[#9c9888] hover:bg-white/5"
+                          ? "bg-[#d4af37] text-[#0b0c0e] font-semibold shadow-sm"
+                          : "text-[#a1a1aa] hover:text-white"
                       }`}
                     >
                       Election
@@ -364,34 +380,38 @@ export function LandingShell({ summaryDataset, constituencyDataset }: LandingShe
                     <button
                       type="button"
                       onClick={() => setMapMode("referendum")}
-                      className={`px-3 py-1.5 font-mono text-[11px] uppercase tracking-widest transition ${
+                      className={`rounded px-3 py-1 font-mono text-[11px] uppercase tracking-wider transition ${
                         mapMode === "referendum"
-                          ? "bg-[#c9a84c] text-[#0d0d0b]"
-                          : "text-[#9c9888] hover:bg-white/5"
+                          ? "bg-[#d4af37] text-[#0b0c0e] font-semibold shadow-sm"
+                          : "text-[#a1a1aa] hover:text-white"
                       }`}
                     >
                       Referendum
                     </button>
                   </div>
-                  <p className="font-mono text-[10px] uppercase tracking-[0.12em] text-[#5a5848]">
-                    Map Mode: {mapMode === "election" ? "Election" : "Referendum"}
-                  </p>
+                  <div className="flex items-center gap-2">
+                    <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-[#71717a]">
+                      Cartography: Esri Dark Canvas
+                    </span>
+                  </div>
                 </div>
-                <div className="mt-2">
-                  <label className="sr-only" htmlFor="seatSearch">
-                    Search constituency, district, division, party, or candidate
-                  </label>
+                <div className="relative mt-2">
+                  <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-[#52525b]">
+                    <svg className="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor">
+                      <path fillRule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clipRule="evenodd" />
+                    </svg>
+                  </div>
                   <input
                     id="seatSearch"
                     type="search"
                     value={searchValue}
                     onChange={(event) => handleSearchChange(event.target.value)}
-                    placeholder="Search constituency, district, division..."
-                    className="w-full border border-white/15 bg-[#0d0d0b] px-3 py-2 text-sm text-[#9c9888] outline-none transition focus:border-[#c9a84c] focus:text-[#f0ece2]"
+                    placeholder="Search by constituency, district, division, winner..."
+                    className="w-full rounded-md border border-white/10 bg-[#0b0c0e] py-1.5 pl-9 pr-3 font-mono text-xs text-[#f4f1ea] placeholder-[#52525b] outline-none transition focus:border-[#d4af37]/60 focus:ring-1 focus:ring-[#d4af37]/40"
                   />
                 </div>
               </div>
-              <div className="min-h-0 flex-1 px-4 pb-4 sm:px-5 sm:pb-5">
+              <div className="min-h-0 flex-1 relative">
                 <BangladeshMap
                   seats={sortedSeats}
                   mode={mapMode}
@@ -405,10 +425,10 @@ export function LandingShell({ summaryDataset, constituencyDataset }: LandingShe
             </div>
 
             {/* Seat list panel */}
-            <div className="flex w-70 shrink-0 flex-col border-l border-white/8">
-              <div className="flex shrink-0 items-center justify-between border-b border-white/8 px-4 py-2.5">
-                <p className="font-mono text-[12px] py-2 uppercase tracking-[0.18em] text-[#5a5848]">Constituencies</p>
-                <span className="rounded bg-[#c9a84c]/15 px-2 py-0.5 font-mono text-[11px] text-[#c9a84c]">
+            <div className="flex w-72 shrink-0 flex-col border-l border-white/[0.07] bg-[#0c0d10]">
+              <div className="flex shrink-0 items-center justify-between border-b border-white/[0.07] px-4 py-2.5">
+                <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-[#71717a]">Constituencies</p>
+                <span className="rounded bg-[#d4af37]/15 px-2 py-0.5 font-mono text-[10px] font-semibold text-[#d4af37]">
                   {filteredSeats.length}
                 </span>
               </div>
@@ -423,17 +443,22 @@ export function LandingShell({ summaryDataset, constituencyDataset }: LandingShe
                       }}
                       type="button"
                       onClick={() => setSelectedSeatKey(seat.seat_key)}
-                      className={`flex w-full items-center gap-3 border-b border-white/8 px-4 py-2.5 text-left transition ${
-                        selected ? "border-l-2 border-l-[#c9a84c] bg-[#c9a84c]/10" : "hover:bg-[#1a1a18]"
+                      className={`flex w-full items-center gap-3 border-b border-white/[0.04] px-4 py-2.5 text-left transition ${
+                        selected
+                          ? "border-l-2 border-l-[#d4af37] bg-[#d4af37]/10"
+                          : "hover:bg-white/[0.03]"
                       }`}
                     >
                       <span
                         className="mt-0.5 h-2 w-2 shrink-0 rounded-full"
-                        style={{ backgroundColor: getSeatDisplayColor(seat) }}
+                        style={{
+                          backgroundColor: getSeatDisplayColor(seat),
+                          boxShadow: selected ? `0 0 8px ${getSeatDisplayColor(seat)}` : undefined,
+                        }}
                       />
                       <div className="min-w-0">
-                        <p className="truncate text-sm text-[#f0ece2]">{seat.constituency}</p>
-                        <p className="truncate font-mono text-[10px] text-[#5a5848]">
+                        <p className="truncate text-sm font-medium text-[#f4f1ea]">{seat.constituency}</p>
+                        <p className="truncate font-mono text-[10px] text-[#71717a]">
                           {seat.district} · {seat.division}
                         </p>
                       </div>
@@ -441,7 +466,7 @@ export function LandingShell({ summaryDataset, constituencyDataset }: LandingShe
                   );
                 })}
                 {filteredSeats.length === 0 && (
-                  <div className="px-4 py-6 text-sm text-[#5a5848]">No seats match the current filters.</div>
+                  <div className="px-4 py-6 font-mono text-xs text-[#71717a]">No seats match the current filters.</div>
                 )}
               </div>
             </div>
@@ -450,44 +475,50 @@ export function LandingShell({ summaryDataset, constituencyDataset }: LandingShe
         </div>
 
         {/* Right column: constituency detail panel */}
-        <aside className="flex w-170 shrink-0 flex-col overflow-y-auto border-l border-white/8 bg-[#0f0f0d] px-5 py-5">
+        <aside className="flex w-160 shrink-0 flex-col overflow-y-auto border-l border-white/[0.07] bg-[#0e0f13] px-5 py-5">
           {selectedSeat ? (
             <div className="flex flex-col gap-5">
               <div>
-                <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-[#5a5848]">
-                  {selectedSeat.district} - {selectedSeat.division} Division
+                <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-[#71717a]">
+                  {selectedSeat.district} · {selectedSeat.division} Division
                 </p>
                 <h3
-                  className="mt-2 text-[1.6rem] font-semibold leading-tight text-[#f0ece2]"
+                  className="mt-1 text-[1.65rem] font-semibold leading-tight text-[#f4f1ea]"
                   style={{ fontFamily: "var(--font-playfair), serif" }}
                 >
                   {selectedSeat.constituency}
                 </h3>
                 <div
-                  className="mt-3 inline-flex items-center gap-2 border px-3 py-1.5"
+                  className="mt-2.5 inline-flex items-center gap-2 rounded border px-3 py-1"
                   style={{
                     backgroundColor: getSeatDisplaySoftColor(selectedSeat),
-                    borderColor: `${getSeatDisplayColor(selectedSeat)}66`,
+                    borderColor: `${getSeatDisplayColor(selectedSeat)}55`,
                   }}
                 >
-                  <span className="h-2 w-2 rounded-full" style={{ backgroundColor: getSeatDisplayColor(selectedSeat) }} />
-                  <span className="font-mono text-[13px] tracking-[0.08em]" style={{ color: getSeatDisplayColor(selectedSeat) }}>
+                  <span
+                    className="h-2 w-2 rounded-full"
+                    style={{
+                      backgroundColor: getSeatDisplayColor(selectedSeat),
+                      boxShadow: `0 0 6px ${getSeatDisplayColor(selectedSeat)}`,
+                    }}
+                  />
+                  <span className="font-mono text-xs tracking-wide" style={{ color: getSeatDisplayColor(selectedSeat) }}>
                     {mapMode === "election"
                       ? selectedSeatStatus?.isPostponed
                         ? selectedSeatStatus.label
-                        : `${selectedSeat.winner_party} - ${selectedSeat.winner_candidate}`
+                        : `${selectedSeat.winner_party} · ${selectedSeat.winner_candidate}`
                       : getReferendumBadgeLabel(selectedSeat)}
                   </span>
                 </div>
                 {mapMode === "election" && selectedSeatStatus?.isPostponed ? (
-                  <p className="mt-2 text-xs text-[#d9c38d]">Reason: {selectedSeatStatus.reason}</p>
+                  <p className="mt-2 text-xs text-amber-300">Reason: {selectedSeatStatus.reason}</p>
                 ) : mapMode === "election" ? (
-                  <p className="mt-2 text-xs text-[#9c9888]">
-                    Runner-up: <span className="text-[#f0ece2]">{selectedSeat.runner_up_candidate}</span> ({selectedSeat.runner_up_party})
+                  <p className="mt-2 text-xs text-[#a1a1aa]">
+                    Runner-up: <span className="text-[#f4f1ea]">{selectedSeat.runner_up_candidate}</span> ({selectedSeat.runner_up_party})
                   </p>
                 ) : (
-                  <p className="mt-2 text-xs text-[#9c9888]">
-                    Referendum Votes: <span className="text-[#f0ece2]">Yes {formatNumber(selectedSeat.referendum_yes)} · No {formatNumber(selectedSeat.referendum_no)}</span>
+                  <p className="mt-2 text-xs text-[#a1a1aa]">
+                    Referendum Votes: <span className="text-[#f4f1ea]">Yes {formatNumber(selectedSeat.referendum_yes)} · No {formatNumber(selectedSeat.referendum_no)}</span>
                   </p>
                 )}
               </div>
@@ -497,11 +528,11 @@ export function LandingShell({ summaryDataset, constituencyDataset }: LandingShe
                 mode={mapMode}
               />
 
-              <section className="border border-white/10">
-                <div className="border-b border-white/10 bg-[#141412] px-4 py-2 font-mono text-[10px] uppercase tracking-[0.18em] text-[#5a5848]">
+              <section className="rounded-lg border border-white/[0.07] bg-[#121317] overflow-hidden shadow-sm">
+                <div className="border-b border-white/[0.07] bg-[#16171c] px-4 py-2 font-mono text-[10px] uppercase tracking-[0.18em] text-[#d4af37]">
                   Election Result
                 </div>
-                <div className="grid grid-cols-2 gap-3 p-4">
+                <div className="grid grid-cols-2 gap-2.5 p-3.5">
                   {[
                     { label: "Election Status", value: selectedSeatStatus?.label ?? "Completed" },
                     { label: "Winner Votes", value: formatNumber(selectedSeat.winner_votes) },
@@ -515,51 +546,47 @@ export function LandingShell({ summaryDataset, constituencyDataset }: LandingShe
                       ? [{ label: "Postponement Reason", value: selectedSeatStatus.reason ?? "N/A" }]
                       : []),
                   ].map((item) => (
-                    <article key={item.label} className="border border-white/10 bg-[#141412] px-3 py-2">
-                      <p className="font-mono text-[9px] uppercase tracking-[0.15em] text-[#5a5848]">{item.label}</p>
-                      <p
-                        className="details-number mt-1 text-lg font-semibold text-[#f0ece2]"
-                      >
+                    <article key={item.label} className="rounded border border-white/[0.05] bg-[#17181e] px-3 py-2">
+                      <p className="font-mono text-[9px] uppercase tracking-[0.15em] text-[#71717a]">{item.label}</p>
+                      <p className="details-number mt-1 text-base font-semibold text-[#f4f1ea]">
                         {item.value}
                       </p>
                     </article>
                   ))}
                 </div>
                 {selectedSeatCompetitivenessBadge && (
-                  <div className="px-4 pb-4">
+                  <div className="px-3.5 pb-3.5">
                     <div
-                      className="inline-flex items-center gap-2 border px-3 py-1.5 font-mono text-[11px] uppercase tracking-[0.12em]"
+                      className="inline-flex items-center gap-2 rounded border px-3 py-1 font-mono text-[10px] uppercase tracking-wider"
                       style={{
                         backgroundColor: selectedSeatCompetitivenessBadge.backgroundColor,
                         borderColor: selectedSeatCompetitivenessBadge.borderColor,
                         color: selectedSeatCompetitivenessBadge.textColor,
                       }}
                     >
-                      <span>Competitiveness</span>
+                      <span className="text-[#a1a1aa]">Competitiveness:</span>
                       <span className="font-semibold">{selectedSeatCompetitivenessBadge.label}</span>
                     </div>
                   </div>
                 )}
               </section>
 
-              <section className="border border-white/10">
-                <div className="border-b border-white/10 bg-[#141412] px-4 py-2 font-mono text-[10px] uppercase tracking-[0.18em] text-[#5a5848]">
+              <section className="rounded-lg border border-white/[0.07] bg-[#121317] overflow-hidden shadow-sm">
+                <div className="border-b border-white/[0.07] bg-[#16171c] px-4 py-2 font-mono text-[10px] uppercase tracking-[0.18em] text-[#d4af37]">
                   Constituency Profile
                 </div>
-                <div className="grid grid-cols-2 gap-3 p-4">
+                <div className="grid grid-cols-2 gap-2.5 p-3.5">
                   {[
                     { label: "Population", value: formatNumber(selectedSeat.Population_Total) },
                     { label: "Households", value: formatNumber(selectedSeat.Household_Total) },
-                    { label: "Population Density", value: selectedSeat.pop_density === null ? "N/A" : `${formatNumber(selectedSeat.pop_density)}/km2` },
+                    { label: "Population Density", value: selectedSeat.pop_density === null ? "N/A" : `${formatNumber(selectedSeat.pop_density)}/km²` },
                     { label: "Urban Population", value: formatNumber(selectedSeat.pop_urban) },
                     { label: "Rural Population", value: formatNumber(selectedSeatRuralPopulation) },
                     { label: "Female Share", value: formatPercent(selectedSeatFemalePct) },
                   ].map((item) => (
-                    <article key={item.label} className="border border-white/10 bg-[#141412] px-3 py-2">
-                      <p className="font-mono text-[9px] uppercase tracking-[0.15em] text-[#5a5848]">{item.label}</p>
-                      <p
-                        className="details-number mt-1 text-lg font-semibold text-[#f0ece2]"
-                      >
+                    <article key={item.label} className="rounded border border-white/[0.05] bg-[#17181e] px-3 py-2">
+                      <p className="font-mono text-[9px] uppercase tracking-[0.15em] text-[#71717a]">{item.label}</p>
+                      <p className="details-number mt-1 text-base font-semibold text-[#f4f1ea]">
                         {item.value}
                       </p>
                     </article>
@@ -567,11 +594,11 @@ export function LandingShell({ summaryDataset, constituencyDataset }: LandingShe
                 </div>
               </section>
 
-              <section className="border border-white/10">
-                <div className="border-b border-white/10 bg-[#141412] px-4 py-2 font-mono text-[10px] uppercase tracking-[0.18em] text-[#5a5848]">
-                  Key Indicators vs National
+              <section className="rounded-lg border border-white/[0.07] bg-[#121317] overflow-hidden shadow-sm">
+                <div className="border-b border-white/[0.07] bg-[#16171c] px-4 py-2 font-mono text-[10px] uppercase tracking-[0.18em] text-[#d4af37]">
+                  Key Indicators vs National Baseline
                 </div>
-                <div className="space-y-3 p-4">
+                <div className="space-y-3 p-3.5">
                   {(
                     [
                       ["Voter Turnout", selectedSeat.turnout_pct, NATIONAL_TURNOUT_BASELINE],
@@ -590,20 +617,20 @@ export function LandingShell({ summaryDataset, constituencyDataset }: LandingShe
 
                     return (
                       <div key={label}>
-                        <div className="flex items-center justify-between gap-2 text-xs text-[#9c9888]">
+                        <div className="flex items-center justify-between gap-2 text-xs text-[#a1a1aa]">
                           <span>{label}</span>
-                          <span className="details-number text-[11px]">{formatPercent(seatValue)}</span>
+                          <span className="details-number text-[11px] font-medium text-[#f4f1ea]">{formatPercent(seatValue)}</span>
                         </div>
-                        <div className="mt-1.5 h-1.5 overflow-hidden bg-[#222220]">
+                        <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-[#1e2026]">
                           <div
-                            className="h-full"
+                            className="h-full rounded-full transition-all duration-500"
                             style={{
                               width: `${width}%`,
-                              background: `linear-gradient(90deg, ${getSeatDisplayColor(selectedSeat)}, #c9a84c)`,
+                              background: `linear-gradient(90deg, ${getSeatDisplayColor(selectedSeat)}, #d4af37)`,
                             }}
                           />
                         </div>
-                        <p className="details-number mt-0.5 text-[10px] text-[#5a5848]">{comparison} vs national</p>
+                        <p className="details-number mt-0.5 text-[9px] text-[#71717a]">{comparison} vs national average</p>
                       </div>
                     );
                   })}
@@ -611,17 +638,40 @@ export function LandingShell({ summaryDataset, constituencyDataset }: LandingShe
               </section>
             </div>
           ) : (
-            <div className="flex flex-col justify-center gap-3 px-10 py-10">
-              <p className="font-mono text-[25px] uppercase tracking-[0.18em] text-[#5a5848]">No Selection</p>
-              <h3
-                className="max-w-90 text-3xl font-medium leading-snug text-[#9c9888]"
-                style={{ fontFamily: "var(--font-playfair), serif" }}
-              >
-                Select a seat from the list or map
-              </h3>
-              <p className="max-w-60 leading-6 text-[#5a5848]">
-                View candidate info, election stats, and socioeconomic comparison against national averages.
+            <div className="flex flex-col justify-center gap-4 px-6 py-12">
+              <div className="flex h-10 w-10 items-center justify-center rounded-full border border-[#d4af37]/30 bg-[#d4af37]/10 text-[#d4af37]">
+                <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" />
+                </svg>
+              </div>
+              <div>
+                <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-[#d4af37]">Electoral Inspector</p>
+                <h3
+                  className="mt-1 text-2xl font-semibold leading-snug text-[#f4f1ea]"
+                  style={{ fontFamily: "var(--font-playfair), serif" }}
+                >
+                  Select a constituency to inspect details
+                </h3>
+              </div>
+              <p className="text-xs leading-relaxed text-[#71717a]">
+                Explore constituency geometry, winning party margins, runner-up candidates, and compare 19 socio-economic indicators directly against national baselines.
               </p>
+              <div className="mt-2 space-y-2 rounded-lg border border-white/[0.06] bg-[#121317] p-3">
+                <p className="font-mono text-[9px] uppercase tracking-wider text-[#a1a1aa]">Quick Summary</p>
+                <div className="flex items-center justify-between text-xs text-[#71717a]">
+                  <span>Total Constituencies:</span>
+                  <span className="font-mono text-[#f4f1ea]">300</span>
+                </div>
+                <div className="flex items-center justify-between text-xs text-[#71717a]">
+                  <span>Majority Threshold:</span>
+                  <span className="font-mono text-[#d4af37]">151 seats</span>
+                </div>
+                <div className="flex items-center justify-between text-xs text-[#71717a]">
+                  <span>Competitive Races (&lt;10%):</span>
+                  <span className="font-mono text-[#f4f1ea]">{summary.competitive_seats.count} seats</span>
+                </div>
+              </div>
             </div>
           )}
         </aside>

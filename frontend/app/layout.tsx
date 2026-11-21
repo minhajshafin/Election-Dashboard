@@ -1,36 +1,11 @@
 import type { Metadata } from "next";
-import { IBM_Plex_Mono, Inter, Playfair_Display, Source_Serif_4 } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import "leaflet/dist/leaflet.css";
 import "./globals.css";
 
-const headlineSerif = Playfair_Display({
-  variable: "--font-playfair",
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
-});
-
-const bodySerif = Source_Serif_4({
-  variable: "--font-source-serif",
-  subsets: ["latin"],
-  weight: ["300", "400", "600"],
-});
-
-const uiMono = IBM_Plex_Mono({
-  variable: "--font-plex-mono",
-  subsets: ["latin"],
-  weight: ["400", "500"],
-});
-
-const detailsInter = Inter({
-  variable: "--font-inter",
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
-});
-
 export const metadata: Metadata = {
-  title: "Bangladesh Election Dashboard",
-  description: "Interactive dashboard for Bangladesh National Election 2026 results and analysis.",
+  title: "Bangladesh Election Dashboard 2026 | National Results & Intelligence",
+  description: "Interactive data journalism and predictive intelligence dashboard for Bangladesh National Election 2026.",
 };
 
 export default function RootLayout({
@@ -40,12 +15,19 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body
-        className={`${headlineSerif.variable} ${bodySerif.variable} ${uiMono.variable} ${detailsInter.variable} antialiased`}
-      >
+      <head>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link
+          href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap"
+          rel="stylesheet"
+        />
+      </head>
+      <body className="antialiased">
         {children}
         <Analytics />
       </body>
     </html>
   );
 }
+
