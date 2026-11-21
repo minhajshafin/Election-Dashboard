@@ -10,13 +10,7 @@ export const metadata: Metadata = {
   icons: {
     icon: [
       {
-        url: "/logo-dark.svg",
-        media: "(prefers-color-scheme: light)",
-        type: "image/svg+xml",
-      },
-      {
         url: "/logo-light.svg",
-        media: "(prefers-color-scheme: dark)",
         type: "image/svg+xml",
       },
       {
@@ -71,8 +65,7 @@ export default function RootLayout({
             `,
           }}
         />
-        <link rel="icon" href="/logo-dark.svg" type="image/svg+xml" media="(prefers-color-scheme: light)" />
-        <link rel="icon" href="/logo-light.svg" type="image/svg+xml" media="(prefers-color-scheme: dark)" />
+        <link rel="icon" href="/logo-light.svg" type="image/svg+xml" />
         <link rel="icon" href="/favicon.ico" sizes="any" />
         <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
