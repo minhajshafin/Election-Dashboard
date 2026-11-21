@@ -30,17 +30,9 @@ export function PrimaryNav() {
   };
 
   return (
-    <header className="sticky top-0 z-50 flex h-[42px] shrink-0 items-center justify-between border-b border-[var(--border)] bg-[var(--bg-surface)] px-4 sm:px-6 relative">
-      {/* Left side: Tagline */}
-      <div className="flex min-w-0 items-center">
-        <span className="hidden font-mono text-[10px] uppercase tracking-[0.14em] text-[var(--text-muted)] lg:block">
-          National Results &amp; Intelligence
-        </span>
-      </div>
-
-      {/* Center: Title & Logo */}
-      <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center justify-center pointer-events-auto">
-        <Link href="/" className="flex items-center gap-2.5 group leading-none">
+    <header className="sticky top-0 z-50 flex h-[42px] shrink-0 items-center justify-between border-b border-[var(--border)] bg-[var(--bg-surface)] px-4 sm:px-6">
+      <div className="flex min-w-0 items-center gap-3 sm:gap-5">
+        <Link href="/" className="flex items-center gap-2.5 group">
           <div className="relative flex h-5 w-5 shrink-0 items-center justify-center">
             {/* Light mode: dark/black icon */}
             <img
@@ -56,16 +48,19 @@ export function PrimaryNav() {
             />
           </div>
           <span
-            className="truncate text-base font-semibold tracking-tight text-[var(--text-primary)] group-hover:opacity-90 transition-opacity leading-none"
+            className="truncate text-base font-semibold tracking-tight text-[var(--text-primary)] group-hover:opacity-90 transition-opacity leading-none -translate-y-[1.5px]"
             style={{ fontFamily: "var(--font-serif)" }}
           >
             Bangladesh Election 2026
           </span>
         </Link>
+        <span className="hidden h-3 w-px bg-[var(--border)] sm:block" />
+        <span className="hidden font-mono text-[10px] uppercase tracking-[0.14em] text-[var(--text-muted)] sm:block">
+          National Results & Intelligence
+        </span>
       </div>
 
-      {/* Right side: Navigation & Theme Toggle */}
-      <div className="flex h-full items-center ml-auto">
+      <div className="flex h-full items-center">
         <nav className="flex h-full items-center">
           {LINKS.map((link) => {
             const normalizedPrefix = link.matchPrefix.replace(/\/$/, "") || "/";
