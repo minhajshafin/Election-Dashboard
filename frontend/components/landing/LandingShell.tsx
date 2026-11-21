@@ -347,6 +347,7 @@ export function LandingShell({ summaryDataset, constituencyDataset }: LandingShe
                   seats={sortedSeats}
                   mode={mapMode}
                   selectedSeatKey={selectedSeatKey}
+                  activeDivision={activeDivision}
                   onSelectSeat={(seatKey) => {
                     setSelectedSeatKey(seatKey);
                   }}
@@ -379,24 +380,24 @@ export function LandingShell({ summaryDataset, constituencyDataset }: LandingShe
                       }}
                       type="button"
                       onClick={() => setSelectedSeatKey(seat.seat_key)}
-                      className={`w-full text-left px-3 py-2 flex items-center gap-2.5 transition-colors rounded-none cursor-pointer ${
+                      className={`w-full text-left px-3 py-2 flex items-center justify-between gap-2.5 transition-colors rounded-none cursor-pointer ${
                         selected
                           ? "border border-[var(--border-active)] bg-[var(--bg-subtle)]"
                           : "border border-transparent hover:bg-[var(--bg-subtle)]"
                       }`}
                     >
-                      <span
-                        className="h-2 w-2 shrink-0 rounded-full"
-                        style={{ backgroundColor: displayColor }}
-                      />
-                      <div className="min-w-0 flex-1">
-                        <p className="truncate text-xs font-medium text-[var(--text-primary)] leading-snug">
+                      <div className="flex items-center gap-2.5 min-w-0">
+                        <span
+                          className="h-2 w-2 shrink-0 rounded-full"
+                          style={{ backgroundColor: displayColor }}
+                        />
+                        <span className="truncate text-xs font-medium text-[var(--text-primary)]">
                           {seat.constituency}
-                        </p>
-                        <p className="truncate font-mono text-[9px] text-[var(--text-muted)] mt-0.5">
-                          {seat.district} · {seat.division}
-                        </p>
+                        </span>
                       </div>
+                      <span className="font-mono text-[10px] text-[var(--text-muted)] shrink-0">
+                        {seat.division}
+                      </span>
                     </button>
                   );
                 })}

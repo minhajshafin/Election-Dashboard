@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { GeoJsonObject } from "geojson";
 import L from "leaflet";
 import { GeoJSON, MapContainer, TileLayer, useMap, useMapEvents } from "react-leaflet";
@@ -19,6 +19,7 @@ interface BangladeshMapProps {
   seats: ConstituencyRow[];
   mode: "election" | "referendum";
   selectedSeatKey: string | null;
+  activeDivision?: string;
   onSelectSeat: (seatKey: string) => void;
   onClearSelection: () => void;
 }
@@ -61,6 +62,68 @@ function FlyToSelectedSeat({ feature }: { feature: BangladeshGeoFeature | null }
       });
     }
   }, [feature, map]);
+
+  return null;
+}
+
+function FlyToActiveDivision({
+  activeDivision,
+  geoJson,
+  getSeatForFeature,
+}: {
+  activeDivision: string | undefined;
+  geoJson: BangladeshGeoJson | null;
+  getSeatForFeature: (feature?: BangladeshGeoFeature) => ConstituencyRow | null;
+}) {
+  const map = useMap();
+  const prevDivisionRef = useRef<string | undefined>(undefined);
+
+  useEffect(() => {
+    if (!geoJson || !activeDivision) {
+      return;
+    }
+
+    if (prevDivisionRef.current === activeDivision) {
+      return;
+    }
+    const isInitialMount = prevDivisionRef.current === undefined;
+    prevDivisionRef.current = activeDivision;
+
+    if (isInitialMount && activeDivision === "All Divisions") {
+      return;
+    }
+
+    if (activeDivision === "All Divisions") {
+      const bounds = L.geoJSON(geoJson as GeoJsonObject).getBounds();
+      if (bounds.isValid()) {
+        map.flyToBounds(bounds, {
+          padding: [4, 4],
+          duration: 0.8,
+          easeLinearity: 0.25,
+        });
+      }
+      return;
+    }
+
+    const divisionFeatures = geoJson.features.filter((feature) => {
+      const seat = getSeatForFeature(feature);
+      return seat?.division === activeDivision;
+    });
+
+    if (divisionFeatures.length > 0) {
+      const collection: BangladeshGeoJson = {
+        type: "FeatureCollection",
+        features: divisionFeatures,
+      };
+      const bounds = L.geoJSON(collection as unknown as GeoJsonObject).getBounds();
+      if (bounds.isValid()) {
+        map.flyToBounds(bounds.pad(0.06), {
+          duration: 0.8,
+          easeLinearity: 0.25,
+        });
+      }
+    }
+  }, [activeDivision, geoJson, getSeatForFeature, map]);
 
   return null;
 }
@@ -141,6 +204,7 @@ export function BangladeshMap({
   seats,
   mode,
   selectedSeatKey,
+  activeDivision,
   onSelectSeat,
   onClearSelection,
 }: BangladeshMapProps) {
@@ -308,6 +372,17 @@ export function BangladeshMap({
     }) ?? null;
   }, [geoJson, getSeatForFeature, selectedSeatKey]);
 
+  const activeDivisionFeatures = useMemo(() => {
+    if (!geoJson || !activeDivision || activeDivision === "All Divisions") {
+      return [];
+    }
+
+    return geoJson.features.filter((feature) => {
+      const seat = getSeatForFeature(feature);
+      return seat?.division === activeDivision;
+    });
+  }, [geoJson, activeDivision, getSeatForFeature]);
+
   return (
     <div className="relative h-full w-full overflow-hidden bg-[var(--bg-canvas)]">
       {!geoJson ? (
@@ -332,6 +407,11 @@ export function BangladeshMap({
         >
           <FitBoundsAfterResize geoJson={geoJson} />
           <FlyToSelectedSeat feature={selectedFeature} />
+          <FlyToActiveDivision
+            activeDivision={activeDivision}
+            geoJson={geoJson}
+            getSeatForFeature={getSeatForFeature}
+          />
           <MapZoomControls geoJson={geoJson} />
           <MapBackgroundReset onClearSelection={onClearSelection} />
 
@@ -347,17 +427,21 @@ export function BangladeshMap({
           />
 
           <GeoJSON
-            key={`features-${theme}`}
+            key={`features-${theme}-${activeDivision ?? "all"}`}
             data={geoJson as GeoJsonObject}
             style={(feature) => {
               const seat = getSeatForFeature(feature as BangladeshGeoFeature | undefined);
+              const isOtherDivision =
+                activeDivision && activeDivision !== "All Divisions" && seat && seat.division !== activeDivision;
 
               return {
                 color: theme === "dark" ? "rgba(255,255,255,0.18)" : "rgba(0,0,0,0.16)",
                 weight: 0.5,
                 fillColor: getSeatFillColor(seat),
-                fillOpacity: seat ? fillOpacity : emptyFillOpacity,
-                opacity: 1,
+                fillOpacity: isOtherDivision
+                  ? (seat ? fillOpacity : emptyFillOpacity) * 0.22
+                  : (seat ? fillOpacity : emptyFillOpacity),
+                opacity: isOtherDivision ? 0.35 : 1,
               };
             }}
             onEachFeature={(feature, layer) => {
@@ -403,6 +487,25 @@ export function BangladeshMap({
               });
             }}
           />
+
+          {activeDivisionFeatures.length > 0 ? (
+            <GeoJSON
+              key={`division-outline-${activeDivision}-${theme}`}
+              data={
+                {
+                  type: "FeatureCollection",
+                  features: activeDivisionFeatures,
+                } as unknown as GeoJsonObject
+              }
+              interactive={false}
+              style={{
+                color: theme === "dark" ? "#f3f4f6" : "#0f172a",
+                weight: 1.8,
+                opacity: 1,
+                fillOpacity: 0,
+              }}
+            />
+          ) : null}
 
           {selectedFeature ? (
             <GeoJSON
