@@ -1,30 +1,49 @@
 @import "tailwindcss";
 
-:root {
-  --background: #0b0c0e;
-  --foreground: #f4f1ea;
-  
-  --font-playfair: 'Playfair Display', Georgia, serif;
-  --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  --font-inter: var(--font-sans);
-  --font-source-serif: var(--font-sans);
-  --font-plex-mono: 'JetBrains Mono', 'IBM Plex Mono', monospace;
+@import "tailwindcss";
 
-  /* Editorial Color Tokens */
-  --bg-obsidian: #0b0c0e;
-  --bg-surface: #121316;
-  --bg-elevated: #18191d;
-  --border-subtle: rgba(255, 255, 255, 0.07);
-  --border-focus: rgba(201, 168, 76, 0.5);
-  --accent-gold: #c9a84c;
-  --accent-gold-soft: rgba(201, 168, 76, 0.12);
+:root {
+  --bg-canvas: #f8f8f7;
+  --bg-surface: #ffffff;
+  --bg-subtle: #f0f0ee;
+  --text-primary: #111111;
+  --text-secondary: #555555;
+  --text-muted: #888888;
+  --border: rgba(0, 0, 0, 0.12);
+  --border-active: #111111;
+  
+  --font-serif: 'Newsreader', Georgia, serif;
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+
+  /* Legacy compatibility aliases */
+  --background: var(--bg-canvas);
+  --foreground: var(--text-primary);
+  --font-playfair: var(--font-serif);
+  --font-source-serif: var(--font-serif);
+  --font-inter: var(--font-sans);
+  --font-plex-mono: var(--font-mono);
+}
+
+[data-theme="dark"] {
+  --bg-canvas: #101114;
+  --bg-surface: #17181c;
+  --bg-subtle: #1f2026;
+  --text-primary: #f0f0f0;
+  --text-secondary: #9c9c9c;
+  --text-muted: #666666;
+  --border: rgba(255, 255, 255, 0.12);
+  --border-active: #f0f0f0;
+
+  --background: var(--bg-canvas);
+  --foreground: var(--text-primary);
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --font-sans: var(--font-sans);
-  --font-mono: var(--font-plex-mono);
+  --font-mono: var(--font-mono);
 }
 
 * {
@@ -33,12 +52,13 @@
 
 html {
   scroll-behavior: smooth;
-  background-color: var(--background);
+  background-color: var(--bg-canvas);
+  color: var(--text-primary);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
+  background: var(--bg-canvas);
+  color: var(--text-primary);
   font-family: var(--font-sans);
   margin: 0;
   -webkit-font-smoothing: antialiased;
@@ -50,76 +70,70 @@ a {
   text-decoration: none;
 }
 
-.leaflet-container {
-  font-family: var(--font-sans);
-  background: #0b0c0e !important;
-}
-
-.leaflet-control-attribution {
-  background: rgba(11, 12, 14, 0.75) !important;
-  color: #52525b !important;
-  font-family: var(--font-plex-mono) !important;
-  font-size: 9px !important;
-  border-top-left-radius: 4px;
-  backdrop-filter: blur(4px);
-}
-
-.leaflet-control-attribution a {
-  color: #71717a !important;
-}
-
-.leaflet-control-attribution a:hover {
-  color: #d4af37 !important;
-}
-
-.leaflet-tooltip {
-  border: 1px solid rgba(255, 255, 255, 0.12) !important;
-  border-radius: 8px !important;
-  background: rgba(11, 12, 14, 0.92) !important;
-  backdrop-filter: blur(12px) !important;
-  color: #f4f1ea !important;
-  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.65), 0 0 0 1px rgba(212, 175, 55, 0.2) !important;
-  padding: 4px 6px !important;
-}
-
-.leaflet-tooltip-top:before {
-  border-top-color: rgba(11, 12, 14, 0.92) !important;
-}
-.leaflet-tooltip-bottom:before {
-  border-bottom-color: rgba(11, 12, 14, 0.92) !important;
-}
-.leaflet-tooltip-left:before {
-  border-left-color: rgba(11, 12, 14, 0.92) !important;
-}
-.leaflet-tooltip-right:before {
-  border-right-color: rgba(11, 12, 14, 0.92) !important;
-}
-
+/* Sharp boxy scrollbars */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 5px;
+  height: 5px;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.15);
-  border-radius: 999px;
+  background: var(--border);
+  border-radius: 0;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(212, 175, 55, 0.4);
+  background: var(--text-muted);
 }
 
 ::-webkit-scrollbar-track {
   background: transparent;
 }
 
+/* Tabular figures */
 .details-number {
-  font-family: var(--font-plex-mono), monospace;
+  font-family: var(--font-mono), monospace;
   font-variant-numeric: tabular-nums;
 }
 
-.leaflet-interactive.selected-seat-outline {
-  stroke-linecap: round;
-  stroke-linejoin: round;
-  filter: drop-shadow(0 0 8px rgba(212, 175, 55, 0.95)) drop-shadow(0 0 16px rgba(212, 175, 55, 0.45));
+/* Leaflet strict sharp styling */
+.leaflet-container {
+  font-family: var(--font-sans);
+  background: var(--bg-canvas) !important;
 }
+
+.leaflet-control-attribution {
+  background: var(--bg-surface) !important;
+  color: var(--text-muted) !important;
+  font-family: var(--font-mono) !important;
+  font-size: 9px !important;
+  border: 1px solid var(--border);
+  border-radius: 0 !important;
+}
+
+.leaflet-control-attribution a {
+  color: var(--text-secondary) !important;
+}
+
+.leaflet-tooltip {
+  border: 1px solid var(--border-active) !important;
+  border-radius: 0 !important;
+  background: var(--bg-surface) !important;
+  color: var(--text-primary) !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12) !important;
+  padding: 6px 10px !important;
+}
+
+.leaflet-tooltip-top:before,
+.leaflet-tooltip-bottom:before,
+.leaflet-tooltip-left:before,
+.leaflet-tooltip-right:before {
+  display: none !important;
+}
+
+/* Sharp solid selected outline (no glow, no drop-shadow) */
+.leaflet-interactive.selected-seat-outline {
+  stroke-linecap: square;
+  stroke-linejoin: miter;
+  filter: none !important;
+}
+

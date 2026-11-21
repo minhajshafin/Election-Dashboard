@@ -6,9 +6,7 @@ import { useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
 import {
   getReferendumSeatColor,
   getReferendumSeatResult,
-  getReferendumSeatSoftColor,
   getSeatColor,
-  getSeatSoftColor,
 } from "@/lib/colors";
 import { getSeatElectionStatus } from "@/lib/electionStatus";
 import type { ConstituencyDataset, ConstituencyRow, SummaryDataset } from "@/types/api";
@@ -16,12 +14,12 @@ import { PrimaryNav } from "@/components/nav/PrimaryNav";
 
 const BangladeshMap = dynamic(() => import("../map/BangladeshMap").then((mod) => mod.BangladeshMap), {
   ssr: false,
-  loading: () => <div className="h-full border border-white/10 bg-[#141412] animate-pulse" />,
+  loading: () => <div className="h-full border border-[var(--border)] bg-[var(--bg-canvas)]" />,
 });
 
 const ConstituencyMiniMap = dynamic(() => import("../map/ConstituencyMiniMap").then((mod) => mod.ConstituencyMiniMap), {
   ssr: false,
-  loading: () => <div className="h-56 border border-white/10 bg-[#141412] animate-pulse" />,
+  loading: () => <div className="h-44 border border-[var(--border)] bg-[var(--bg-canvas)]" />,
 });
 
 interface LandingShellProps {
@@ -35,9 +33,6 @@ const NATIONAL_TURNOUT_BASELINE = 58.2;
 
 interface CompetitivenessBadge {
   label: "Highly Contested" | "Competitive" | "Safe Seat" | "Data Missing";
-  backgroundColor: string;
-  borderColor: string;
-  textColor: string;
 }
 
 function formatNumber(value: number | null | undefined): string {
@@ -53,7 +48,7 @@ function formatPercent(value: number | null | undefined): string {
     return "N/A";
   }
 
-  return `${value.toFixed(2)}%`;
+  return `${value.toFixed(1)}%`;
 }
 
 function getSeatRuralPopulation(seat: ConstituencyRow): number | null {
@@ -88,35 +83,15 @@ function getRunnerUpVoteSharePct(seat: ConstituencyRow): number | null {
 
 function getCompetitivenessBadge(seat: ConstituencyRow): CompetitivenessBadge {
   if (seat.competitiveness_index === null) {
-    return {
-      label: "Data Missing",
-      backgroundColor: "rgba(115, 115, 115, 0.22)",
-      borderColor: "rgba(156, 152, 136, 0.55)",
-      textColor: "#d1d5db",
-    };
+    return { label: "Data Missing" };
   }
   if (seat.competitiveness_index > 5) {
-    return {
-      label: "Highly Contested",
-      backgroundColor: "rgba(220, 38, 38, 0.18)",
-      borderColor: "rgba(248, 113, 113, 0.5)",
-      textColor: "#fecaca",
-    };
+    return { label: "Highly Contested" };
   }
   if (seat.competitiveness_index >= 2) {
-    return {
-      label: "Competitive",
-      backgroundColor: "rgba(201, 168, 76, 0.18)",
-      borderColor: "rgba(217, 195, 141, 0.5)",
-      textColor: "#f6e7c0",
-    };
+    return { label: "Competitive" };
   }
-  return {
-    label: "Safe Seat",
-    backgroundColor: "rgba(115, 115, 115, 0.22)",
-    borderColor: "rgba(156, 152, 136, 0.55)",
-    textColor: "#d1d5db",
-  };
+  return { label: "Safe Seat" };
 }
 
 function matchesSeatQuery(seat: ConstituencyRow, query: string): boolean {
@@ -205,6 +180,7 @@ export function LandingShell({ summaryDataset, constituencyDataset }: LandingShe
 
     return getSeatElectionStatus(selectedSeat);
   }, [selectedSeat]);
+
   const selectedSeatRuralPopulation = selectedSeat ? getSeatRuralPopulation(selectedSeat) : null;
   const selectedSeatFemalePct = selectedSeat ? getSeatFemaleSharePct(selectedSeat) : null;
   const selectedSeatRunnerUpSharePct = selectedSeat ? getRunnerUpVoteSharePct(selectedSeat) : null;
@@ -212,10 +188,6 @@ export function LandingShell({ summaryDataset, constituencyDataset }: LandingShe
 
   const getSeatDisplayColor = (seat: ConstituencyRow): string => {
     return mapMode === "election" ? getSeatColor(seat) : getReferendumSeatColor(seat);
-  };
-
-  const getSeatDisplaySoftColor = (seat: ConstituencyRow): string => {
-    return mapMode === "election" ? getSeatSoftColor(seat) : getReferendumSeatSoftColor(seat);
   };
 
   const getReferendumBadgeLabel = (seat: ConstituencyRow): string => {
@@ -226,7 +198,7 @@ export function LandingShell({ summaryDataset, constituencyDataset }: LandingShe
     if (result === "no") {
       return "Referendum · Majority No";
     }
-    return "Referendum · Result Missing";
+    return "Referendum · Result Pending";
   };
 
   useEffect(() => {
@@ -253,256 +225,211 @@ export function LandingShell({ summaryDataset, constituencyDataset }: LandingShe
     }
   };
 
-  const summaryCards = [
-    {
-      label: "Total Seats",
-      value: formatNumber(summary.total_seats),
-      detail: `${summary.divisions.length} divisions covered`,
-    },
-    {
-      label: "Top Party",
-      value: summary.top_party.party,
-      detail: `${summary.top_party.seat_count} seats · ${summary.top_party.seat_share_pct.toFixed(2)}% share`,
-    },
-    {
-      label: "Avg Turnout",
-      value: formatPercent(summary.avg_turnout),
-      detail: `${formatPercent(summary.national_averages.winner_vote_share_pct)} average winner share`,
-    },
-    {
-      label: "Avg Margin",
-      value: formatPercent(summary.avg_margin),
-      detail: `${formatNumber(summary.avg_candidate_count)} average candidates`,
-    },
-    {
-      label: "Competitive Seats",
-      value: formatNumber(summary.competitive_seats.count),
-      detail: `<${summary.competitive_seats.threshold_pct}% margin · ${summary.competitive_seats.share_pct.toFixed(2)}% of seats`,
-    },
-  ];
-
   return (
-    <main className="min-h-screen bg-[#0b0c0e] text-[#f4f1ea]">
+    <main className="h-screen max-h-screen overflow-hidden flex flex-col bg-[var(--bg-canvas)] text-[var(--text-primary)] font-sans antialiased">
+      {/* ── Fixed 42px Primary Nav ─────────────────────────────────────── */}
       <PrimaryNav />
 
-      {/* ── Hero banner ──────────────────────────────────────── */}
-      <section className="relative shrink-0 overflow-hidden border-b border-white/[0.07] px-4 py-5 sm:px-10 sm:py-6">
-        <div className="pointer-events-none absolute right-0 top-0 h-full w-1/3 bg-[radial-gradient(ellipse_at_top_right,rgba(212,175,55,0.08),transparent_70%)]" />
-        <div className="flex flex-wrap items-center justify-between gap-4">
-          <div>
-            <p className="relative z-10 font-mono text-[10px] uppercase tracking-[0.24em] text-[#d4af37]">
-              Bangladesh General Election · 2026 National Results
-            </p>
-            <h1
-              className="relative z-10 mt-1 text-2xl font-semibold leading-tight text-[#f4f1ea] sm:text-3xl lg:text-4xl"
-              style={{ fontFamily: "var(--font-playfair), serif" }}
-            >
-              National Election <em className="text-[#d4af37]">Intelligence</em>
-            </h1>
-          </div>
-          <div className="flex items-center gap-2">
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/20 bg-emerald-500/10 px-3 py-1 font-mono text-[10px] uppercase tracking-wider text-emerald-400">
-              <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
-              Verified Pre-rendered
-            </span>
-          </div>
+      {/* ── Strict 38px Macro Stats Ribbon ────────────────────────────── */}
+      <header className="h-[38px] shrink-0 border-b border-[var(--border)] bg-[var(--bg-surface)] flex items-stretch divide-x divide-[var(--border)] overflow-x-auto text-xs">
+        <div className="flex items-center gap-2 px-3.5 whitespace-nowrap">
+          <span className="font-mono text-[10px] uppercase text-[var(--text-muted)] tracking-wider">Seats</span>
+          <span className="font-mono font-semibold text-[var(--text-primary)]">{summary.total_seats}</span>
+          <span className="text-[10px] text-[var(--text-muted)]">({summary.divisions.length} Divisions)</span>
         </div>
-      </section>
 
-      {/* ── Stats strip ──────────────────────────────────────── */}
-      <section className="shrink-0 grid border-b border-white/[0.07] bg-[#0e0f12]/50 sm:grid-cols-2 lg:grid-cols-5">
-        {summaryCards.map((card) => (
-          <article key={card.label} className="border-r border-white/[0.07] px-4 py-3 last:border-r-0 sm:px-6">
-            <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-[#71717a]">{card.label}</p>
-            <p
-              className={`details-number mt-1 text-[1.65rem] font-bold leading-none ${card.label === "Top Party" ? "text-[#d4af37]" : "text-[#f4f1ea]"}`}
+        <div className="flex items-center gap-2 px-3.5 whitespace-nowrap">
+          <span className="font-mono text-[10px] uppercase text-[var(--text-muted)] tracking-wider">Leading</span>
+          <span className="font-mono font-semibold text-[var(--text-primary)]">{summary.top_party.party}</span>
+          <span className="text-[10px] text-[var(--text-muted)] font-mono">
+            {summary.top_party.seat_count} ({summary.top_party.seat_share_pct.toFixed(1)}%)
+          </span>
+        </div>
+
+        <div className="flex items-center gap-2 px-3.5 whitespace-nowrap">
+          <span className="font-mono text-[10px] uppercase text-[var(--text-muted)] tracking-wider">Turnout</span>
+          <span className="font-mono font-semibold text-[var(--text-primary)]">{formatPercent(summary.avg_turnout)}</span>
+          <span className="text-[10px] text-[var(--text-muted)] font-mono">
+            (Winner Avg: {formatPercent(summary.national_averages.winner_vote_share_pct)})
+          </span>
+        </div>
+
+        <div className="flex items-center gap-2 px-3.5 whitespace-nowrap">
+          <span className="font-mono text-[10px] uppercase text-[var(--text-muted)] tracking-wider">Avg Margin</span>
+          <span className="font-mono font-semibold text-[var(--text-primary)]">{formatPercent(summary.avg_margin)}</span>
+          <span className="text-[10px] text-[var(--text-muted)] font-mono">
+            ({summary.competitive_seats.count} Competitive &lt;10%)
+          </span>
+        </div>
+
+        <div className="hidden lg:flex items-center gap-2 px-3.5 ml-auto whitespace-nowrap">
+          <span className="font-mono text-[10px] uppercase text-[var(--text-muted)] tracking-wider">Cartography</span>
+          <span className="font-mono text-[10px] text-[var(--text-primary)]">300 Constituencies · Verified Pre-rendered</span>
+        </div>
+      </header>
+
+      {/* ── Main 3-Pane Workspace (Strictly fills remainder of 100dvh) ──── */}
+      <section className="flex-1 min-h-0 flex overflow-hidden">
+
+        {/* ── Left Pane: Division Filter & Constituency Directory (260px) ─ */}
+        <aside className="w-64 shrink-0 flex flex-col border-r border-[var(--border)] bg-[var(--bg-surface)]">
+          {/* Controls: Division Select & Search */}
+          <div className="p-2 space-y-1.5 border-b border-[var(--border)] bg-[var(--bg-canvas)]">
+            <select
+              aria-label="Filter by division"
+              value={activeDivision}
+              onChange={(e) => handleDivisionChange(e.target.value)}
+              className="w-full h-7 px-2 font-mono text-[11px] bg-[var(--bg-surface)] text-[var(--text-primary)] border border-[var(--border)] rounded-none outline-none cursor-pointer focus:border-[var(--text-primary)]"
             >
-              {card.value}
-            </p>
-            <p className="mt-1 text-xs text-[#a1a1aa]">{card.detail}</p>
-          </article>
-        ))}
-      </section>
+              {divisions.map((d) => (
+                <option key={d.name} value={d.name} className="bg-[var(--bg-surface)] text-[var(--text-primary)]">
+                  {d.name} ({d.count})
+                </option>
+              ))}
+            </select>
 
-      {/* ── Main content (fills remaining viewport) ──────────── */}
-      <section className="flex h-screen overflow-hidden border-t border-white/[0.07]">
+            <div className="relative">
+              <input
+                id="seatSearch"
+                type="search"
+                value={searchValue}
+                onChange={(e) => handleSearchChange(e.target.value)}
+                placeholder="Search constituency..."
+                className="w-full h-7 pl-2 pr-2 font-mono text-[11px] bg-[var(--bg-surface)] text-[var(--text-primary)] border border-[var(--border)] rounded-none outline-none placeholder:text-[var(--text-muted)] focus:border-[var(--text-primary)]"
+              />
+            </div>
+          </div>
 
-        {/* Left column: division tabs + map + seat list */}
-        <div className="flex min-w-0 flex-1 flex-col border-r border-white/[0.07]">
+          {/* Directory Column Header */}
+          <div className="h-6 shrink-0 px-2.5 flex items-center justify-between border-b border-[var(--border)] bg-[var(--bg-surface)] font-mono text-[9px] uppercase tracking-wider text-[var(--text-muted)]">
+            <span>Constituencies</span>
+            <span>{filteredSeats.length} / {sortedSeats.length}</span>
+          </div>
 
-          {/* Division filter tabs */}
-          <div className="flex h-11 shrink-0 items-center overflow-x-auto border-b border-white/[0.07] bg-[#0b0c0e] px-2 sm:px-6">
-            {divisions.map((division) => {
-              const active = division.name === activeDivision;
+          {/* Scrollable Constituency List */}
+          <div className="flex-1 min-h-0 overflow-y-auto divide-y divide-[var(--border-subtle)]">
+            {filteredSeats.map((seat) => {
+              const selected = seat.seat_key === selectedSeatKey;
+              const displayColor = getSeatDisplayColor(seat);
+
               return (
                 <button
-                  key={division.name}
+                  key={seat.seat_key}
+                  ref={(node) => {
+                    seatRefs.current[seat.seat_key] = node;
+                  }}
                   type="button"
-                  onClick={() => handleDivisionChange(division.name)}
-                  className={`group flex h-11 items-center gap-1.5 whitespace-nowrap border-b-2 px-3 font-mono text-[11px] tracking-wide transition ${
-                    active
-                      ? "border-[#d4af37] text-[#f4f1ea] font-medium"
-                      : "border-transparent text-[#71717a] hover:text-[#d4d4d8]"
+                  onClick={() => setSelectedSeatKey(seat.seat_key)}
+                  className={`w-full text-left px-2.5 py-2 flex items-center gap-2.5 transition-colors rounded-none ${
+                    selected
+                      ? "bg-[var(--accent-muted)] border-l-2 border-l-[var(--text-primary)]"
+                      : "hover:bg-[var(--accent-muted)]"
                   }`}
                 >
-                  <span>{division.name}</span>
                   <span
-                    className={`rounded px-1.5 py-0.2 text-[9px] ${
-                      active ? "bg-[#d4af37]/20 text-[#d4af37]" : "bg-white/5 text-[#52525b]"
-                    }`}
-                  >
-                    {division.count}
-                  </span>
+                    className="w-2 h-2 shrink-0 rounded-none border border-[var(--border)]"
+                    style={{ backgroundColor: displayColor }}
+                  />
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-xs font-medium text-[var(--text-primary)] leading-tight">
+                      {seat.constituency}
+                    </p>
+                    <p className="truncate font-mono text-[9px] text-[var(--text-muted)] mt-0.5">
+                      {seat.district} · {seat.division}
+                    </p>
+                  </div>
                 </button>
               );
             })}
+
+            {filteredSeats.length === 0 && (
+              <div className="p-4 text-center font-mono text-xs text-[var(--text-muted)]">
+                No matching constituencies
+              </div>
+            )}
           </div>
+        </aside>
 
-          {/* Map + seat list side-by-side */}
-          <div className="flex min-h-0 flex-1">
-
-            {/* Map panel */}
-            <div className="flex min-w-0 flex-1 flex-col bg-[#0b0c0e]">
-              <div className="shrink-0 border-b border-white/[0.07] bg-[#0e0f12]/60 px-4 py-2.5 sm:px-5">
-                <div className="flex flex-wrap items-center justify-between gap-3">
-                  <div className="inline-flex rounded-md border border-white/10 bg-[#0b0c0e] p-0.5">
-                    <button
-                      type="button"
-                      onClick={() => setMapMode("election")}
-                      className={`rounded px-3 py-1 font-mono text-[11px] uppercase tracking-wider transition ${
-                        mapMode === "election"
-                          ? "bg-[#d4af37] text-[#0b0c0e] font-semibold shadow-sm"
-                          : "text-[#a1a1aa] hover:text-white"
-                      }`}
-                    >
-                      Election
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setMapMode("referendum")}
-                      className={`rounded px-3 py-1 font-mono text-[11px] uppercase tracking-wider transition ${
-                        mapMode === "referendum"
-                          ? "bg-[#d4af37] text-[#0b0c0e] font-semibold shadow-sm"
-                          : "text-[#a1a1aa] hover:text-white"
-                      }`}
-                    >
-                      Referendum
-                    </button>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-[#71717a]">
-                      Cartography: Esri Dark Canvas
-                    </span>
-                  </div>
-                </div>
-                <div className="relative mt-2">
-                  <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-[#52525b]">
-                    <svg className="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor">
-                      <path fillRule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clipRule="evenodd" />
-                    </svg>
-                  </div>
-                  <input
-                    id="seatSearch"
-                    type="search"
-                    value={searchValue}
-                    onChange={(event) => handleSearchChange(event.target.value)}
-                    placeholder="Search by constituency, district, division, winner..."
-                    className="w-full rounded-md border border-white/10 bg-[#0b0c0e] py-1.5 pl-9 pr-3 font-mono text-xs text-[#f4f1ea] placeholder-[#52525b] outline-none transition focus:border-[#d4af37]/60 focus:ring-1 focus:ring-[#d4af37]/40"
-                  />
-                </div>
-              </div>
-              <div className="min-h-0 flex-1 relative">
-                <BangladeshMap
-                  seats={sortedSeats}
-                  mode={mapMode}
-                  selectedSeatKey={selectedSeatKey}
-                  onSelectSeat={(seatKey) => {
-                    setSelectedSeatKey(seatKey);
-                  }}
-                  onClearSelection={() => setSelectedSeatKey(null)}
-                />
-              </div>
+        {/* ── Center Pane: Cartography Canvas ────────────────────────────── */}
+        <section className="flex-1 min-w-0 flex flex-col bg-[var(--bg-canvas)] relative">
+          {/* Map Top Control Bar (34px) */}
+          <div className="h-[34px] shrink-0 border-b border-[var(--border)] bg-[var(--bg-surface)] px-3 flex items-center justify-between gap-3">
+            <div className="flex items-center gap-1.5">
+              <span className="font-mono text-[10px] uppercase text-[var(--text-muted)] tracking-wider mr-1">Layer:</span>
+              <button
+                type="button"
+                onClick={() => setMapMode("election")}
+                className={`px-2.5 py-0.5 font-mono text-[10px] uppercase tracking-wider rounded-none border border-[var(--border)] transition-colors ${
+                  mapMode === "election"
+                    ? "bg-[var(--text-primary)] text-[var(--bg-canvas)] font-semibold"
+                    : "bg-transparent text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+                }`}
+              >
+                Election 2026
+              </button>
+              <button
+                type="button"
+                onClick={() => setMapMode("referendum")}
+                className={`px-2.5 py-0.5 font-mono text-[10px] uppercase tracking-wider rounded-none border border-[var(--border)] transition-colors ${
+                  mapMode === "referendum"
+                    ? "bg-[var(--text-primary)] text-[var(--bg-canvas)] font-semibold"
+                    : "bg-transparent text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+                }`}
+              >
+                Constitutional Referendum
+              </button>
             </div>
 
-            {/* Seat list panel */}
-            <div className="flex w-72 shrink-0 flex-col border-l border-white/[0.07] bg-[#0c0d10]">
-              <div className="flex shrink-0 items-center justify-between border-b border-white/[0.07] px-4 py-2.5">
-                <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-[#71717a]">Constituencies</p>
-                <span className="rounded bg-[#d4af37]/15 px-2 py-0.5 font-mono text-[10px] font-semibold text-[#d4af37]">
-                  {filteredSeats.length}
-                </span>
-              </div>
-              <div className="min-h-0 flex-1 overflow-y-auto">
-                {filteredSeats.map((seat) => {
-                  const selected = seat.seat_key === selectedSeatKey;
-                  return (
-                    <button
-                      key={seat.seat_key}
-                      ref={(node) => {
-                        seatRefs.current[seat.seat_key] = node;
-                      }}
-                      type="button"
-                      onClick={() => setSelectedSeatKey(seat.seat_key)}
-                      className={`flex w-full items-center gap-3 border-b border-white/[0.04] px-4 py-2.5 text-left transition ${
-                        selected
-                          ? "border-l-2 border-l-[#d4af37] bg-[#d4af37]/10"
-                          : "hover:bg-white/[0.03]"
-                      }`}
-                    >
-                      <span
-                        className="mt-0.5 h-2 w-2 shrink-0 rounded-full"
-                        style={{
-                          backgroundColor: getSeatDisplayColor(seat),
-                          boxShadow: selected ? `0 0 8px ${getSeatDisplayColor(seat)}` : undefined,
-                        }}
-                      />
-                      <div className="min-w-0">
-                        <p className="truncate text-sm font-medium text-[#f4f1ea]">{seat.constituency}</p>
-                        <p className="truncate font-mono text-[10px] text-[#71717a]">
-                          {seat.district} · {seat.division}
-                        </p>
-                      </div>
-                    </button>
-                  );
-                })}
-                {filteredSeats.length === 0 && (
-                  <div className="px-4 py-6 font-mono text-xs text-[#71717a]">No seats match the current filters.</div>
-                )}
-              </div>
+            <div className="flex items-center gap-3">
+              {selectedSeat && (
+                <button
+                  type="button"
+                  onClick={() => setSelectedSeatKey(null)}
+                  className="font-mono text-[10px] uppercase tracking-wider text-[var(--text-muted)] hover:text-[var(--text-primary)] underline decoration-[var(--border)]"
+                >
+                  Clear Selection
+                </button>
+              )}
+              <span className="hidden md:inline font-mono text-[10px] text-[var(--text-muted)] uppercase tracking-wider">
+                Esri Canvas Basemap
+              </span>
             </div>
-
           </div>
-        </div>
 
-        {/* Right column: constituency detail panel */}
-        <aside className="flex w-160 shrink-0 flex-col overflow-y-auto border-l border-white/[0.07] bg-[#0e0f13] px-5 py-5">
+          {/* Interactive Map */}
+          <div className="flex-1 min-h-0 relative">
+            <BangladeshMap
+              seats={sortedSeats}
+              mode={mapMode}
+              selectedSeatKey={selectedSeatKey}
+              onSelectSeat={(seatKey) => {
+                setSelectedSeatKey(seatKey);
+              }}
+              onClearSelection={() => setSelectedSeatKey(null)}
+            />
+          </div>
+        </section>
+
+        {/* ── Right Pane: Electoral & Demographic Inspector (360px) ───────── */}
+        <aside className="w-80 md:w-96 shrink-0 flex flex-col border-l border-[var(--border)] bg-[var(--bg-surface)] overflow-y-auto">
           {selectedSeat ? (
-            <div className="flex flex-col gap-5">
+            <div className="p-3.5 space-y-3.5">
+              {/* Constituency Title Header */}
               <div>
-                <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-[#71717a]">
+                <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--text-muted)]">
                   {selectedSeat.district} · {selectedSeat.division} Division
                 </p>
-                <h3
-                  className="mt-1 text-[1.65rem] font-semibold leading-tight text-[#f4f1ea]"
-                  style={{ fontFamily: "var(--font-playfair), serif" }}
-                >
+                <h2 className="mt-1 text-2xl font-serif font-bold text-[var(--text-primary)] leading-tight">
                   {selectedSeat.constituency}
-                </h3>
-                <div
-                  className="mt-2.5 inline-flex items-center gap-2 rounded border px-3 py-1"
-                  style={{
-                    backgroundColor: getSeatDisplaySoftColor(selectedSeat),
-                    borderColor: `${getSeatDisplayColor(selectedSeat)}55`,
-                  }}
-                >
+                </h2>
+
+                {/* Status Badge */}
+                <div className="mt-2.5 flex items-center gap-2 border border-[var(--border)] bg-[var(--bg-canvas)] px-2.5 py-1">
                   <span
-                    className="h-2 w-2 rounded-full"
-                    style={{
-                      backgroundColor: getSeatDisplayColor(selectedSeat),
-                      boxShadow: `0 0 6px ${getSeatDisplayColor(selectedSeat)}`,
-                    }}
+                    className="w-2.5 h-2.5 shrink-0 rounded-none"
+                    style={{ backgroundColor: getSeatDisplayColor(selectedSeat) }}
                   />
-                  <span className="font-mono text-xs tracking-wide" style={{ color: getSeatDisplayColor(selectedSeat) }}>
+                  <span className="font-mono text-xs font-medium text-[var(--text-primary)]">
                     {mapMode === "election"
                       ? selectedSeatStatus?.isPostponed
                         ? selectedSeatStatus.label
@@ -510,167 +437,166 @@ export function LandingShell({ summaryDataset, constituencyDataset }: LandingShe
                       : getReferendumBadgeLabel(selectedSeat)}
                   </span>
                 </div>
+
                 {mapMode === "election" && selectedSeatStatus?.isPostponed ? (
-                  <p className="mt-2 text-xs text-amber-300">Reason: {selectedSeatStatus.reason}</p>
+                  <p className="mt-1.5 font-mono text-xs text-amber-500">
+                    Reason: {selectedSeatStatus.reason}
+                  </p>
                 ) : mapMode === "election" ? (
-                  <p className="mt-2 text-xs text-[#a1a1aa]">
-                    Runner-up: <span className="text-[#f4f1ea]">{selectedSeat.runner_up_candidate}</span> ({selectedSeat.runner_up_party})
+                  <p className="mt-1.5 text-xs text-[var(--text-muted)] font-mono">
+                    Runner-up: <span className="text-[var(--text-primary)]">{selectedSeat.runner_up_candidate}</span> ({selectedSeat.runner_up_party})
                   </p>
                 ) : (
-                  <p className="mt-2 text-xs text-[#a1a1aa]">
-                    Referendum Votes: <span className="text-[#f4f1ea]">Yes {formatNumber(selectedSeat.referendum_yes)} · No {formatNumber(selectedSeat.referendum_no)}</span>
+                  <p className="mt-1.5 text-xs text-[var(--text-muted)] font-mono">
+                    Votes: <span className="text-[var(--text-primary)]">Yes {formatNumber(selectedSeat.referendum_yes)} · No {formatNumber(selectedSeat.referendum_no)}</span>
                   </p>
                 )}
               </div>
 
-              <ConstituencyMiniMap
-                seat={selectedSeat}
-                mode={mapMode}
-              />
+              {/* Cartographic Boundary Mini-Map */}
+              <ConstituencyMiniMap seat={selectedSeat} mode={mapMode} />
 
-              <section className="rounded-lg border border-white/[0.07] bg-[#121317] overflow-hidden shadow-sm">
-                <div className="border-b border-white/[0.07] bg-[#16171c] px-4 py-2 font-mono text-[10px] uppercase tracking-[0.18em] text-[#d4af37]">
-                  Election Result
+              {/* Election Breakdown Card */}
+              <div className="border border-[var(--border)] bg-[var(--bg-canvas)]">
+                <div className="border-b border-[var(--border)] px-3 py-1.5 font-mono text-[10px] uppercase tracking-wider text-[var(--text-muted)] bg-[var(--bg-surface)]">
+                  Election Metrics
                 </div>
-                <div className="grid grid-cols-2 gap-2.5 p-3.5">
+                <div className="grid grid-cols-2 divide-x divide-y divide-[var(--border)]">
                   {[
-                    { label: "Election Status", value: selectedSeatStatus?.label ?? "Completed" },
                     { label: "Winner Votes", value: formatNumber(selectedSeat.winner_votes) },
                     { label: "Runner-up Votes", value: formatNumber(selectedSeat.runner_up_votes) },
                     { label: "Winner Vote Share", value: formatPercent(selectedSeat.winner_vote_share_pct) },
-                    { label: "Runner-up Vote Share", value: formatPercent(selectedSeatRunnerUpSharePct) },
-                    { label: "Turnout", value: formatPercent(selectedSeat.turnout_pct) },
+                    { label: "Runner-up Share", value: formatPercent(selectedSeatRunnerUpSharePct) },
+                    { label: "Voter Turnout", value: formatPercent(selectedSeat.turnout_pct) },
                     { label: "Valid Votes", value: formatNumber(selectedSeat.total_valid_votes) },
                     { label: "Candidates", value: formatNumber(selectedSeat.candidate_count) },
-                    ...(selectedSeatStatus?.isPostponed
-                      ? [{ label: "Postponement Reason", value: selectedSeatStatus.reason ?? "N/A" }]
-                      : []),
+                    { label: "Competitiveness", value: selectedSeatCompetitivenessBadge?.label ?? "Safe" },
                   ].map((item) => (
-                    <article key={item.label} className="rounded border border-white/[0.05] bg-[#17181e] px-3 py-2">
-                      <p className="font-mono text-[9px] uppercase tracking-[0.15em] text-[#71717a]">{item.label}</p>
-                      <p className="details-number mt-1 text-base font-semibold text-[#f4f1ea]">
+                    <div key={item.label} className="p-2">
+                      <p className="font-mono text-[9px] uppercase text-[var(--text-muted)]">{item.label}</p>
+                      <p className="font-mono text-xs font-semibold text-[var(--text-primary)] mt-0.5">
                         {item.value}
                       </p>
-                    </article>
+                    </div>
                   ))}
                 </div>
-                {selectedSeatCompetitivenessBadge && (
-                  <div className="px-3.5 pb-3.5">
-                    <div
-                      className="inline-flex items-center gap-2 rounded border px-3 py-1 font-mono text-[10px] uppercase tracking-wider"
-                      style={{
-                        backgroundColor: selectedSeatCompetitivenessBadge.backgroundColor,
-                        borderColor: selectedSeatCompetitivenessBadge.borderColor,
-                        color: selectedSeatCompetitivenessBadge.textColor,
-                      }}
-                    >
-                      <span className="text-[#a1a1aa]">Competitiveness:</span>
-                      <span className="font-semibold">{selectedSeatCompetitivenessBadge.label}</span>
-                    </div>
-                  </div>
-                )}
-              </section>
+              </div>
 
-              <section className="rounded-lg border border-white/[0.07] bg-[#121317] overflow-hidden shadow-sm">
-                <div className="border-b border-white/[0.07] bg-[#16171c] px-4 py-2 font-mono text-[10px] uppercase tracking-[0.18em] text-[#d4af37]">
-                  Constituency Profile
+              {/* Census & Demographic Profile */}
+              <div className="border border-[var(--border)] bg-[var(--bg-canvas)]">
+                <div className="border-b border-[var(--border)] px-3 py-1.5 font-mono text-[10px] uppercase tracking-wider text-[var(--text-muted)] bg-[var(--bg-surface)]">
+                  Demographic Profile
                 </div>
-                <div className="grid grid-cols-2 gap-2.5 p-3.5">
+                <div className="grid grid-cols-2 divide-x divide-y divide-[var(--border)]">
                   {[
                     { label: "Population", value: formatNumber(selectedSeat.Population_Total) },
                     { label: "Households", value: formatNumber(selectedSeat.Household_Total) },
-                    { label: "Population Density", value: selectedSeat.pop_density === null ? "N/A" : `${formatNumber(selectedSeat.pop_density)}/km²` },
-                    { label: "Urban Population", value: formatNumber(selectedSeat.pop_urban) },
-                    { label: "Rural Population", value: formatNumber(selectedSeatRuralPopulation) },
+                    { label: "Density", value: selectedSeat.pop_density === null ? "N/A" : `${formatNumber(selectedSeat.pop_density)}/km²` },
+                    { label: "Urban Pop", value: formatNumber(selectedSeat.pop_urban) },
+                    { label: "Rural Pop", value: formatNumber(selectedSeatRuralPopulation) },
                     { label: "Female Share", value: formatPercent(selectedSeatFemalePct) },
                   ].map((item) => (
-                    <article key={item.label} className="rounded border border-white/[0.05] bg-[#17181e] px-3 py-2">
-                      <p className="font-mono text-[9px] uppercase tracking-[0.15em] text-[#71717a]">{item.label}</p>
-                      <p className="details-number mt-1 text-base font-semibold text-[#f4f1ea]">
+                    <div key={item.label} className="p-2">
+                      <p className="font-mono text-[9px] uppercase text-[var(--text-muted)]">{item.label}</p>
+                      <p className="font-mono text-xs font-semibold text-[var(--text-primary)] mt-0.5">
                         {item.value}
                       </p>
-                    </article>
+                    </div>
                   ))}
                 </div>
-              </section>
+              </div>
 
-              <section className="rounded-lg border border-white/[0.07] bg-[#121317] overflow-hidden shadow-sm">
-                <div className="border-b border-white/[0.07] bg-[#16171c] px-4 py-2 font-mono text-[10px] uppercase tracking-[0.18em] text-[#d4af37]">
-                  Key Indicators vs National Baseline
+              {/* Socio-Economic Benchmark vs National Baseline */}
+              <div className="border border-[var(--border)] bg-[var(--bg-canvas)]">
+                <div className="border-b border-[var(--border)] px-3 py-1.5 font-mono text-[10px] uppercase tracking-wider text-[var(--text-muted)] bg-[var(--bg-surface)]">
+                  Indicators vs National Baseline
                 </div>
-                <div className="space-y-3 p-3.5">
+                <div className="p-2.5 space-y-2.5">
                   {(
                     [
                       ["Voter Turnout", selectedSeat.turnout_pct, NATIONAL_TURNOUT_BASELINE],
-                      ["Literacy", selectedSeat.literacy_rate, summary.national_averages.literacy_rate],
+                      ["Literacy Rate", selectedSeat.literacy_rate, summary.national_averages.literacy_rate],
                       ["Internet Access", selectedSeat.internet_pct, summary.national_averages.internet_pct],
                       ["Employment Rate", selectedSeat.employment_rate_pct, summary.national_averages.employment_rate_pct],
-                      ["NEET", selectedSeat.neet_pct, summary.national_averages.neet_pct],
+                      ["NEET Share", selectedSeat.neet_pct, summary.national_averages.neet_pct],
                       ["Financial Account", selectedSeat.financial_account_pct, summary.national_averages.financial_account_pct],
                     ] as [string, number | null, number | null][]
                   ).map(([label, seatValue, nationalValue]) => {
                     const width = seatValue === null ? 0 : Math.max(0, Math.min(seatValue, 100));
-                    const comparison =
+                    const diff =
                       seatValue !== null && nationalValue !== null
-                        ? `${seatValue >= nationalValue ? "+" : ""}${(seatValue - nationalValue).toFixed(1)} pts`
+                        ? seatValue - nationalValue
+                        : null;
+                    const diffLabel =
+                      diff !== null
+                        ? `${diff >= 0 ? "+" : ""}${diff.toFixed(1)} pts vs avg`
                         : "N/A";
 
                     return (
-                      <div key={label}>
-                        <div className="flex items-center justify-between gap-2 text-xs text-[#a1a1aa]">
-                          <span>{label}</span>
-                          <span className="details-number text-[11px] font-medium text-[#f4f1ea]">{formatPercent(seatValue)}</span>
+                      <div key={label} className="space-y-1">
+                        <div className="flex items-center justify-between text-[11px]">
+                          <span className="text-[var(--text-secondary)]">{label}</span>
+                          <span className="font-mono font-medium text-[var(--text-primary)]">
+                            {formatPercent(seatValue)}
+                          </span>
                         </div>
-                        <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-[#1e2026]">
+                        <div className="h-1 bg-[var(--border)] rounded-none overflow-hidden">
                           <div
-                            className="h-full rounded-full transition-all duration-500"
-                            style={{
-                              width: `${width}%`,
-                              background: `linear-gradient(90deg, ${getSeatDisplayColor(selectedSeat)}, #d4af37)`,
-                            }}
+                            className="h-full rounded-none bg-[var(--text-primary)]"
+                            style={{ width: `${width}%` }}
                           />
                         </div>
-                        <p className="details-number mt-0.5 text-[9px] text-[#71717a]">{comparison} vs national average</p>
+                        <div className="font-mono text-[9px] text-[var(--text-muted)]">
+                          {diffLabel}
+                        </div>
                       </div>
                     );
                   })}
                 </div>
-              </section>
+              </div>
             </div>
           ) : (
-            <div className="flex flex-col justify-center gap-4 px-6 py-12">
-              <div className="flex h-10 w-10 items-center justify-center rounded-full border border-[#d4af37]/30 bg-[#d4af37]/10 text-[#d4af37]">
-                <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" />
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" />
-                </svg>
-              </div>
+            <div className="p-6 flex flex-col justify-between h-full space-y-6">
               <div>
-                <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-[#d4af37]">Electoral Inspector</p>
-                <h3
-                  className="mt-1 text-2xl font-semibold leading-snug text-[#f4f1ea]"
-                  style={{ fontFamily: "var(--font-playfair), serif" }}
-                >
-                  Select a constituency to inspect details
+                <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--text-muted)]">
+                  Electoral Inspector
+                </p>
+                <h3 className="mt-2 text-2xl font-serif font-bold text-[var(--text-primary)] leading-tight">
+                  Constituency Cartography & Analytics
                 </h3>
+                <p className="mt-2 text-xs leading-relaxed text-[var(--text-muted)]">
+                  Select any constituency on the interactive map or directory to inspect official 2026 election returns, runner-up candidate margins, boundary cartography, and socio-economic benchmarks.
+                </p>
               </div>
-              <p className="text-xs leading-relaxed text-[#71717a]">
-                Explore constituency geometry, winning party margins, runner-up candidates, and compare 19 socio-economic indicators directly against national baselines.
-              </p>
-              <div className="mt-2 space-y-2 rounded-lg border border-white/[0.06] bg-[#121317] p-3">
-                <p className="font-mono text-[9px] uppercase tracking-wider text-[#a1a1aa]">Quick Summary</p>
-                <div className="flex items-center justify-between text-xs text-[#71717a]">
-                  <span>Total Constituencies:</span>
-                  <span className="font-mono text-[#f4f1ea]">300</span>
+
+              <div className="border border-[var(--border)] bg-[var(--bg-canvas)]">
+                <div className="border-b border-[var(--border)] px-3 py-1.5 font-mono text-[10px] uppercase tracking-wider text-[var(--text-muted)] bg-[var(--bg-surface)]">
+                  National Benchmark
                 </div>
-                <div className="flex items-center justify-between text-xs text-[#71717a]">
-                  <span>Majority Threshold:</span>
-                  <span className="font-mono text-[#d4af37]">151 seats</span>
+                <div className="grid grid-cols-2 divide-x divide-y divide-[var(--border)]">
+                  <div className="p-2.5">
+                    <p className="font-mono text-[9px] uppercase text-[var(--text-muted)]">Total Seats</p>
+                    <p className="font-mono text-base font-bold text-[var(--text-primary)] mt-0.5">300</p>
+                  </div>
+                  <div className="p-2.5">
+                    <p className="font-mono text-[9px] uppercase text-[var(--text-muted)]">Majority Threshold</p>
+                    <p className="font-mono text-base font-bold text-[var(--text-primary)] mt-0.5">151 Seats</p>
+                  </div>
+                  <div className="p-2.5">
+                    <p className="font-mono text-[9px] uppercase text-[var(--text-muted)]">Competitive Races</p>
+                    <p className="font-mono text-base font-bold text-[var(--text-primary)] mt-0.5">{summary.competitive_seats.count}</p>
+                  </div>
+                  <div className="p-2.5">
+                    <p className="font-mono text-[9px] uppercase text-[var(--text-muted)]">Avg Turnout</p>
+                    <p className="font-mono text-base font-bold text-[var(--text-primary)] mt-0.5">{formatPercent(summary.avg_turnout)}</p>
+                  </div>
                 </div>
-                <div className="flex items-center justify-between text-xs text-[#71717a]">
-                  <span>Competitive Races (&lt;10%):</span>
-                  <span className="font-mono text-[#f4f1ea]">{summary.competitive_seats.count} seats</span>
-                </div>
+              </div>
+
+              <div className="border border-dashed border-[var(--border)] p-3 text-center">
+                <p className="font-mono text-[11px] text-[var(--text-muted)]">
+                  ← Click any region on the map or constituency in the directory
+                </p>
               </div>
             </div>
           )}
