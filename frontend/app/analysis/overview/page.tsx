@@ -128,7 +128,7 @@ export default async function AnalysisOverviewPage() {
     Object.entries(summary.seats_by_alliance).sort((left, right) => right[1] - left[1])[0] ?? ["N/A", 0];
 
   return (
-    <main className="space-y-6">
+    <div className="space-y-4">
       {/* Top 5 Headline Metric Bento Cards */}
       <MetricCards
         cards={[
@@ -246,6 +246,6 @@ export default async function AnalysisOverviewPage() {
           </p>
         </Panel>
       </section>
-    </main>
+    </div>
   );
 }

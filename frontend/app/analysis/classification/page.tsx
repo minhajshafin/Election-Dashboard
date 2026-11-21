@@ -41,7 +41,7 @@ export default async function ClassificationPage() {
   }
 
   return (
-    <main className="space-y-6">
+    <div className="space-y-4">
       {/* Classification Performance Scorecards */}
       <MetricCards
         cards={[
@@ -166,6 +166,6 @@ export default async function ClassificationPage() {
           </p>
         </Panel>
       </section>
-    </main>
+    </div>
   );
 }

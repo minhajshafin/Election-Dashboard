@@ -34,7 +34,7 @@ export default async function CorrelationPage() {
   const topNegative = getTopPairs(columns, pearson, "negative", 6);
 
   return (
-    <main className="space-y-6">
+    <div className="space-y-4">
       {/* Interactive Pearson Correlation Heatmap */}
       <section>
         <CorrelationHeatmap
@@ -140,6 +140,6 @@ export default async function CorrelationPage() {
           </p>
         </Panel>
       </section>
-    </main>
+    </div>
   );
 }

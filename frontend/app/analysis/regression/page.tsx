@@ -101,7 +101,7 @@ export default async function RegressionPage() {
     .filter((point): point is NonNullable<typeof point> => point !== null);
 
   return (
-    <main className="space-y-6">
+    <div className="space-y-4">
       {/* Model Performance Scorecards */}
       <MetricCards
         cards={[
@@ -155,6 +155,6 @@ export default async function RegressionPage() {
           </p>
         </Panel>
       </section>
-    </main>
+    </div>
   );
 }

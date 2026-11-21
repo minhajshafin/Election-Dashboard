@@ -177,7 +177,7 @@ export default async function ClustersPage() {
     .filter((point): point is NonNullable<typeof point> => point !== null);
 
   return (
-    <main className="space-y-6">
+    <div className="space-y-4">
       {/* 5 Socioeconomic Archetype Dossier Cards */}
       <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
         {CLUSTER_PROFILES.map((profile) => {
@@ -278,6 +278,6 @@ export default async function ClustersPage() {
           </p>
         </Panel>
       </section>
-    </main>
+    </div>
   );
 }
