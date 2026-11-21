@@ -71,7 +71,7 @@ function MapZoomControls({ geoJson }: { geoJson: BangladeshGeoJson }) {
   const handleReset = () => {
     const bounds = L.geoJSON(geoJson as GeoJsonObject).getBounds();
     if (bounds.isValid()) {
-      map.fitBounds(bounds, { animate: true });
+      map.fitBounds(bounds, { animate: true, padding: [4, 4] });
     }
   };
 
@@ -120,10 +120,8 @@ function FitBoundsAfterResize({ geoJson }: { geoJson: BangladeshGeoJson }) {
       map.invalidateSize();
       map.fitBounds(bounds, {
         animate: false,
+        padding: [4, 4],
       });
-
-      // Slightly tighter than exact bounds fit so geometry reads edge-to-edge.
-      map.setZoom(map.getZoom(), { animate: false });
     };
 
     // Run once after layout settles, then keep fit centered on map resizes.
