@@ -13,6 +13,8 @@ import {
   type GeoResolvableSeat,
 } from "@/lib/geo";
 
+import { useTheme } from "@/lib/useTheme";
+
 type MiniMapSeat = GeoResolvableSeat & {
   alliance?: string | null;
   winner_party?: string | null;
@@ -49,17 +51,7 @@ function FitSelectedFeature({ feature }: { feature: BangladeshGeoFeature | null 
 
 export function ConstituencyMiniMap({ seat, mode }: ConstituencyMiniMapProps) {
   const [geoJson, setGeoJson] = useState<import("@/lib/geo").BangladeshGeoJson | null>(null);
-  const [theme, setTheme] = useState<"light" | "dark">("dark");
-
-  useEffect(() => {
-    const updateTheme = () => {
-      const current = document.documentElement.getAttribute("data-theme");
-      setTheme(current === "light" ? "light" : "dark");
-    };
-    updateTheme();
-    window.addEventListener("themechange", updateTheme);
-    return () => window.removeEventListener("themechange", updateTheme);
-  }, []);
+  const theme = useTheme();
 
   useEffect(() => {
     let disposed = false;

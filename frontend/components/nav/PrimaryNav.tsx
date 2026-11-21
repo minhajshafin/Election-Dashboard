@@ -1,8 +1,10 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
+
+import { toggleThemeMode, useTheme } from "@/lib/useTheme";
 
 const LINKS = [
   { href: "/", label: "Overview", matchPrefix: "/" },
@@ -12,23 +14,7 @@ const LINKS = [
 export function PrimaryNav() {
   const pathname = usePathname();
   const normalizedPath = pathname.replace(/\/$/, "") || "/";
-  const [theme, setTheme] = useState<"light" | "dark">("dark");
-
-  useEffect(() => {
-    const currentTheme = (document.documentElement.getAttribute("data-theme") as "light" | "dark") || "light";
-    setTheme(currentTheme);
-  }, []);
-
-  const toggleTheme = () => {
-    const current = document.documentElement.getAttribute("data-theme") === "dark" ? "dark" : "light";
-    const nextTheme = current === "light" ? "dark" : "light";
-    setTheme(nextTheme);
-    document.documentElement.setAttribute("data-theme", nextTheme);
-    try {
-      localStorage.setItem("theme", nextTheme);
-    } catch {}
-    window.dispatchEvent(new CustomEvent("themechange", { detail: { theme: nextTheme } }));
-  };
+  const theme = useTheme();
 
   return (
     <header className="sticky top-0 z-50 flex h-[42px] shrink-0 items-center justify-between border-b border-[var(--border)] bg-[var(--bg-surface)] px-4 sm:px-6">
@@ -36,15 +22,21 @@ export function PrimaryNav() {
         <Link href="/" className="flex h-full items-center gap-2.5 group">
           <div className="relative flex h-5 w-5 shrink-0 items-center justify-center">
             {/* Light mode: dark/black icon */}
-            <img
+            <Image
               src="/logo-dark.svg"
               alt="Bangladesh Election 2026 Logo"
+              width={20}
+              height={20}
+              priority
               className="h-5 w-5 object-contain block [html[data-theme='dark']_&]:hidden"
             />
             {/* Dark mode: light/white icon */}
-            <img
+            <Image
               src="/logo-light.svg"
               alt="Bangladesh Election 2026 Logo"
+              width={20}
+              height={20}
+              priority
               className="h-5 w-5 object-contain hidden [html[data-theme='dark']_&]:block"
             />
           </div>
@@ -92,7 +84,7 @@ export function PrimaryNav() {
         {/* Sharp Boxy Theme Toggle */}
         <button
           type="button"
-          onClick={toggleTheme}
+          onClick={toggleThemeMode}
           aria-label="Toggle light/dark theme"
           className="flex h-full items-center gap-1.5 border-l border-[var(--border)] px-3 font-mono text-[10px] uppercase tracking-widest text-[var(--text-secondary)] hover:bg-[var(--bg-subtle)] hover:text-[var(--text-primary)] transition-colors cursor-pointer"
         >

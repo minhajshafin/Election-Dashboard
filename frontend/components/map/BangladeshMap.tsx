@@ -21,6 +21,7 @@ import {
   normalizeGeoLookupName,
 } from "@/lib/geo";
 import type { ConstituencyRow } from "@/types/api";
+import { useTheme } from "@/lib/useTheme";
 
 interface BangladeshMapProps {
   seats: ConstituencyRow[];
@@ -234,24 +235,7 @@ export function BangladeshMap({
   onClearSelection,
 }: BangladeshMapProps) {
   const [geoJson, setGeoJson] = useState<BangladeshGeoJson | null>(null);
-  const [theme, setTheme] = useState<"light" | "dark">("light");
-
-  useEffect(() => {
-    const getTheme = () => (document.documentElement.getAttribute("data-theme") as "light" | "dark") || "light";
-    setTheme(getTheme());
-
-    const handleThemeChange = (e: Event) => {
-      const custom = e as CustomEvent<{ theme: "light" | "dark" }>;
-      if (custom.detail?.theme) {
-        setTheme(custom.detail.theme);
-      } else {
-        setTheme(getTheme());
-      }
-    };
-
-    window.addEventListener("themechange", handleThemeChange);
-    return () => window.removeEventListener("themechange", handleThemeChange);
-  }, []);
+  const theme = useTheme();
 
   useEffect(() => {
     let disposed = false;
@@ -304,7 +288,7 @@ export function BangladeshMap({
     return seatIndex.byName.get(normalizeGeoLookupName(feature.properties.cst_n)) ?? null;
   }, [seatIndex]);
 
-  const getSeatFillColor = (seat: ConstituencyRow | null): string => {
+  const getSeatFillColor = useCallback((seat: ConstituencyRow | null): string => {
     if (!seat) {
       if (mode === "referendum") {
         return theme === "dark" ? REFERENDUM_NULL_FILL_COLOR_DARK : REFERENDUM_NULL_FILL_COLOR_LIGHT;
@@ -321,7 +305,7 @@ export function BangladeshMap({
     }
 
     return getSeatColor(seat);
-  };
+  }, [mode, theme]);
 
   const getSeatTooltip = (seat: ConstituencyRow | null, fallbackSeatName: string): string => {
     if (!seat) {
@@ -392,7 +376,7 @@ export function BangladeshMap({
   const geoJsonLayerRef = useRef<L.GeoJSON | null>(null);
 
   const getFeatureStyle = useCallback(
-    (feature?: any): L.PathOptions => {
+    (feature?: BangladeshGeoFeature | GeoJsonObject | unknown): L.PathOptions => {
       const seat = getSeatForFeature(feature as BangladeshGeoFeature | undefined);
       const isOtherDivision =
         activeDivision && activeDivision !== "All Divisions" && seat && seat.division !== activeDivision;

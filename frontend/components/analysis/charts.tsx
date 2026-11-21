@@ -416,7 +416,7 @@ export function CorrelationHeatmap({
   }
 
   return (
-    <article className="border border-[var(--border)] bg-[var(--bg-surface)] p-5 rounded-none">
+    <article className="border border-[var(--border)] bg-[var(--bg-surface)] p-5 rounded-none" style={{ minHeight: height }}>
       <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-[var(--border-subtle)] pb-3 gap-2">
         <div>
           <h2 className="font-mono text-[11px] uppercase tracking-[0.16em] font-semibold text-[var(--text-primary)]">
@@ -478,7 +478,7 @@ export function CorrelationHeatmap({
       </div>
 
       {/* Matrix Table */}
-      <div className="mt-3 overflow-x-auto no-scrollbar">
+      <div className="mt-3 overflow-x-auto no-scrollbar" style={{ minHeight: height }}>
         <div className="min-w-[680px]">
           <div
             style={{
@@ -490,57 +490,71 @@ export function CorrelationHeatmap({
             <div className="p-2 font-mono text-[10px] text-[var(--text-muted)] uppercase tracking-wider border-b border-r border-[var(--border)]">
               Feature Matrix
             </div>
-            {columns.map((col) => (
-              <div
-                key={`col-${col}`}
-                className="p-1.5 text-center font-mono text-[9px] uppercase tracking-wider text-[var(--text-secondary)] border-b border-r border-[var(--border)] truncate"
-                title={getAnalysisLabel(col)}
-              >
-                {getAnalysisLabel(col).slice(0, 8)}
-              </div>
-            ))}
+            {columns.map((col) => {
+              const isTargetCol = col === highlightKey;
+              return (
+                <div
+                  key={`col-${col}`}
+                  className={`p-1.5 text-center font-mono text-[9px] uppercase tracking-wider border-b border-r border-[var(--border)] truncate ${
+                    isTargetCol
+                      ? "bg-[var(--bg-subtle)] text-[var(--text-primary)] font-bold"
+                      : "text-[var(--text-secondary)]"
+                  }`}
+                  title={getAnalysisLabel(col)}
+                >
+                  {getAnalysisLabel(col).slice(0, 8)}
+                </div>
+              );
+            })}
 
             {/* Matrix Data Rows */}
-            {columns.map((rowFeature, rowIndex) => (
-              <Fragment key={`row-${rowFeature}`}>
-                <div
-                  className="p-2 font-mono text-[10px] text-[var(--text-secondary)] border-b border-r border-[var(--border)] truncate"
-                  title={getAnalysisLabel(rowFeature)}
-                >
-                  {getAnalysisLabel(rowFeature)}
-                </div>
-                {matrix[rowIndex].map((val, colIndex) => {
-                  const isHovered = activeCell?.row === rowIndex && activeCell?.col === colIndex;
-                  const isSelf = rowIndex === colIndex;
-                  const bg = isSelf ? "var(--bg-subtle)" : getCellColor(val);
+            {columns.map((rowFeature, rowIndex) => {
+              const isTargetRow = rowFeature === highlightKey;
+              return (
+                <Fragment key={`row-${rowFeature}`}>
+                  <div
+                    className={`p-2 font-mono text-[10px] border-b border-r border-[var(--border)] truncate ${
+                      isTargetRow
+                        ? "bg-[var(--bg-subtle)] text-[var(--text-primary)] font-bold"
+                        : "text-[var(--text-secondary)]"
+                    }`}
+                    title={getAnalysisLabel(rowFeature)}
+                  >
+                    {getAnalysisLabel(rowFeature)}
+                  </div>
+                  {matrix[rowIndex].map((val, colIndex) => {
+                    const isHovered = activeCell?.row === rowIndex && activeCell?.col === colIndex;
+                    const isSelf = rowIndex === colIndex;
+                    const bg = isSelf ? "var(--bg-subtle)" : getCellColor(val);
 
-                  return (
-                    <div
-                      key={`cell-${rowIndex}-${colIndex}`}
-                      onMouseEnter={() =>
-                        setActiveCell({
-                          row: rowIndex,
-                          col: colIndex,
-                          value: val,
-                          left: rowFeature,
-                          right: columns[colIndex],
-                        })
-                      }
-                      onMouseLeave={() => setActiveCell(null)}
-                      className={`h-9 flex items-center justify-center font-mono text-[10px] font-bold border-b border-r border-[var(--border-subtle)] transition-transform cursor-pointer select-none ${
-                        isHovered ? "scale-105 z-10 shadow-sm border-[var(--border-active)]" : ""
-                      }`}
-                      style={{
-                        backgroundColor: bg,
-                        color: Math.abs(val) > 0.6 ? "#ffffff" : "var(--text-primary)",
-                      }}
-                    >
-                      {val.toFixed(2)}
-                    </div>
-                  );
-                })}
-              </Fragment>
-            ))}
+                    return (
+                      <div
+                        key={`cell-${rowIndex}-${colIndex}`}
+                        onMouseEnter={() =>
+                          setActiveCell({
+                            row: rowIndex,
+                            col: colIndex,
+                            value: val,
+                            left: rowFeature,
+                            right: columns[colIndex],
+                          })
+                        }
+                        onMouseLeave={() => setActiveCell(null)}
+                        className={`h-9 flex items-center justify-center font-mono text-[10px] font-bold border-b border-r border-[var(--border-subtle)] transition-transform cursor-pointer select-none ${
+                          isHovered ? "scale-105 z-10 shadow-sm border-[var(--border-active)]" : ""
+                        }`}
+                        style={{
+                          backgroundColor: bg,
+                          color: Math.abs(val) > 0.6 ? "#ffffff" : "var(--text-primary)",
+                        }}
+                      >
+                        {val.toFixed(2)}
+                      </div>
+                    );
+                  })}
+                </Fragment>
+              );
+            })}
           </div>
         </div>
       </div>
@@ -651,7 +665,7 @@ export function DivergingBarChart({
                     isPositive ? "text-emerald-600 dark:text-emerald-400" : "text-red-600 dark:text-red-400"
                   }`}
                 >
-                  {isPositive ? `+${item.value.toFixed(valueDecimals)}` : item.value.toFixed(valueDecimals)}
+                  {isPositive ? `+${item.value.toFixed(valueDecimals)}${valueUnit}` : `${item.value.toFixed(valueDecimals)}${valueUnit}`}
                 </span>
               </div>
             );
@@ -869,6 +883,33 @@ export function ScatterPlot({
             >
               {maxY.toFixed(0)}%
             </text>
+
+            {/* Axis Titles */}
+            <text
+              x={svgWidth / 2}
+              y={svgHeight - 6}
+              textAnchor="middle"
+              fontFamily="var(--font-mono)"
+              fontSize="9"
+              fontWeight="600"
+              fill="var(--text-muted)"
+              className="uppercase tracking-wider"
+            >
+              {xAxisLabel}
+            </text>
+            <text
+              x={14}
+              y={svgHeight / 2}
+              transform={`rotate(-90 14 ${svgHeight / 2})`}
+              textAnchor="middle"
+              fontFamily="var(--font-mono)"
+              fontSize="9"
+              fontWeight="600"
+              fill="var(--text-muted)"
+              className="uppercase tracking-wider"
+            >
+              {yAxisLabel}
+            </text>
           </svg>
         </div>
 
@@ -927,7 +968,7 @@ export function RadarComparison({
   const rings = [0.25, 0.5, 0.75, 1.0];
 
   return (
-    <article className="border border-[var(--border)] bg-[var(--bg-surface)] p-5 rounded-none">
+    <article className="border border-[var(--border)] bg-[var(--bg-surface)] p-5 rounded-none" style={{ minHeight: height }}>
       <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-[var(--border-subtle)] pb-3 gap-2">
         <h2 className="font-mono text-[11px] uppercase tracking-[0.16em] font-semibold text-[var(--text-primary)]">
           {title}
@@ -999,7 +1040,7 @@ export function RadarComparison({
           })}
 
           {/* Radar Series Polygons */}
-          {series.map((s, idx) => {
+          {series.map((s) => {
             const isDimmed = selectedSeries && selectedSeries !== s.name;
             const isSelected = selectedSeries === s.name;
 
@@ -1059,12 +1100,17 @@ export function GroupedBarChart({
   const max = Math.max(...allValues, 1);
 
   return (
-    <article className="border border-[var(--border)] bg-[var(--bg-surface)] p-5 rounded-none flex flex-col justify-between">
+    <article className="border border-[var(--border)] bg-[var(--bg-surface)] p-5 rounded-none flex flex-col justify-between" style={{ minHeight: height }}>
       <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-[var(--border-subtle)] pb-3 gap-2">
         <h2 className="font-mono text-[11px] uppercase tracking-[0.16em] font-semibold text-[var(--text-primary)]">
           {title}
         </h2>
         <div className="flex items-center gap-3 font-mono text-[10px]">
+          {yAxisLabel ? (
+            <span className="text-[var(--text-muted)] uppercase tracking-wider mr-1">
+              {yAxisLabel}
+            </span>
+          ) : null}
           {series.map((s) => (
             <span key={s.key} className="flex items-center gap-1.5 text-[var(--text-secondary)]">
               <span className="h-2 w-2 shrink-0 inline-block" style={{ backgroundColor: s.color }} />
@@ -1107,6 +1153,11 @@ export function GroupedBarChart({
             </div>
           ))}
         </div>
+        {xAxisLabel ? (
+          <div className="mt-2 text-right font-mono text-[9px] text-[var(--text-muted)] uppercase tracking-wider">
+            {xAxisLabel}
+          </div>
+        ) : null}
       </div>
     </article>
   );
