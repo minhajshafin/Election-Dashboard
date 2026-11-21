@@ -32,10 +32,23 @@ export function PrimaryNav() {
   return (
     <header className="sticky top-0 z-50 flex h-[42px] shrink-0 items-center justify-between border-b border-[var(--border)] bg-[var(--bg-surface)] px-4 sm:px-6">
       <div className="flex min-w-0 items-center gap-3 sm:gap-5">
-        <Link href="/" className="flex items-center gap-2.5">
-          <span className="h-2 w-2 bg-[var(--text-primary)]" />
+        <Link href="/" className="flex items-center gap-2.5 group">
+          <div className="relative flex h-5 w-5 shrink-0 items-center justify-center">
+            {/* Light mode: dark/black icon */}
+            <img
+              src="/logo-dark.svg"
+              alt="Bangladesh Election 2026 Logo"
+              className="h-5 w-5 object-contain block [html[data-theme='dark']_&]:hidden"
+            />
+            {/* Dark mode: light/white icon */}
+            <img
+              src="/logo-light.svg"
+              alt="Bangladesh Election 2026 Logo"
+              className="h-5 w-5 object-contain hidden [html[data-theme='dark']_&]:block"
+            />
+          </div>
           <span
-            className="truncate text-base font-semibold tracking-tight text-[var(--text-primary)]"
+            className="truncate text-base font-semibold tracking-tight text-[var(--text-primary)] group-hover:opacity-90 transition-opacity"
             style={{ fontFamily: "var(--font-serif)" }}
           >
             Bangladesh Election 2026
