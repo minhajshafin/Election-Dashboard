@@ -15,7 +15,7 @@ export default async function ClassificationPage() {
   const featureData = features.map(([feature, score]) => ({
     label: getAnalysisLabel(feature),
     value: score * 100,
-    color: "#3b82f6",
+    color: "#1d4ed8",
     valueLabel: `${(score * 100).toFixed(1)}%`,
   }));
 
@@ -37,7 +37,7 @@ export default async function ClassificationPage() {
   function getHeatBg(val: number): string {
     if (val === 0) return "var(--bg-subtle)";
     const ratio = Math.min(val / maxCell, 1);
-    return `rgba(59, 130, 246, ${(ratio * 0.8 + 0.15).toFixed(2)})`;
+    return `rgba(29, 78, 216, ${(ratio * 0.8 + 0.15).toFixed(2)})`;
   }
 
   return (
@@ -62,7 +62,7 @@ export default async function ClassificationPage() {
           xAxisLabel="Gini Importance (%)"
           yAxisLabel="Input Feature"
           height={380}
-          defaultColor="#3b82f6"
+          defaultColor="#1d4ed8"
           valueDecimals={1}
           valueUnit="%"
         />
@@ -122,7 +122,7 @@ export default async function ClassificationPage() {
                           }`}
                           style={{
                             backgroundColor: bg,
-                            color: val > 20 ? "#ffffff" : "var(--text-primary)",
+                            color: val > 15 ? "#ffffff" : "var(--text-primary)",
                           }}
                         >
                           <span>{val}</span>

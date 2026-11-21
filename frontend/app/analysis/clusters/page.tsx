@@ -5,6 +5,7 @@ import {
   ScatterPlot,
   type ScatterPoint,
 } from "@/components/analysis/charts";
+import { ALLIANCE_COLORS } from "@/lib/colors";
 import { getConstituencyDataset } from "@/lib/data";
 
 interface ClusterProfile {
@@ -72,11 +73,11 @@ const CLUSTER_PROFILES: ClusterProfile[] = [
 ];
 
 const CLUSTER_COLORS: Record<number, string> = {
-  0: "#ef4444",
-  1: "#3b82f6",
-  2: "#10b981",
-  3: "#f59e0b",
-  4: "#8b5cf6",
+  0: "#dc2626",
+  1: "#1d4ed8",
+  2: "#059669",
+  3: "#d97706",
+  4: "#7c3aed",
 };
 
 const PARTY_BY_CLUSTER = [
@@ -235,9 +236,9 @@ export default async function ClustersPage() {
           title="Parliamentary Seats by Typology Cluster"
           data={groupedData}
           series={[
-            { key: "bnp", label: "BNP", color: "#10b981" },
-            { key: "jamaat", label: "Jamaat", color: "#3b82f6" },
-            { key: "others", label: "Others", color: "#f59e0b" },
+            { key: "bnp", label: "BNP", color: ALLIANCE_COLORS.bnp },
+            { key: "jamaat", label: "Jamaat", color: ALLIANCE_COLORS.jamaat },
+            { key: "others", label: "Others", color: ALLIANCE_COLORS.others },
           ]}
           xAxisLabel="Constituency Typology"
           yAxisLabel="Seat Count"

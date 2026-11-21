@@ -1,36 +1,47 @@
 const ALLIANCE_COLORS = {
-  bnp: "#16a34a",
-  jamaat: "#2563eb",
-  others: "#64748b",
-  neutral: "#94a3b8",
+  bnp: "#0d7645",
+  jamaat: "#1d4ed8",
+  others: "#475569",
+  neutral: "#64748b",
 } as const;
 
 const ALLIANCE_SOFT_COLORS = {
-  bnp: "rgba(22, 163, 74, 0.12)",
-  jamaat: "rgba(37, 99, 235, 0.12)",
-  others: "rgba(100, 116, 139, 0.12)",
-  neutral: "rgba(148, 163, 184, 0.12)",
+  bnp: "rgba(13, 118, 69, 0.12)",
+  jamaat: "rgba(29, 78, 216, 0.12)",
+  others: "rgba(71, 85, 105, 0.12)",
+  neutral: "rgba(100, 116, 139, 0.12)",
 } as const;
 
 const PARTY_COLORS = {
-  ncp: "#ea580c",
+  ncp: "#c2410c",
 } as const;
 
 const PARTY_SOFT_COLORS = {
-  ncp: "rgba(234, 88, 12, 0.12)",
+  ncp: "rgba(194, 65, 12, 0.12)",
 } as const;
 
 const REFERENDUM_COLORS = {
-  yes: "#16a34a",
+  yes: "#059669",
   no: "#dc2626",
   null: "#64748b",
 } as const;
 
 const REFERENDUM_SOFT_COLORS = {
-  yes: "rgba(22, 163, 74, 0.12)",
+  yes: "rgba(5, 150, 105, 0.12)",
   no: "rgba(220, 38, 38, 0.12)",
   null: "rgba(100, 116, 139, 0.12)",
 } as const;
+
+export const DEFAULT_DIVISION_COLORS: Record<string, string> = {
+  Barishal: "#ea580c",
+  Chattogram: "#1d4ed8",
+  Dhaka: "#059669",
+  Khulna: "#b45309",
+  Mymensingh: "#e11d48",
+  Rajshahi: "#0891b2",
+  Rangpur: "#7c3aed",
+  Sylhet: "#4d7c0f",
+};
 
 export type AllianceKey = keyof typeof ALLIANCE_COLORS;
 
@@ -133,4 +144,4 @@ export function getReferendumSeatSoftColor(seat: ReferendumSeat | null | undefin
   return REFERENDUM_SOFT_COLORS.null;
 }
 
-export { ALLIANCE_COLORS, REFERENDUM_COLORS };
+export { ALLIANCE_COLORS, PARTY_COLORS, REFERENDUM_COLORS };

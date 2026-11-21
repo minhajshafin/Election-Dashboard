@@ -5,7 +5,14 @@ import type { GeoJsonObject } from "geojson";
 import L from "leaflet";
 import { GeoJSON, MapContainer, TileLayer, useMap, useMapEvents } from "react-leaflet";
 
-import { getReferendumSeatColor, getReferendumSeatResult, getSeatColor } from "@/lib/colors";
+import {
+  ALLIANCE_COLORS,
+  PARTY_COLORS,
+  REFERENDUM_COLORS,
+  getReferendumSeatColor,
+  getReferendumSeatResult,
+  getSeatColor,
+} from "@/lib/colors";
 import { getSeatElectionStatus } from "@/lib/electionStatus";
 import {
   type BangladeshGeoFeature,
@@ -24,9 +31,11 @@ interface BangladeshMapProps {
   onClearSelection: () => void;
 }
 
-const ELECTION_NO_DATA_FILL_COLOR = "#272a30";
-const POSTPONED_SEAT_FILL_COLOR = "#475569";
-const REFERENDUM_NULL_FILL_COLOR = "#272a30";
+const ELECTION_NO_DATA_FILL_COLOR_LIGHT = "#cbd5e1";
+const ELECTION_NO_DATA_FILL_COLOR_DARK = "#272a30";
+const POSTPONED_SEAT_FILL_COLOR = "#64748b";
+const REFERENDUM_NULL_FILL_COLOR_LIGHT = "#cbd5e1";
+const REFERENDUM_NULL_FILL_COLOR_DARK = "#272a30";
 
 function formatVotes(value: number | null | undefined): string {
   if (value === null || value === undefined) {
@@ -281,7 +290,10 @@ export function BangladeshMap({
 
   const getSeatFillColor = (seat: ConstituencyRow | null): string => {
     if (!seat) {
-      return mode === "referendum" ? REFERENDUM_NULL_FILL_COLOR : ELECTION_NO_DATA_FILL_COLOR;
+      if (mode === "referendum") {
+        return theme === "dark" ? REFERENDUM_NULL_FILL_COLOR_DARK : REFERENDUM_NULL_FILL_COLOR_LIGHT;
+      }
+      return theme === "dark" ? ELECTION_NO_DATA_FILL_COLOR_DARK : ELECTION_NO_DATA_FILL_COLOR_LIGHT;
     }
 
     if (mode === "referendum") {
@@ -422,7 +434,7 @@ export function BangladeshMap({
                 ? "https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}"
                 : "https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}"
             }
-            opacity={theme === "dark" ? 0.75 : 0.85}
+            opacity={theme === "dark" ? 0.75 : 0.95}
             attribution='&copy; <a href="https://www.esri.com/">Esri</a>'
           />
 
@@ -435,7 +447,7 @@ export function BangladeshMap({
                 activeDivision && activeDivision !== "All Divisions" && seat && seat.division !== activeDivision;
 
               return {
-                color: theme === "dark" ? "rgba(255,255,255,0.18)" : "rgba(0,0,0,0.16)",
+                color: theme === "dark" ? "rgba(255,255,255,0.18)" : "rgba(0,0,0,0.22)",
                 weight: 0.5,
                 fillColor: getSeatFillColor(seat),
                 fillOpacity: isOtherDivision
@@ -480,7 +492,7 @@ export function BangladeshMap({
                   }
                   styleLayer.setStyle({
                     weight: 0.5,
-                    color: theme === "dark" ? "rgba(255,255,255,0.18)" : "rgba(0,0,0,0.16)",
+                    color: theme === "dark" ? "rgba(255,255,255,0.18)" : "rgba(0,0,0,0.22)",
                     fillOpacity: seat ? fillOpacity : emptyFillOpacity,
                   });
                 },
@@ -529,31 +541,31 @@ export function BangladeshMap({
         {mode === "election" ? (
           <>
             <span className="inline-flex items-center gap-1.5">
-              <span className="h-2 w-2" style={{ backgroundColor: "#16a34a" }} /> BNP
+              <span className="h-2 w-2" style={{ backgroundColor: ALLIANCE_COLORS.bnp }} /> BNP
             </span>
             <span className="inline-flex items-center gap-1.5">
-              <span className="h-2 w-2" style={{ backgroundColor: "#2563eb" }} /> Jamaat
+              <span className="h-2 w-2" style={{ backgroundColor: ALLIANCE_COLORS.jamaat }} /> Jamaat
             </span>
             <span className="inline-flex items-center gap-1.5">
-              <span className="h-2 w-2" style={{ backgroundColor: "#ea580c" }} /> NCP
+              <span className="h-2 w-2" style={{ backgroundColor: PARTY_COLORS.ncp }} /> NCP
             </span>
             <span className="inline-flex items-center gap-1.5">
-              <span className="h-2 w-2" style={{ backgroundColor: "#64748b" }} /> Others
+              <span className="h-2 w-2" style={{ backgroundColor: ALLIANCE_COLORS.others }} /> Others
             </span>
             <span className="inline-flex items-center gap-1.5">
-              <span className="h-2 w-2" style={{ backgroundColor: "#94a3b8" }} /> Postponed
+              <span className="h-2 w-2" style={{ backgroundColor: ALLIANCE_COLORS.neutral }} /> Postponed
             </span>
           </>
         ) : (
           <>
             <span className="inline-flex items-center gap-1.5">
-              <span className="h-2 w-2" style={{ backgroundColor: "#16a34a" }} /> Majority Yes
+              <span className="h-2 w-2" style={{ backgroundColor: REFERENDUM_COLORS.yes }} /> Majority Yes
             </span>
             <span className="inline-flex items-center gap-1.5">
-              <span className="h-2 w-2" style={{ backgroundColor: "#dc2626" }} /> Majority No
+              <span className="h-2 w-2" style={{ backgroundColor: REFERENDUM_COLORS.no }} /> Majority No
             </span>
             <span className="inline-flex items-center gap-1.5">
-              <span className="h-2 w-2" style={{ backgroundColor: "#64748b" }} /> Null
+              <span className="h-2 w-2" style={{ backgroundColor: REFERENDUM_COLORS.null }} /> Null
             </span>
           </>
         )}

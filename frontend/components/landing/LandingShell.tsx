@@ -4,6 +4,8 @@ import dynamic from "next/dynamic";
 import { useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
 
 import {
+  ALLIANCE_COLORS,
+  PARTY_COLORS,
   getReferendumSeatColor,
   getReferendumSeatResult,
   getSeatColor,
@@ -97,15 +99,15 @@ function getCompetitivenessBadge(seat: ConstituencyRow): CompetitivenessBadge {
 function getPartySwatchColor(partyName: string): string {
   const norm = partyName.toLowerCase();
   if (norm.includes("bnp") || norm.includes("bangladesh nationalist party")) {
-    return "#16a34a";
+    return ALLIANCE_COLORS.bnp;
   }
   if (norm.includes("jamaat") || norm.includes("islamic")) {
-    return "#2563eb";
+    return ALLIANCE_COLORS.jamaat;
   }
   if (norm.includes("ncp") || norm.includes("national citizens")) {
-    return "#ea580c";
+    return PARTY_COLORS.ncp;
   }
-  return "#64748b";
+  return ALLIANCE_COLORS.others;
 }
 
 function matchesSeatQuery(seat: ConstituencyRow, query: string): boolean {
@@ -414,7 +416,7 @@ export function LandingShell({ summaryDataset, constituencyDataset }: LandingShe
         </div>
 
         {/* ── Column 3: Constituency Detail Panel (Inspector) ───────────── */}
-        <aside className="flex w-[440px] lg:w-[480px] xl:w-[520px] 2xl:w-[560px] shrink-0 flex-col overflow-y-auto bg-[var(--bg-surface)] p-4 space-y-4">
+        <aside className="flex w-[440px] lg:w-[480px] xl:w-[520px] 2xl:w-[560px] shrink-0 flex-col overflow-y-auto bg-[var(--bg-canvas)] p-4 space-y-4 border-l border-[var(--border)]">
           {selectedSeat ? (
             <div className="space-y-4">
               {/* Breadcrumb & Title */}
@@ -427,7 +429,7 @@ export function LandingShell({ summaryDataset, constituencyDataset }: LandingShe
                 </h2>
 
                 {/* Winner Status Badge */}
-                <div className="mt-2.5 inline-flex items-center gap-2 border border-[var(--border)] bg-[var(--bg-canvas)] px-2.5 py-1">
+                <div className="mt-2.5 inline-flex items-center gap-2 border border-[var(--border)] bg-[var(--bg-surface)] px-2.5 py-1">
                   <span
                     className="h-2 w-2 shrink-0 rounded-full"
                     style={{ backgroundColor: getSeatDisplayColor(selectedSeat) }}
@@ -460,8 +462,8 @@ export function LandingShell({ summaryDataset, constituencyDataset }: LandingShe
               <ConstituencyMiniMap seat={selectedSeat} mode={mapMode} />
 
               {/* Election Result Card */}
-              <div className="border border-[var(--border)] bg-[var(--bg-canvas)]">
-                <div className="border-b border-[var(--border)] px-3 py-1.5 font-mono text-[10px] uppercase tracking-wider text-[var(--text-muted)] bg-[var(--bg-surface)]">
+              <div className="border border-[var(--border)] bg-[var(--bg-surface)]">
+                <div className="border-b border-[var(--border-subtle)] px-3 py-1.5 font-mono text-[10px] uppercase tracking-wider text-[var(--text-muted)] bg-[var(--bg-subtle)]">
                   Election Result
                 </div>
                 <div className="grid grid-cols-2 divide-x divide-y divide-[var(--border)]">
@@ -488,8 +490,8 @@ export function LandingShell({ summaryDataset, constituencyDataset }: LandingShe
                 </div>
 
                 {selectedSeatCompetitivenessBadge && (
-                  <div className="border-t border-[var(--border)] p-2 bg-[var(--bg-surface)]">
-                    <div className="inline-flex items-center gap-1.5 border border-[var(--border)] bg-[var(--bg-canvas)] px-2 py-0.5 font-mono text-[10px] uppercase tracking-wider text-[var(--text-primary)]">
+                  <div className="border-t border-[var(--border)] p-2 bg-[var(--bg-subtle)]">
+                    <div className="inline-flex items-center gap-1.5 border border-[var(--border)] bg-[var(--bg-surface)] px-2 py-0.5 font-mono text-[10px] uppercase tracking-wider text-[var(--text-primary)]">
                       <span className="text-[var(--text-muted)]">Competitiveness:</span>
                       <span className="font-bold">{selectedSeatCompetitivenessBadge.label}</span>
                     </div>
@@ -498,8 +500,8 @@ export function LandingShell({ summaryDataset, constituencyDataset }: LandingShe
               </div>
 
               {/* Constituency Profile Card */}
-              <div className="border border-[var(--border)] bg-[var(--bg-canvas)]">
-                <div className="border-b border-[var(--border)] px-3 py-1.5 font-mono text-[10px] uppercase tracking-wider text-[var(--text-muted)] bg-[var(--bg-surface)]">
+              <div className="border border-[var(--border)] bg-[var(--bg-surface)]">
+                <div className="border-b border-[var(--border-subtle)] px-3 py-1.5 font-mono text-[10px] uppercase tracking-wider text-[var(--text-muted)] bg-[var(--bg-subtle)]">
                   Constituency Profile
                 </div>
                 <div className="grid grid-cols-2 divide-x divide-y divide-[var(--border)]">
@@ -525,8 +527,8 @@ export function LandingShell({ summaryDataset, constituencyDataset }: LandingShe
               </div>
 
               {/* Indicators vs National Baseline */}
-              <div className="border border-[var(--border)] bg-[var(--bg-canvas)]">
-                <div className="border-b border-[var(--border)] px-3 py-1.5 font-mono text-[10px] uppercase tracking-wider text-[var(--text-muted)] bg-[var(--bg-surface)]">
+              <div className="border border-[var(--border)] bg-[var(--bg-surface)]">
+                <div className="border-b border-[var(--border-subtle)] px-3 py-1.5 font-mono text-[10px] uppercase tracking-wider text-[var(--text-muted)] bg-[var(--bg-subtle)]">
                   Key Indicators vs National Baseline
                 </div>
                 <div className="p-3 space-y-3">
@@ -590,10 +592,10 @@ export function LandingShell({ summaryDataset, constituencyDataset }: LandingShe
               </div>
 
               {/* Winning Party Spotlight Card */}
-              <div className="border border-[var(--border)] bg-[var(--bg-canvas)]">
-                <div className="border-b border-[var(--border)] px-3 py-1.5 font-mono text-[10px] uppercase tracking-wider text-[var(--text-muted)] bg-[var(--bg-surface)] flex items-center justify-between">
+              <div className="border border-[var(--border)] bg-[var(--bg-surface)]">
+                <div className="border-b border-[var(--border-subtle)] px-3 py-1.5 font-mono text-[10px] uppercase tracking-wider text-[var(--text-muted)] bg-[var(--bg-subtle)] flex items-center justify-between">
                   <span>Leading Party</span>
-                  <span className="font-semibold text-emerald-600 dark:text-emerald-400">Absolute Majority</span>
+                  <span className="font-semibold text-[#0d7645] dark:text-emerald-400">Absolute Majority</span>
                 </div>
                 <div className="p-3 space-y-2.5">
                   <div className="flex items-baseline justify-between gap-2">
@@ -605,7 +607,7 @@ export function LandingShell({ summaryDataset, constituencyDataset }: LandingShe
                         ({summary.top_party.seat_count} Seats · {summary.top_party.seat_share_pct.toFixed(1)}%)
                       </span>
                     </div>
-                    <span className="font-mono text-[10px] font-semibold px-2 py-0.5 border border-[var(--border)] bg-[var(--bg-surface)] text-[var(--text-primary)]">
+                    <span className="font-mono text-[10px] font-semibold px-2 py-0.5 border border-[var(--border)] bg-[var(--bg-subtle)] text-[var(--text-primary)]">
                       +{summary.top_party.seat_count - 150} above 151
                     </span>
                   </div>
@@ -619,8 +621,11 @@ export function LandingShell({ summaryDataset, constituencyDataset }: LandingShe
                     </div>
                     <div className="relative h-2.5 w-full bg-[var(--bg-subtle)] border border-[var(--border)] overflow-hidden">
                       <div
-                        className="h-full bg-[#16a34a] transition-all duration-500"
-                        style={{ width: `${(summary.top_party.seat_count / summary.total_seats) * 100}%` }}
+                        className="h-full transition-all duration-500"
+                        style={{
+                          backgroundColor: ALLIANCE_COLORS.bnp,
+                          width: `${(summary.top_party.seat_count / summary.total_seats) * 100}%`,
+                        }}
                       />
                       <div
                         className="absolute top-0 bottom-0 w-0.5 bg-[var(--text-primary)] z-10"
@@ -633,8 +638,8 @@ export function LandingShell({ summaryDataset, constituencyDataset }: LandingShe
               </div>
 
               {/* National Key Metrics 2x2 Grid */}
-              <div className="border border-[var(--border)] bg-[var(--bg-canvas)]">
-                <div className="border-b border-[var(--border)] px-3 py-1.5 font-mono text-[10px] uppercase tracking-wider text-[var(--text-muted)] bg-[var(--bg-surface)]">
+              <div className="border border-[var(--border)] bg-[var(--bg-surface)]">
+                <div className="border-b border-[var(--border-subtle)] px-3 py-1.5 font-mono text-[10px] uppercase tracking-wider text-[var(--text-muted)] bg-[var(--bg-subtle)]">
                   National Key Metrics
                 </div>
                 <div className="grid grid-cols-2 divide-x divide-y divide-[var(--border)]">
@@ -662,8 +667,8 @@ export function LandingShell({ summaryDataset, constituencyDataset }: LandingShe
               </div>
 
               {/* Parliamentary Standings Table */}
-              <div className="border border-[var(--border)] bg-[var(--bg-canvas)]">
-                <div className="border-b border-[var(--border)] px-3 py-1.5 font-mono text-[10px] uppercase tracking-wider text-[var(--text-muted)] bg-[var(--bg-surface)] flex justify-between">
+              <div className="border border-[var(--border)] bg-[var(--bg-surface)]">
+                <div className="border-b border-[var(--border-subtle)] px-3 py-1.5 font-mono text-[10px] uppercase tracking-wider text-[var(--text-muted)] bg-[var(--bg-subtle)] flex justify-between">
                   <span>Parliamentary Standings</span>
                   <span>300 Seats</span>
                 </div>
@@ -687,8 +692,8 @@ export function LandingShell({ summaryDataset, constituencyDataset }: LandingShe
               </div>
 
               {/* National Socio-Economic Baseline */}
-              <div className="border border-[var(--border)] bg-[var(--bg-canvas)]">
-                <div className="border-b border-[var(--border)] px-3 py-1.5 font-mono text-[10px] uppercase tracking-wider text-[var(--text-muted)] bg-[var(--bg-surface)]">
+              <div className="border border-[var(--border)] bg-[var(--bg-surface)]">
+                <div className="border-b border-[var(--border-subtle)] px-3 py-1.5 font-mono text-[10px] uppercase tracking-wider text-[var(--text-muted)] bg-[var(--bg-subtle)]">
                   National Socio-Economic Baseline
                 </div>
                 <div className="grid grid-cols-2 divide-x divide-y divide-[var(--border)]">
@@ -719,7 +724,7 @@ export function LandingShell({ summaryDataset, constituencyDataset }: LandingShe
                 </div>
               </div>
 
-              <div className="border border-dashed border-[var(--border)] p-2.5 text-center">
+              <div className="border border-dashed border-[var(--border)] bg-[var(--bg-surface)] p-2.5 text-center">
                 <p className="font-mono text-[10px] text-[var(--text-muted)]">
                   ← Click any constituency on the map or in the directory to inspect
                 </p>

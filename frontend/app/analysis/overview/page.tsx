@@ -6,7 +6,7 @@ import {
   Panel,
   VerticalBarChart,
 } from "@/components/analysis/charts";
-import { getAllianceColor } from "@/lib/colors";
+import { DEFAULT_DIVISION_COLORS, getAllianceColor } from "@/lib/colors";
 
 function formatPercent(value: number | null): string {
   if (value === null) {
@@ -99,7 +99,7 @@ export default async function AnalysisOverviewPage() {
     .map((division) => ({
       label: division.division,
       value: division.seat_count,
-      color: "#3b82f6",
+      color: DEFAULT_DIVISION_COLORS[division.division] ?? "#1d4ed8",
       valueLabel: `${division.seat_count}`,
     }));
 
@@ -211,7 +211,7 @@ export default async function AnalysisOverviewPage() {
         <HistogramChart
           title="Constituency Voter Turnout Distribution"
           data={turnoutBuckets}
-          color="#10b981"
+          color="#059669"
           xAxisLabel="Turnout Percentage Range"
           yAxisLabel="Number of Seats"
           height={300}
@@ -219,7 +219,7 @@ export default async function AnalysisOverviewPage() {
         <HistogramChart
           title="Constituency Winning Margin Distribution"
           data={marginBuckets}
-          color="#3b82f6"
+          color="#1d4ed8"
           xAxisLabel="Victory Margin Percentage Range"
           yAxisLabel="Number of Seats"
           height={300}

@@ -2,6 +2,9 @@
 
 import { Fragment, useState, type ReactNode } from "react";
 import { getAnalysisLabel } from "@/lib/analysisLabels";
+import { DEFAULT_DIVISION_COLORS } from "@/lib/colors";
+
+export { DEFAULT_DIVISION_COLORS };
 
 interface MetricCard {
   label: string;
@@ -103,7 +106,7 @@ export function HorizontalBarChart({
   xAxisLabel,
   yAxisLabel,
   height = 340,
-  defaultColor = "#10b981",
+  defaultColor = "#059669",
   valueDecimals = 0,
   valueUnit = "",
   maxBarFillPercent = 100,
@@ -191,7 +194,7 @@ export function VerticalBarChart({
   xAxisLabel,
   yAxisLabel,
   height = 320,
-  defaultColor = "#3b82f6",
+  defaultColor = "#1d4ed8",
   valueDecimals = 0,
   valueUnit = "",
 }: {
@@ -284,7 +287,7 @@ export function HistogramChart({
   xAxisLabel,
   yAxisLabel,
   height = 320,
-  color = "#10b981",
+  color = "#059669",
 }: {
   title: string;
   data: HistogramDatum[];
@@ -393,12 +396,12 @@ export function CorrelationHeatmap({
     if (clamped > 0) {
       // Emerald / positive
       const alpha = Math.min(Math.max(Math.abs(clamped) * 0.85, 0.08), 0.95);
-      return `rgba(16, 185, 129, ${alpha.toFixed(2)})`;
+      return `rgba(5, 150, 105, ${alpha.toFixed(2)})`;
     }
     if (clamped < 0) {
-      // Rose / negative
+      // Crimson / negative
       const alpha = Math.min(Math.max(Math.abs(clamped) * 0.85, 0.08), 0.95);
-      return `rgba(239, 68, 68, ${alpha.toFixed(2)})`;
+      return `rgba(220, 38, 38, ${alpha.toFixed(2)})`;
     }
     return "transparent";
   }
@@ -427,7 +430,7 @@ export function CorrelationHeatmap({
         {/* Legend */}
         <div className="flex items-center gap-4 font-mono text-[10px] uppercase text-[var(--text-muted)]">
           <div className="flex items-center gap-1.5">
-            <span className="h-3 w-3 bg-red-500/80 inline-block" />
+            <span className="h-3 w-3 bg-[#dc2626]/85 inline-block" />
             <span>r = -1.0</span>
           </div>
           <div className="flex items-center gap-1.5">
@@ -435,7 +438,7 @@ export function CorrelationHeatmap({
             <span>0.0</span>
           </div>
           <div className="flex items-center gap-1.5">
-            <span className="h-3 w-3 bg-emerald-500/80 inline-block" />
+            <span className="h-3 w-3 bg-[#059669]/85 inline-block" />
             <span>r = +1.0</span>
           </div>
         </div>
@@ -529,7 +532,7 @@ export function CorrelationHeatmap({
                       }`}
                       style={{
                         backgroundColor: bg,
-                        color: Math.abs(val) > 0.45 ? "#ffffff" : "var(--text-primary)",
+                        color: Math.abs(val) > 0.6 ? "#ffffff" : "var(--text-primary)",
                       }}
                     >
                       {val.toFixed(2)}
@@ -553,8 +556,8 @@ export function DivergingBarChart({
   height = 360,
   valueDecimals = 4,
   valueUnit = "",
-  positiveColor = "#10b981",
-  negativeColor = "#ef4444",
+  positiveColor = "#059669",
+  negativeColor = "#dc2626",
 }: {
   title: string;
   data: BarDatum[];
@@ -707,18 +710,7 @@ export function ScatterPlot({
     return svgHeight - padding - ((val - minY) / (maxY - minY)) * (svgHeight - padding * 2);
   }
 
-  // Division color map
-  const divisionColors: Record<string, string> = {
-    Barishal: "#f97316",
-    Chattogram: "#3b82f6",
-    Dhaka: "#10b981",
-    Khulna: "#eab308",
-    Mymensingh: "#f43f5e",
-    Rajshahi: "#06b6d4",
-    Rangpur: "#8b5cf6",
-    Sylhet: "#84cc16",
-  };
-  const effectiveColors = groupColors ?? divisionColors;
+  const effectiveColors = groupColors ?? DEFAULT_DIVISION_COLORS;
 
   return (
     <article className="border border-[var(--border)] bg-[var(--bg-surface)] p-5 rounded-none flex flex-col justify-between">
@@ -880,10 +872,10 @@ export function ScatterPlot({
           </svg>
         </div>
 
-        {/* Axis Titles & Division Color Legend */}
+        {/* Axis Titles & Division / Group Color Legend */}
         <div className="mt-3 flex flex-wrap items-center justify-between gap-2 border-t border-[var(--border-subtle)] pt-2.5">
           <div className="flex flex-wrap items-center gap-3">
-            {Object.entries(divisionColors).map(([div, col]) => (
+            {Object.entries(effectiveColors).map(([div, col]) => (
               <span key={div} className="flex items-center gap-1 font-mono text-[9px] uppercase text-[var(--text-muted)]">
                 <span className="h-2 w-2 shrink-0 inline-block" style={{ backgroundColor: col }} />
                 {div}
