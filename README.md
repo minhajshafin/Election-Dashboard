@@ -15,12 +15,12 @@
 
 <br>
 
-### 🖥️ Desktop Command Center Layout
+### 🖥️ Desktop Layout
 <p align="center">
-  <img src="screenshots/desktop_layout.png" alt="Desktop Command Center Layout" width="100%">
+  <img src="screenshots/desktop_layout.png" alt="Desktop Layout" width="100%">
 </p>
 <p align="center">
-  <em>Desktop Command Center — 3-column synchronized layout featuring administrative division tabs, interactive Leaflet constituency map with party color legend, 300-seat directory list, and real-time constituency inspector.</em>
+  <em>Desktop Layout</em> — 3-column synchronized layout featuring administrative division tabs, interactive Leaflet constituency map with party color legend, 300-seat directory list, and real-time constituency inspector.
 </p>
 
 <br>
