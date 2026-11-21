@@ -31,8 +31,8 @@ export function PrimaryNav() {
 
   return (
     <header className="sticky top-0 z-50 flex h-[42px] shrink-0 items-center justify-between border-b border-[var(--border)] bg-[var(--bg-surface)] px-4 sm:px-6">
-      <div className="flex min-w-0 items-center gap-3 sm:gap-5">
-        <Link href="/" className="flex items-center gap-2.5 group">
+      <div className="flex h-full min-w-0 items-center gap-3 sm:gap-3.5">
+        <Link href="/" className="flex h-full items-center gap-2.5 group">
           <div className="relative flex h-5 w-5 shrink-0 items-center justify-center">
             {/* Light mode: dark/black icon */}
             <img
@@ -48,15 +48,14 @@ export function PrimaryNav() {
             />
           </div>
           <span
-            className="truncate text-base font-semibold tracking-tight text-[var(--text-primary)] group-hover:opacity-90 transition-opacity leading-none -translate-y-[1.5px]"
-            style={{ fontFamily: "var(--font-serif)" }}
+            className="truncate text-base font-semibold tracking-tight text-[var(--text-primary)] group-hover:opacity-90 transition-opacity font-serif leading-none"
           >
             Bangladesh Election 2026
           </span>
         </Link>
-        <span className="hidden h-3 w-px bg-[var(--border)] sm:block" />
-        <span className="hidden font-mono text-[10px] uppercase tracking-[0.14em] text-[var(--text-muted)] sm:block">
-          National Results & Intelligence
+        <span className="hidden h-3 w-px bg-[var(--border)] sm:block shrink-0" />
+        <span className="hidden font-mono text-[10px] uppercase tracking-[0.14em] text-[var(--text-muted)] sm:inline-block leading-none">
+          National Results &amp; Intelligence
         </span>
       </div>
 
