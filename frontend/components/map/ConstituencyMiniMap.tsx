@@ -36,7 +36,11 @@ function FitSelectedFeature({ feature }: { feature: BangladeshGeoFeature | null 
 
     const bounds = L.geoJSON(feature as GeoJsonObject).getBounds();
     if (bounds.isValid()) {
-      map.fitBounds(bounds.pad(0.35));
+      map.fitBounds(bounds.pad(0.35), {
+        animate: true,
+        duration: 0.45,
+        easeLinearity: 0.3,
+      });
     }
   }, [feature, map]);
 
@@ -133,7 +137,7 @@ export function ConstituencyMiniMap({ seat, mode }: ConstituencyMiniMapProps) {
       </div>
 
       <MapContainer
-        key={featureKey}
+        key={theme}
         center={[23.685, 90.3563]}
         zoom={10}
         zoomControl={false}

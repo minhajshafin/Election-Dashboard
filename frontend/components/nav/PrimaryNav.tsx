@@ -20,7 +20,8 @@ export function PrimaryNav() {
   }, []);
 
   const toggleTheme = () => {
-    const nextTheme = theme === "light" ? "dark" : "light";
+    const current = document.documentElement.getAttribute("data-theme") === "dark" ? "dark" : "light";
+    const nextTheme = current === "light" ? "dark" : "light";
     setTheme(nextTheme);
     document.documentElement.setAttribute("data-theme", nextTheme);
     try {

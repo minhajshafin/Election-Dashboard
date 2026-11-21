@@ -98,7 +98,20 @@ export function getSeatGeoReference(seat: GeoResolvableSeat): {
   };
 }
 
+const geoIndexCache = new WeakMap<
+  BangladeshGeoJson,
+  {
+    byCode: Map<number, BangladeshGeoFeature>;
+    byLookupName: Map<string, BangladeshGeoFeature>;
+  }
+>();
+
 export function buildGeoFeatureIndexes(geoJson: BangladeshGeoJson) {
+  const cached = geoIndexCache.get(geoJson);
+  if (cached) {
+    return cached;
+  }
+
   const byCode = new Map<number, BangladeshGeoFeature>();
   const byLookupName = new Map<string, BangladeshGeoFeature>();
 
@@ -107,10 +120,9 @@ export function buildGeoFeatureIndexes(geoJson: BangladeshGeoJson) {
     byLookupName.set(normalizeGeoLookupName(feature.properties.cst_n), feature);
   }
 
-  return {
-    byCode,
-    byLookupName,
-  };
+  const indexes = { byCode, byLookupName };
+  geoIndexCache.set(geoJson, indexes);
+  return indexes;
 }
 
 export function findGeoFeatureForSeat(

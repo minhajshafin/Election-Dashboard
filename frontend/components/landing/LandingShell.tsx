@@ -11,6 +11,7 @@ import {
   getSeatColor,
 } from "@/lib/colors";
 import { getSeatElectionStatus } from "@/lib/electionStatus";
+import { fetchBangladeshGeoJson } from "@/lib/geo";
 import type { ConstituencyDataset, ConstituencyRow, SummaryDataset } from "@/types/api";
 import { PrimaryNav } from "@/components/nav/PrimaryNav";
 
@@ -153,6 +154,10 @@ export function LandingShell({ summaryDataset, constituencyDataset }: LandingShe
     return seats.some((seat) => seat.seat_key === seatFromQuery) ? seatFromQuery : null;
   });
   const seatRefs = useRef<Record<string, HTMLButtonElement | null>>({});
+
+  useEffect(() => {
+    fetchBangladeshGeoJson().catch(() => {});
+  }, []);
 
   const normalizedSearch = deferredSearchValue.trim().toLowerCase();
 

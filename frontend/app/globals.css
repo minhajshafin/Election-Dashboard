@@ -225,3 +225,9 @@ a {
   }
 }
 
+/* Smooth transitions for interactive map polygons */
+.leaflet-interactive {
+  transition: fill-opacity 0.2s ease, stroke 0.15s ease, stroke-width 0.15s ease;
+}
+
+
