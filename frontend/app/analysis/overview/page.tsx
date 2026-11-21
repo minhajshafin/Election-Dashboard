@@ -40,7 +40,7 @@ function buildDynamicBins(values: Array<number | null>, binCount: number) {
     const start = min + index * width;
     const end = index === binCount - 1 ? max : start + width;
     return {
-      label: `${start.toFixed(1)}-${end.toFixed(1)}`,
+      label: `${start.toFixed(1)}–${end.toFixed(1)}%`,
       count,
     };
   });
@@ -99,7 +99,7 @@ export default async function AnalysisOverviewPage() {
     .map((division) => ({
       label: division.division,
       value: division.seat_count,
-      color: "#2a6aaa",
+      color: "#3b82f6",
       valueLabel: `${division.seat_count}`,
     }));
 
@@ -128,103 +128,121 @@ export default async function AnalysisOverviewPage() {
     Object.entries(summary.seats_by_alliance).sort((left, right) => right[1] - left[1])[0] ?? ["N/A", 0];
 
   return (
-    <main className="min-h-screen bg-[#0d0d0b] px-4 pb-10 text-[#f0ece2] sm:px-10">
-      <Panel title="What This Page Shows">
-        <p className="text-sm leading-6 text-[#c8c3b5]">
-          This page gives a quick national briefing before deeper model analysis. Read top cards for the headline,
-          then use party/division bars for power distribution, and the two histograms to understand voter behavior and
-          race competitiveness.
-        </p>
-      </Panel>
-
+    <main className="space-y-6">
+      {/* Top 5 Headline Metric Bento Cards */}
       <MetricCards
         cards={[
-          { label: "Total Seats", value: String(summary.total_seats), detail: `${summary.divisions.length} divisions` },
+          { label: "Total Seats", value: String(summary.total_seats), detail: `${summary.divisions.length} divisions declared` },
           {
-            label: "Top Party",
+            label: "Dominant Party",
             value: `${summary.top_party.party} (${summary.top_party.seat_count})`,
-            detail: `${summary.top_party.seat_share_pct.toFixed(2)}% seat share`,
+            detail: `${summary.top_party.seat_share_pct.toFixed(1)}% parliamentary share`,
           },
-          { label: "Avg Turnout", value: formatPercent(summary.avg_turnout) },
-          { label: "Avg Margin", value: formatPercent(summary.avg_margin) },
-          { label: "Avg Candidates", value: summary.avg_candidate_count?.toFixed(2) ?? "N/A" },
+          { label: "National Turnout", value: formatPercent(summary.avg_turnout), detail: "Mean constituency turnout" },
+          { label: "Average Margin", value: formatPercent(summary.avg_margin), detail: "Lead over runner-up" },
+          { label: "Candidates / Seat", value: summary.avg_candidate_count?.toFixed(1) ?? "N/A", detail: "Ballot competition density" },
         ]}
       />
 
-      <section className="mt-6 grid gap-4 xl:grid-cols-3">
-        <Panel title="Key Takeaway 1">
-          <p className="text-sm text-[#d8d3c6]">
-            {leadingAlliance[0].toUpperCase()} leads with {leadingAlliance[1]} seats nationally, while
-            {" "}
-            {summary.top_party.party} alone holds {summary.top_party.seat_share_pct.toFixed(1)}% of all seats.
+      {/* Editorial Key Findings Dossier */}
+      <section className="grid gap-3 md:grid-cols-3">
+        <article className="border border-[var(--border)] bg-[var(--bg-surface)] p-4 rounded-none">
+          <div className="flex items-center gap-2 mb-2">
+            <span className="h-1.5 w-1.5 bg-emerald-500 shrink-0" />
+            <h3 className="font-mono text-[10px] uppercase tracking-wider text-[var(--text-muted)] font-semibold">
+              01 · Coalition Stance
+            </h3>
+          </div>
+          <p className="font-sans text-xs leading-relaxed text-[var(--text-secondary)]">
+            <strong className="text-[var(--text-primary)] font-semibold">{leadingAlliance[0].toUpperCase()}</strong> leads with{" "}
+            <span className="font-mono font-bold text-[var(--text-primary)]">{leadingAlliance[1]} seats</span> nationwide, while{" "}
+            {summary.top_party.party} alone secured {summary.top_party.seat_share_pct.toFixed(1)}% of all declared seats.
           </p>
-        </Panel>
-        <Panel title="Key Takeaway 2">
-          <p className="text-sm text-[#d8d3c6]">
-            {competitiveSeats.length} constituencies are highly competitive (margin below {threshold}%). These are the
-            most volatile seats for future election swings.
+        </article>
+
+        <article className="border border-[var(--border)] bg-[var(--bg-surface)] p-4 rounded-none">
+          <div className="flex items-center gap-2 mb-2">
+            <span className="h-1.5 w-1.5 bg-amber-500 shrink-0" />
+            <h3 className="font-mono text-[10px] uppercase tracking-wider text-[var(--text-muted)] font-semibold">
+              02 · Battleground Volatility
+            </h3>
+          </div>
+          <p className="font-sans text-xs leading-relaxed text-[var(--text-secondary)]">
+            <span className="font-mono font-bold text-[var(--text-primary)]">{competitiveSeats.length} constituencies</span> are highly contested with winning margins below {threshold}%. These represent key swing battlegrounds for subsequent electoral cycles.
           </p>
-        </Panel>
-        <Panel title="Key Takeaway 3">
-          <p className="text-sm text-[#d8d3c6]">
-            Turnout is highest in {highestTurnoutDivision?.division ?? "N/A"} ({highestTurnoutDivision?.turnout.toFixed(2) ?? "N/A"}%) and lowest in
-            {" "}
-            {lowestTurnoutDivision?.division ?? "N/A"} ({lowestTurnoutDivision?.turnout.toFixed(2) ?? "N/A"}%).
+        </article>
+
+        <article className="border border-[var(--border)] bg-[var(--bg-surface)] p-4 rounded-none">
+          <div className="flex items-center gap-2 mb-2">
+            <span className="h-1.5 w-1.5 bg-blue-500 shrink-0" />
+            <h3 className="font-mono text-[10px] uppercase tracking-wider text-[var(--text-muted)] font-semibold">
+              03 · Regional Participation
+            </h3>
+          </div>
+          <p className="font-sans text-xs leading-relaxed text-[var(--text-secondary)]">
+            Turnout peaked in <strong className="text-[var(--text-primary)] font-semibold">{highestTurnoutDivision?.division}</strong> ({highestTurnoutDivision?.turnout.toFixed(1)}%), contrasting with <strong className="text-[var(--text-primary)] font-semibold">{lowestTurnoutDivision?.division}</strong> ({lowestTurnoutDivision?.turnout.toFixed(1)}%).
           </p>
-        </Panel>
+        </article>
       </section>
 
-      <section className="mt-6 grid gap-4 xl:grid-cols-2">
+      {/* Power Distribution Charts */}
+      <section className="grid gap-6 lg:grid-cols-2">
         <HorizontalBarChart
-          title="Seats by Party"
+          title="Parliamentary Seats by Party"
           data={partyData}
-          xAxisLabel="Seats"
-          yAxisLabel="Party"
+          xAxisLabel="Seats Won"
+          yAxisLabel="Political Party"
           height={320}
           valueDecimals={0}
-          maxBarFillPercent={88}
+          maxBarFillPercent={90}
         />
         <VerticalBarChart
-          title="Seats by Division"
+          title="Seat Allocation by Administrative Division"
           data={divisionData}
           xAxisLabel="Division"
-          yAxisLabel="Seat Count"
+          yAxisLabel="Constituencies"
           height={320}
           valueDecimals={0}
         />
       </section>
 
-      <section className="mt-6 grid gap-4 xl:grid-cols-2">
+      {/* Histograms: Turnout & Winning Margin Distributions */}
+      <section className="grid gap-6 lg:grid-cols-2">
         <HistogramChart
-          title="Turnout Distribution"
+          title="Constituency Voter Turnout Distribution"
           data={turnoutBuckets}
-          color="#4a9e7a"
-          xAxisLabel="Voter Turnout (%)"
-          yAxisLabel="Number of Constituencies"
-          height={320}
+          color="#10b981"
+          xAxisLabel="Turnout Percentage Range"
+          yAxisLabel="Number of Seats"
+          height={300}
         />
         <HistogramChart
-          title="Winning Margin Distribution"
+          title="Constituency Winning Margin Distribution"
           data={marginBuckets}
-          color="#2a6aaa"
-          xAxisLabel="Winning Margin (%)"
-          yAxisLabel="Number of Constituencies"
-          height={320}
+          color="#3b82f6"
+          xAxisLabel="Victory Margin Percentage Range"
+          yAxisLabel="Number of Seats"
+          height={300}
         />
       </section>
 
-      <section className="mt-6 grid gap-4 xl:grid-cols-2">
-        <Panel title="How To Interpret Turnout Distribution">
-          <p className="text-sm leading-6 text-[#c8c3b5]">
-            Bars show how many constituencies fall into each turnout range. If bars cluster tightly in the middle,
-            turnout behavior is consistent nationwide. Wider spread implies stronger local variation that may require
-            division-specific campaign strategy.
+      {/* Methodological Guidance Panels */}
+      <section className="grid gap-6 lg:grid-cols-2">
+        <Panel
+          title="Turnout Distribution Dynamics"
+          subtitle="Interpreting voter participation spread"
+        >
+          <p className="font-sans text-xs sm:text-sm leading-relaxed text-[var(--text-secondary)]">
+            Bars aggregate constituencies into discrete turnout brackets. Tight clustering around the median indicates uniform national civic mobilization, whereas pronounced bimodality indicates stark urban-rural divides or localized boycott dynamics.
           </p>
         </Panel>
-        <Panel title="How To Interpret Margin Distribution">
-          <p className="text-sm leading-6 text-[#c8c3b5]">
-            Lower-margin bins indicate competitive seats, while higher bins indicate safe seats. A large share of
-            low-margin seats means coalition shifts or local issues can significantly change seat outcomes.
+
+        <Panel
+          title="Competitiveness & Margin Spread"
+          subtitle="Understanding seat vulnerability"
+        >
+          <p className="font-sans text-xs sm:text-sm leading-relaxed text-[var(--text-secondary)]">
+            The leftward skew in the margin distribution highlights seats decided by razor-thin leads. When over 20% of constituencies fall under a 10% margin, parliamentary control remains highly sensitive to minor swing voter shifts.
           </p>
         </Panel>
       </section>

@@ -1,7 +1,9 @@
 import {
   DivergingBarChart,
   MetricCards,
+  Panel,
   ScatterPlot,
+  type ScatterPoint,
 } from "@/components/analysis/charts";
 import { getConstituencyDataset, getRegressionDataset } from "@/lib/data";
 import { getAnalysisLabel } from "@/lib/analysisLabels";
@@ -23,37 +25,29 @@ function resolveNumericFeature(seat: ConstituencyRow, feature: string): number |
   return typeof value === "number" ? value : null;
 }
 
-function computeFeatureMeans(rows: ConstituencyRow[], features: string[]): Record<string, number> {
-  const accumulators = new Map<string, { total: number; count: number }>();
+function computeFeatureBounds(rows: ConstituencyRow[], features: string[]): Record<string, { min: number; max: number }> {
+  const bounds: Record<string, { min: number; max: number }> = {};
 
   for (const feature of features) {
-    accumulators.set(feature, { total: 0, count: 0 });
-  }
-
-  for (const seat of rows) {
-    for (const feature of features) {
-      const value = resolveNumericFeature(seat, feature);
-      if (value === null) {
-        continue;
+    const values: number[] = [];
+    for (const seat of rows) {
+      const val = resolveNumericFeature(seat, feature);
+      if (val !== null) {
+        values.push(val);
       }
+    }
 
-      const accumulator = accumulators.get(feature);
-      if (!accumulator) {
-        continue;
-      }
-
-      accumulator.total += value;
-      accumulator.count += 1;
+    if (values.length > 0) {
+      bounds[feature] = {
+        min: Math.min(...values),
+        max: Math.max(...values),
+      };
+    } else {
+      bounds[feature] = { min: 0, max: 1 };
     }
   }
 
-  const means: Record<string, number> = {};
-  for (const feature of features) {
-    const accumulator = accumulators.get(feature);
-    means[feature] = accumulator && accumulator.count > 0 ? accumulator.total / accumulator.count : 0;
-  }
-
-  return means;
+  return bounds;
 }
 
 export default async function RegressionPage() {
@@ -67,14 +61,14 @@ export default async function RegressionPage() {
   const coefficientData = sorted.map(([feature, value]) => ({
     label: getAnalysisLabel(feature),
     value,
-    valueLabel: value.toFixed(4),
+    valueLabel: `${value > 0 ? "+" : ""}${value.toFixed(4)}`,
   }));
-  const featureMeans = computeFeatureMeans(constituencyDataset.rows, result.features);
+  const featureBounds = computeFeatureBounds(constituencyDataset.rows, result.features);
 
   const divisionColors: Record<string, string> = {
     Barishal: "#f97316",
     Chattogram: "#3b82f6",
-    Dhaka: "#22c55e",
+    Dhaka: "#10b981",
     Khulna: "#eab308",
     Mymensingh: "#f43f5e",
     Rajshahi: "#06b6d4",
@@ -82,7 +76,7 @@ export default async function RegressionPage() {
     Sylhet: "#84cc16",
   };
 
-  const points = constituencyDataset.rows
+  const points: ScatterPoint[] = constituencyDataset.rows
     .map((seat) => {
       if (seat.turnout_pct === null) {
         return null;
@@ -91,56 +85,75 @@ export default async function RegressionPage() {
       let prediction = result.intercept;
       for (const feature of result.features) {
         const featureValue = resolveNumericFeature(seat, feature);
-        const valueForPrediction = featureValue ?? featureMeans[feature] ?? 0;
-        prediction += (result.coefficients[feature] ?? 0) * valueForPrediction;
+        const { min, max } = featureBounds[feature] ?? { min: 0, max: 1 };
+        const normalized = featureValue !== null && max > min ? (featureValue - min) / (max - min) : 0.5;
+        prediction += (result.coefficients[feature] ?? 0) * normalized;
       }
 
       return {
         x: seat.turnout_pct,
         y: prediction,
-        group: seat.division,
-        label: seat.constituency,
+        group: seat.division ?? "Unknown",
+        label: `${seat.constituency} (${seat.district})`,
+        detail: seat.winner_party ? `Winner: ${seat.winner_party}` : undefined,
       };
     })
-    .filter((point): point is { x: number; y: number; group: string; label: string } => point !== null);
+    .filter((point): point is NonNullable<typeof point> => point !== null);
 
   return (
-    <main className="min-h-screen bg-[#0d0d0b] px-4 pb-10 text-[#f0ece2] sm:px-10">
+    <main className="space-y-6">
+      {/* Model Performance Scorecards */}
       <MetricCards
         cards={[
-          { label: "Model", value: result.model, detail: `Target: ${result.target}` },
-          { label: "R2", value: result.r2.toFixed(3), detail: "Explained variance" },
-          { label: "RMSE", value: result.rmse.toFixed(3), detail: "Prediction error" },
+          { label: "Architecture", value: result.model, detail: `Target: ${result.target}` },
+          { label: "R² Goodness of Fit", value: result.r2.toFixed(3), detail: `${(result.r2 * 100).toFixed(1)}% variance explained` },
+          { label: "Root Mean Squared Error", value: `${result.rmse.toFixed(2)}%`, detail: "Constituency residual deviance" },
+          { label: "Model Intercept", value: result.intercept.toFixed(2), detail: "Baseline turnout constant" },
+          { label: "Feature Predictors", value: String(result.features.length), detail: "Socioeconomic inputs" },
         ]}
       />
 
-      <section className="mt-6 grid gap-4">
-        <div className="space-y-2">
-          <DivergingBarChart
-            title="Linear Regression Coefficients (Direction + Magnitude)"
-            data={coefficientData}
-            xAxisLabel="Coefficient Value"
-            yAxisLabel="Features"
-            height={360}
-            valueDecimals={4}
-          />
-          <p className="text-xs text-[#9c9888]">
-            Blue coefficients increase predicted turnout, while red coefficients decrease it. Values closer to zero
-            indicate weaker marginal influence.
-          </p>
-        </div>
+      {/* Main Charts: Diverging Coefficients and Scatter Canvas */}
+      <section className="grid gap-6 lg:grid-cols-2">
+        <DivergingBarChart
+          title="Turnout Feature Coefficients (Marginal Impact)"
+          data={coefficientData}
+          xAxisLabel="Beta Coefficient (β)"
+          yAxisLabel="Demographic & Political Factor"
+          height={380}
+          valueDecimals={4}
+        />
 
         <ScatterPlot
-          title="Predicted vs Actual Turnout"
-          points={points}
-          xAxisLabel="Actual Turnout (%)"
-          yAxisLabel="Predicted Turnout (%)"
-          xUnit="%"
-          yUnit="%"
-          height={400}
-          showReferenceLine
+          title="Constituency Actual vs. Model Predicted Turnout"
+          data={points}
+          xAxisLabel="Actual General Election Turnout (%)"
+          yAxisLabel="ML Predicted Turnout (%)"
+          height={380}
+          showRegressionLine
           groupColors={divisionColors}
         />
+      </section>
+
+      {/* Editorial Methodology & Takeaways */}
+      <section className="grid gap-6 lg:grid-cols-2">
+        <Panel
+          title="Coefficient Direction & Magnitude"
+          subtitle="Understanding statistical turnout drivers"
+        >
+          <p className="font-sans text-xs sm:text-sm leading-relaxed text-[var(--text-secondary)]">
+            Green bars indicate variables that elevate voter participation (e.g. higher candidate counts and rural civic mobilization), while red bars indicate dampening factors (such as acute urban mobility or low economic baseline). Coefficients closer to zero reflect minimal marginal elasticity.
+          </p>
+        </Panel>
+
+        <Panel
+          title="Residual Error & Regional Clustering"
+          subtitle="Evaluating model accuracy across divisions"
+        >
+          <p className="font-sans text-xs sm:text-sm leading-relaxed text-[var(--text-secondary)]">
+            Dots positioned closer to the dashed 45° diagonal line indicate accurate model estimates. Outliers drifting significantly above or below the line highlight local anomalies—such as hyper-contested mayoral districts or uncontested stronghold seats—where national demographic baselines fail to capture idiosyncratic political dynamics.
+          </p>
+        </Panel>
       </section>
     </main>
   );
